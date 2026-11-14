@@ -4,85 +4,158 @@
   <meta charset="utf-8">
   <title>Modo educativo — Lunar Landing Site Navigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/theme.css">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="/theme.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 1.5rem auto; max-width: 1000px; padding: 0 1rem; line-height: 1.5; }
-    .row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
-    label { display: flex; flex-direction: column; font-size: .85rem; gap: .2rem; }
-    #banner { background: #fff3cd; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
-    #error { background: #f8d7da; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: .75rem 1rem; margin-bottom: 1rem; }
-    .card h2 { margin: .2rem 0 .4rem; font-size: 1.15rem; }
-    .why { color: #333; }
-    .data { background: #eef5ff; border-radius: 6px; padding: .5rem .75rem; margin: .5rem 0; }
-    .tabs { display: flex; gap: .5rem; margin: 1rem 0; }
-    .tabs button { padding: .4rem .9rem; border: 1px solid #bbb; background: #f6f6f6; border-radius: 6px; cursor: pointer; }
-    .tabs button.on { background: #1f4e9c; color: #fff; border-color: #1f4e9c; }
-    .myth { margin-bottom: .9rem; }
-    .myth b.m { color: #a33; }
-    .myth b.f { color: #1a7f37; }
-    [hidden] { display: none !important; }
+    .page { max-width: 1180px; margin: 0 auto; padding: 22px 28px 56px; display: grid; gap: 18px; }
+    .hero { display: flex; align-items: center; gap: 22px; }
+    .hero h2 { margin: 2px 0 6px; font-size: 28px; line-height: 1.15; letter-spacing: -.3px; font-weight: 650; }
+    .hero p { margin: 0; color: var(--muted); max-width: 70ch; }
+    .controls { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
+    .controls input, .controls select, .controls .btn { height: 40px; }
+    @media (max-width: 800px) { .controls { grid-template-columns: 1fr 1fr; } }
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; width: max-content; }
+    .tabs button { padding: 7px 18px; border: 0; background: none; border-radius: 999px; cursor: pointer; color: var(--muted); font-size: 13.5px; }
+    .tabs button.on { background: rgba(76, 201, 240, .16); color: var(--text); box-shadow: inset 0 0 0 1px rgba(76, 201, 240, .5); }
+    .lesson { display: grid; gap: 14px; }
+    .lesson-head { display: flex; align-items: center; gap: 14px; }
+    .num { font-family: var(--mono); font-size: 13px; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+           background: rgba(76, 201, 240, .12); border: 1px solid rgba(76, 201, 240, .45); color: var(--accent); flex: none; }
+    .num.sun { background: rgba(255, 180, 59, .12); border-color: rgba(255, 180, 59, .5); color: var(--sun); }
+    .num.earth { background: rgba(77, 163, 255, .12); border-color: rgba(77, 163, 255, .5); color: var(--earth); }
+    .lesson h2 { margin: 0; font-size: 19px; letter-spacing: -.1px; }
+    .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 22px; align-items: start; }
+    @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+    .why { color: #c3cce2; margin: 0 0 12px; }
+    .readout { background: rgba(5, 9, 20, .6); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; color: #d5dcee; }
+    .readout b { font-family: var(--mono); color: #fff; font-weight: 600; }
+    .readout .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .stat { flex: 1 1 110px; background: var(--panel2); border-radius: 10px; padding: 8px 10px; border: 1px solid var(--line); }
+    .stat span { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .stat b { font-size: 20px; }
+    .stat.sun b { color: var(--sun); } .stat.earth b { color: var(--earth); } .stat.ok b { color: var(--ok); } .stat.bad b { color: var(--bad); }
+    .plot { height: 300px; }
+    #c1 { height: 400px; }
+    svg.tilt { width: 100%; max-width: 360px; height: auto; display: block; margin: 10px 0 0; }
+    .myths { display: grid; gap: 12px; }
+    .myth { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+    @media (max-width: 800px) { .myth { grid-template-columns: 1fr; } }
+    .myth > div { padding: 14px 18px; }
+    .myth .m { background: rgba(255, 122, 107, .07); border-right: 1px solid var(--line); }
+    .myth .f { background: rgba(79, 224, 164, .06); }
+    .myth .lab { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 4px; display: block; }
+    .myth .m .lab { color: var(--bad); } .myth .f .lab { color: var(--ok); }
+    #banner, #error { margin: 0; }
   </style>
 </head>
 <body>
-  <h1>Modo educativo</h1>
-  <p>Tres preguntas sobre cómo se ve el cielo desde la Luna, respondidas con los datos del sitio que elijas.</p>
-  <p><a href="/">← Volver al navegador</a> · <a href="/heatmap.html">Heatmap sitio × fecha</a></p>
-  <div id="banner">⚠ Datos simulados (mock): las cifras de abajo son de prueba y no describen la Luna real. Los textos explicativos sí son válidos.</div>
-  <div id="error"></div>
+  <header class="topbar">
+    <div class="brand"><div class="moon" aria-hidden="true"></div>
+      <div><h1>Lunar Landing Site Navigator</h1><div class="sub">Modo educativo</div></div></div>
+    <nav class="nav">
+      <a href="/">Navegador</a>
+      <a href="/heatmap.html">Heatmap</a>
+      <a href="/educativo.html" class="on">Educativo</a>
+    </nav>
+  </header>
 
-  <div class="row">
-    <label>Sitio <select id="site"></select></label>
-    <label>Inicio <input type="date" id="start" value="2027-01-01"></label>
-    <label>Fin <input type="date" id="end" value="2027-01-31"></label>
-    <button id="load">Explicar</button>
+  <div class="page">
+    <section class="hero">
+      <div class="moon-orb big" aria-hidden="true"></div>
+      <div>
+        <div class="eyebrow">Cómo se ve el cielo desde la Luna</div>
+        <h2>Tres preguntas, respondidas con los datos de tu sitio</h2>
+        <p>Elige un sitio y un periodo. Las cifras de cada lección se calculan para ese lugar: el Sol, la Tierra y el relieve del horizonte.</p>
+      </div>
+    </section>
+
+    <div id="banner" class="banner" hidden>⚠ Datos simulados (mock): alguna cifra de abajo es de prueba y no describe la Luna real. Los textos explicativos sí son válidos.</div>
+    <div id="error" hidden></div>
+
+    <section class="panel">
+      <div class="controls">
+        <label>Sitio <select id="site"></select></label>
+        <label>Inicio (UTC) <input type="date" id="start" value="2027-01-01"></label>
+        <label>Fin (UTC) <input type="date" id="end" value="2027-01-31"></label>
+        <button class="btn" id="load">Explicar</button>
+      </div>
+    </section>
+
+    <div class="tabs" role="tablist">
+      <button id="tab-q" class="on" role="tab">Tu sitio</button>
+      <button id="tab-m" role="tab">Mitos y datos</button>
+    </div>
+
+    <section id="pane-q" style="display:grid;gap:18px">
+      <article class="card lesson">
+        <div class="lesson-head"><span class="num sun">01</span><h2>¿Por qué el Sol casi no sube en el polo sur?</h2></div>
+        <div class="split">
+          <div>
+            <p class="why">El eje de la Luna está inclinado solo ~1.5° respecto a su órbita (el de la Tierra, 23.4°). Por eso no hay estaciones marcadas, y cerca de los polos el Sol da vueltas casi pegado al horizonte. Las sombras son larguísimas.</p>
+            <div class="readout" id="d1"></div>
+            <svg class="tilt" viewBox="0 0 360 150" role="img" aria-label="Inclinación del eje: Tierra 23.4 grados, Luna 1.5 grados">
+              <defs>
+                <radialGradient id="gE" cx="32%" cy="28%"><stop offset="0" stop-color="#8fd0ff"/><stop offset=".6" stop-color="#2f6fc4"/><stop offset="1" stop-color="#0d2552"/></radialGradient>
+                <radialGradient id="gM" cx="32%" cy="28%"><stop offset="0" stop-color="#f4f1ea"/><stop offset=".55" stop-color="#9a9792"/><stop offset="1" stop-color="#2a2b33"/></radialGradient>
+              </defs>
+              <g transform="translate(90 78)">
+                <line x1="0" y1="-66" x2="0" y2="66" stroke="rgba(142,155,186,.45)" stroke-dasharray="4 4"/>
+                <circle r="40" fill="url(#gE)"/>
+                <g transform="rotate(23.4)"><line x1="0" y1="-62" x2="0" y2="62" stroke="#ffb43b" stroke-width="2.5" stroke-linecap="round"/></g>
+                <path d="M0 -50 A50 50 0 0 1 19.8 -45.9" fill="none" stroke="#ffb43b" stroke-width="1.5"/>
+                <text x="26" y="-52" fill="#ffb43b" font-size="12" font-family="ui-monospace, Menlo, monospace">23.4°</text>
+                <text x="0" y="86" fill="#8e9bba" font-size="12" text-anchor="middle">Tierra</text>
+              </g>
+              <g transform="translate(270 78)">
+                <line x1="0" y1="-66" x2="0" y2="66" stroke="rgba(142,155,186,.45)" stroke-dasharray="4 4"/>
+                <circle r="30" fill="url(#gM)"/>
+                <g transform="rotate(1.5)"><line x1="0" y1="-62" x2="0" y2="62" stroke="#4cc9f0" stroke-width="2.5" stroke-linecap="round"/></g>
+                <text x="10" y="-52" fill="#4cc9f0" font-size="12" font-family="ui-monospace, Menlo, monospace">1.5°</text>
+                <text x="0" y="86" fill="#8e9bba" font-size="12" text-anchor="middle">Luna</text>
+              </g>
+            </svg>
+          </div>
+          <div id="c1" class="plot"></div>
+        </div>
+      </article>
+
+      <article class="card lesson">
+        <div class="lesson-head"><span class="num earth">02</span><h2>¿Por qué la Tierra casi no se mueve en el cielo?</h2></div>
+        <div class="split">
+          <div>
+            <p class="why">La Luna siempre muestra la misma cara a la Tierra (rotación sincrónica). Desde la cara visible, la Tierra queda casi fija en el cielo y solo oscila por la libración. Desde la cara oculta nunca se ve directamente. Desde el polo sur queda cerca del horizonte, y el terreno la tapa con facilidad.</p>
+            <div class="readout" id="d2"></div>
+          </div>
+          <div id="c2" class="plot"></div>
+        </div>
+      </article>
+
+      <article class="card lesson">
+        <div class="lesson-head"><span class="num">03</span><h2>¿Qué cambia el terreno?</h2></div>
+        <div class="split">
+          <div>
+            <p class="why">En la Luna no hay atmósfera, así que no hay refracción: el horizonte es geométrico y lo define el relieve. Un horizonte plano deja ver el Sol apenas supera 0°; con relieve, una montaña de pocos grados basta para taparlo. Aquí se compara el mismo cálculo con y sin terreno.</p>
+            <div class="readout" id="d3"></div>
+          </div>
+          <div id="c3" class="plot"></div>
+        </div>
+      </article>
+    </section>
+
+    <section id="pane-m" class="myths" hidden>
+      <div class="myth"><div class="m"><span class="lab">Mito</span>"En la Luna hay un lado oscuro donde nunca llega el Sol."</div><div class="f"><span class="lab">Dato</span>Todos los puntos reciben Sol; el día lunar dura ≈ 29.5 días terrestres. Lo que cambia es el lado que mira a la Tierra: el lado oculto nunca la ve, pero sí tiene días y noches.</div></div>
+      <div class="myth"><div class="m"><span class="lab">Mito</span>"El cielo lunar se ve azul de día."</div><div class="f"><span class="lab">Dato</span>Sin atmósfera no hay dispersión de luz ni refracción: el cielo es negro incluso con el Sol sobre el horizonte.</div></div>
+      <div class="myth"><div class="m"><span class="lab">Mito</span>"El Sol sube alto en todas partes."</div><div class="f"><span class="lab">Dato</span>En el ecuador sube hasta el cenit, pero en el polo sur apenas unos pocos grados por la inclinación axial de ~1.5°. Por eso interesa el polo sur: hay cráteres en sombra permanente y picos con luz casi continua.</div></div>
+      <div class="myth"><div class="m"><span class="lab">Mito</span>"La Tierra sale y se pone como la Luna en nuestro cielo."</div><div class="f"><span class="lab">Dato</span>Desde la Luna, la Tierra está casi fija en el cielo (con oscilación por libración) o no se ve nunca, según el sitio.</div></div>
+      <div class="myth"><div class="m"><span class="lab">Mito</span>"Si el Sol está sobre 0°, hay luz."</div><div class="f"><span class="lab">Dato</span>Hay luz solo si el Sol está por encima del <i>horizonte local</i>, que incluye el terreno. En el polo sur esa diferencia puede ser decisiva.</div></div>
+    </section>
   </div>
-
-  <div class="tabs">
-    <button id="tab-q" class="on">Tu sitio</button>
-    <button id="tab-m">Mitos y datos</button>
-  </div>
-
-  <section id="pane-q">
-    <div class="card">
-      <h2>1. ¿Por qué el Sol casi no sube en el polo sur?</h2>
-      <p class="why">El eje de la Luna está inclinado solo ~1.5° respecto a su órbita (el de la Tierra, 23.4°). Por eso no hay "estaciones" marcadas, y cerca de los polos el Sol da vueltas casi pegado al horizonte, sin subir más que unos pocos grados. Las sombras son larguísimas.</p>
-      <div class="data" id="d1"></div>
-      <div id="c1" style="height:300px"></div>
-    </div>
-
-    <div class="card">
-      <h2>2. ¿Por qué la Tierra casi no se mueve en el cielo?</h2>
-      <p class="why">La Luna siempre muestra la misma cara a la Tierra (rotación sincrónica). Desde la cara visible, la Tierra queda casi fija en el cielo y solo oscila un poco por la libración. Desde la cara oculta nunca se ve directamente. Desde el polo sur queda cerca del horizonte, y por eso el terreno la tapa con facilidad.</p>
-      <div class="data" id="d2"></div>
-      <div id="c2" style="height:300px"></div>
-    </div>
-
-    <div class="card">
-      <h2>3. ¿Qué cambia el terreno?</h2>
-      <p class="why">En la Luna no hay atmósfera, así que no hay refracción: el horizonte es geométrico y lo define el relieve (cráteres y montañas). Un horizonte plano deja ver el Sol y la Tierra apenas superan 0°; con relieve, una montaña de pocos grados basta para taparlos. Compara abajo el mismo cálculo con y sin terreno.</p>
-      <div class="data" id="d3"></div>
-      <div id="c3" style="height:300px"></div>
-    </div>
-  </section>
-
-  <section id="pane-m" hidden>
-    <div class="card">
-      <div class="myth"><b class="m">Mito:</b> "En la Luna hay un lado oscuro donde nunca llega el Sol."<br>
-        <b class="f">Dato:</b> Todos los puntos reciben Sol; el día lunar dura ≈ 29.5 días terrestres. Lo que cambia es el lado que mira a la Tierra: el lado oculto nunca la ve, pero sí tiene días y noches.</div>
-      <div class="myth"><b class="m">Mito:</b> "El cielo lunar se ve azul de día."<br>
-        <b class="f">Dato:</b> Sin atmósfera no hay dispersión de luz ni refracción: el cielo es negro incluso con el Sol sobre el horizonte.</div>
-      <div class="myth"><b class="m">Mito:</b> "El Sol sube alto en todas partes."<br>
-        <b class="f">Dato:</b> En el ecuador sube hasta el cenit, pero en el polo sur apenas unos pocos grados por la inclinación axial de ~1.5°. Esa es una razón por la que se estudia el polo sur: hay cráteres en sombra permanente y picos con luz casi continua.</div>
-      <div class="myth"><b class="m">Mito:</b> "La Tierra sale y se pone como la Luna en nuestro cielo."<br>
-        <b class="f">Dato:</b> Desde la Luna, la Tierra está casi fija en el cielo (con oscilación por libración) o no se ve nunca, según el sitio.</div>
-      <div class="myth"><b class="m">Mito:</b> "Si el Sol está sobre 0°, hay luz."<br>
-        <b class="f">Dato:</b> Hay luz solo si el Sol está por encima del <i>horizonte local</i>, que incluye el terreno. En el polo sur esa diferencia puede ser decisiva.</div>
-    </div>
-  </section>
 
   <script>
     const $ = id => document.getElementById(id);
+    const T = window.LunarTheme;
     let sites = [];
 
     /** Elevación del horizonte interpolada (periódica) en un azimut. */
@@ -92,10 +165,11 @@
       const i = Math.floor(x) % n, j = (i + 1) % n, f = x - Math.floor(x);
       return hor.el[i] * (1 - f) + hor.el[j] * f;
     }
-    const pct = (arr) => arr.length ? 100 * arr.filter(Boolean).length / arr.length : 0;
+    const pct = arr => arr.length ? 100 * arr.filter(Boolean).length / arr.length : 0;
     const r1 = v => Math.round(v * 10) / 10;
+    const stat = (cls, label, val) => `<div class="stat ${cls}"><span>${label}</span><b>${val}</b></div>`;
 
-    function showError(msg) { $('error').textContent = msg; $('error').style.display = msg ? 'block' : 'none'; }
+    function showError(msg) { $('error').textContent = msg; $('error').className = msg ? 'errbox' : ''; $('error').hidden = !msg; }
 
     async function getJson(url) {
       const r = await fetch(url);
@@ -118,7 +192,7 @@
     }
 
     function tab(q) {
-      $('pane-q').hidden = !q; $('pane-m').hidden = q;
+      $('pane-q').style.display = q ? 'grid' : 'none'; $('pane-m').hidden = q;
       $('tab-q').classList.toggle('on', q); $('tab-m').classList.toggle('on', !q);
     }
 
@@ -142,7 +216,7 @@
 
     function render(s, eph, hor, met) {
       const mock = [eph.source, hor.source, met.source?.ephemeris, met.source?.horizon].includes('mock');
-      $('banner').style.display = mock ? 'block' : 'none';
+      $('banner').hidden = !mock;
       const n = eph.t.length;
       const span = `${eph.t[0].slice(0, 10)} → ${eph.t[n - 1].slice(0, 10)}`;
 
@@ -154,31 +228,32 @@
       const horMax = Math.max(...hor.el), horMean = hor.el.reduce((a, b) => a + b, 0) / hor.el.length;
 
       // 1. Sol
-      $('d1').innerHTML = `<b>${s.name}</b> (${span}): el Sol llega como máximo a <b>${r1(met.sun_el_max_deg)}°</b> de elevación y está sobre el horizonte local el <b>${r1(met.sun_lit_pct)}%</b> del tiempo. La noche más larga dura <b>${r1(met.longest_dark_h)} h</b>.`;
+      $('d1').innerHTML = `<b>${s.name}</b> · ${span}` +
+        `<div class="row">${stat('sun', 'Elevación máx.', r1(met.sun_el_max_deg) + '°')}${stat('sun', 'Sol visible', r1(met.sun_lit_pct) + '%')}${stat('bad', 'Noche más larga', r1(met.longest_dark_h) + ' h')}</div>`;
       Plotly.react('c1', [
-        { x: eph.t, y: eph.sun.el, name: 'Elevación del Sol', line: { color: 'orange' } },
-        { x: [eph.t[0], eph.t[n - 1]], y: [horMean, horMean], name: 'Horizonte medio', line: { color: '#777', dash: 'dot' } },
-      ], { margin: { t: 10, l: 50, r: 10, b: 40 }, yaxis: { title: 'Elevación (°)' }, xaxis: { title: 'UTC' } }, { responsive: true });
+        { x: eph.t, y: eph.sun.el, name: 'Elevación del Sol', mode: 'lines', line: { color: T.C.sun, width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(255,180,59,.10)' },
+        { x: [eph.t[0], eph.t[n - 1]], y: [horMean, horMean], name: 'Horizonte medio', mode: 'lines', line: { color: T.C.terrainLine, dash: 'dot', width: 1.5 } },
+      ], T.layout({ yaxis: { title: { text: 'Elevación (°)' } }, xaxis: { title: { text: 'UTC' } } }), T.config);
 
       // 2. Tierra
-      let earthMsg;
-      if (met.earth_visible_pct === 0) earthMsg = `En este periodo <b>no se ve la Tierra</b> desde ${s.name}.`;
-      else earthMsg = `La Tierra se ve el <b>${r1(met.earth_visible_pct)}%</b> del tiempo; el mayor corte de comunicación dura <b>${r1(met.longest_comms_gap_h)} h</b>.`;
-      $('d2').innerHTML = `<b>${s.name}</b>: ${earthMsg}`;
+      const earthLine = met.earth_visible_pct === 0
+        ? `En este periodo <b>no se ve la Tierra</b> desde este sitio.`
+        : `La Tierra está sobre el horizonte local parte del periodo.`;
+      $('d2').innerHTML = `<b>${s.name}</b><div style="margin-top:6px">${earthLine}</div>` +
+        `<div class="row">${stat('earth', 'Tierra visible', r1(met.earth_visible_pct) + '%')}${stat('bad', 'Mayor corte', r1(met.longest_comms_gap_h) + ' h')}</div>`;
       Plotly.react('c2', [
-        { x: [...Array(360).keys()], y: hor.el, fill: 'tozeroy', name: 'Horizonte (terreno)', line: { color: '#777' } },
-        { x: eph.earth.az, y: eph.earth.el, mode: 'markers', name: 'Tierra (cada hora)', marker: { size: 5, color: 'dodgerblue' } },
-      ], { margin: { t: 10, l: 50, r: 10, b: 40 }, xaxis: { title: 'Azimut (°)', range: [0, 360] }, yaxis: { title: 'Elevación (°)' } }, { responsive: true });
+        { x: [...Array(360).keys()], y: hor.el, name: 'Horizonte (terreno)', mode: 'lines', fill: 'tozeroy', line: { color: T.C.terrainLine, width: 1.5 }, fillcolor: T.C.terrain },
+        { x: eph.earth.az, y: eph.earth.el, name: 'Tierra (cada hora)', mode: 'markers', marker: { size: 6, color: T.C.earth, opacity: .9 } },
+      ], T.layout({ xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360] }, yaxis: { title: { text: 'Elevación (°)' } } }), T.config);
 
       // 3. Terreno
-      $('d3').innerHTML = `Sol visible: <b>${r1(sunFlat)}%</b> con horizonte plano vs <b>${r1(sunTerr)}%</b> con terreno. ` +
-        `Tierra visible: <b>${r1(earthFlat)}%</b> plano vs <b>${r1(earthTerr)}%</b> con terreno. ` +
-        `El horizonte llega hasta <b>${r1(horMax)}°</b> de elevación.`;
-      Plotly.react('c3', [{
-        type: 'bar', x: ['Sol', 'Tierra'], y: [sunFlat, earthFlat], name: 'Horizonte plano', marker: { color: '#b8c4d6' },
-      }, {
-        type: 'bar', x: ['Sol', 'Tierra'], y: [sunTerr, earthTerr], name: 'Con terreno', marker: { color: '#1f4e9c' },
-      }], { barmode: 'group', margin: { t: 10, l: 50, r: 10, b: 40 }, yaxis: { title: '% del tiempo visible', range: [0, 100] } }, { responsive: true });
+      $('d3').innerHTML = `El horizonte llega hasta <b>${r1(horMax)}°</b> de elevación.` +
+        `<div class="row" style="display:grid;grid-template-columns:1fr 1fr">${stat('sun', 'Sol · plano', r1(sunFlat) + '%')}${stat('sun', 'Sol · terreno', r1(sunTerr) + '%')}` +
+        `${stat('earth', 'Tierra · plano', r1(earthFlat) + '%')}${stat('earth', 'Tierra · terreno', r1(earthTerr) + '%')}</div>`;
+      Plotly.react('c3', [
+        { type: 'bar', x: ['Sol', 'Tierra'], y: [sunFlat, earthFlat], name: 'Horizonte plano', marker: { color: '#5b6788' } },
+        { type: 'bar', x: ['Sol', 'Tierra'], y: [sunTerr, earthTerr], name: 'Con terreno', marker: { color: T.C.accent } },
+      ], T.layout({ barmode: 'group', bargap: .35, yaxis: { title: { text: '% del tiempo visible' }, range: [0, 100] } }), T.config);
     }
 
     init();
