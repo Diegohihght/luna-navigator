@@ -13,3 +13,5 @@ data/kernels/
 *.bpc
 *.tif
 *.img
+data/dem/*.TIF
+data/cache/
