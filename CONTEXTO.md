@@ -127,8 +127,8 @@ Si algo se atrasa, se recorta alcance, no calidad del núcleo: terreno plano + e
 ## Estado
 | Módulo | Estado | Notas |
 |---|---|---|
-| Repo + mocks | listo (esqueleto) | falta subir a GitHub |
-| A. Efemérides | stub (mock) | |
-| B. Terreno | stub (mock) | |
-| C. Frontend | esqueleto mínimo | |
-| D. Métricas | implementado con tests | integrar con datos reales |
+| Repo + mocks | listo | subido a GitHub (`Diegohihght/luna-navigator`) |
+| A. Efemérides | real en `main` (`source: "skyfield-de421"`) | PR #1 (cálculo con Skyfield) y PR #3 (validación contra JPL Horizons). Pendiente: revisar rendimiento con rangos largos |
+| B. Terreno | stub (mock) en `main` | pendiente: `horizon.py` con LOLA. Mientras, las páginas muestran el aviso de datos simulados |
+| C. Frontend | rediseño en `main` (PR #4) | `index.html` con selector, horizonte SVG, línea de tiempo y comparación. Tema compartido `theme.css` en rama `diego/ui-refresh`, pendiente de PR |
+| D. Métricas e integración | en `main` con tests | métricas (PR #2 heatmap sitio × fecha y modo educativo). Pendiente: README y guion del pitch |
