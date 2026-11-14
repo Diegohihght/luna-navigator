@@ -6,10 +6,13 @@ __pycache__/
 .DS_Store
 
 # Datos pesados: NO subir a Git (cada quien los descarga)
-data/dem/
+data/dem/*
 data/cache/
 data/kernels/
 *.bsp
 *.bpc
 *.tif
 *.img
+data/dem/*.TIF
+data/cache/
+!data/dem/README.txt
