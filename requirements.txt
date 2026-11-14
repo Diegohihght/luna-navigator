@@ -1,0 +1,6 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+numpy>=1.26
+skyfield>=1.48
+pytest>=8.0
+# Sennie (terreno): agregar cuando se necesite, por ejemplo rasterio o pyproj

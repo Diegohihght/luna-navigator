@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Lunar Landing Site Navigator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1.5rem auto; max-width: 1000px; padding: 0 1rem; }
+    .row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
+    label { display: flex; flex-direction: column; font-size: .85rem; gap: .2rem; }
+    #banner { background: #fff3cd; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
+    table { border-collapse: collapse; margin-top: 1rem; }
+    td { padding: .25rem .75rem; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>Lunar Landing Site Navigator</h1>
+  <p>Esqueleto mínimo (Luis lo reemplaza). Muestra el horizonte local y la posición del Sol y la Tierra.</p>
+  <div id="banner">⚠ Datos simulados (mock): aún no hay cálculo real en algún módulo.</div>
+
+  <div class="row">
+    <label>Sitio <select id="site"></select></label>
+    <label>Inicio <input type="date" id="start" value="2027-01-01"></label>
+    <label>Fin <input type="date" id="end" value="2027-01-31"></label>
+    <button id="load">Calcular</button>
+  </div>
+
+  <label>Momento (muestra) <input type="range" id="slider" min="0" max="0" value="0" style="width:100%"></label>
+  <div id="chart" style="height:420px"></div>
+  <table id="metrics"></table>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let sites = [], eph, hor;
+
+    async function init() {
+      sites = await (await fetch('/api/sites')).json();
+      $('site').innerHTML = sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      $('load').onclick = load;
+      $('slider').oninput = e => draw(+e.target.value);
+      load();
+    }
+
+    async function load() {
+      const s = sites.find(x => x.id === $('site').value);
+      const q = new URLSearchParams({
+        lat: s.lat, lon: s.lon,
+        start: $('start').value + 'T00:00:00Z', end: $('end').value + 'T00:00:00Z', step_min: 60,
+      });
+      let met;
+      [eph, hor, met] = await Promise.all(
+        ['ephemeris', 'horizon', 'metrics'].map(p => fetch(`/api/${p}?${q}`).then(r => r.json()))
+      );
+      $('slider').max = eph.t.length - 1;
+      $('slider').value = 0;
+      $('banner').style.display = [eph.source, hor.source].includes('mock') ? 'block' : 'none';
+      draw(0);
+      showMetrics(met);
+    }
+
+    function draw(i) {
+      const az = [...Array(360).keys()];
+      Plotly.react('chart', [
+        { x: az, y: hor.el, fill: 'tozeroy', name: 'Horizonte (terreno)', line: { color: '#777' } },
+        { x: [eph.sun.az[i]], y: [eph.sun.el[i]], mode: 'markers', name: 'Sol', marker: { size: 18, color: 'orange' } },
+        { x: [eph.earth.az[i]], y: [eph.earth.el[i]], mode: 'markers', name: 'Tierra', marker: { size: 14, color: 'dodgerblue' } },
+      ], {
+        title: eph.t[i],
+        xaxis: { title: 'Azimut (°)', range: [0, 360] },
+        yaxis: { title: 'Elevación (°)', range: [-10, 30] },
+      });
+    }
+
+    function showMetrics(m) {
+      const rows = [
+        ['Sol visible (%)', m.sun_lit_pct], ['Noche más larga (h)', m.longest_dark_h],
+        ['Elevación solar máx. (°)', m.sun_el_max_deg], ['Tierra visible (%)', m.earth_visible_pct],
+        ['Mayor corte de comunicación (h)', m.longest_comms_gap_h],
+        ['Horas hasta cambio del Sol', m.hours_to_sun_change], ['Horas hasta cambio de la Tierra', m.hours_to_earth_change],
+      ];
+      $('metrics').innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td><b>${v ?? '—'}</b></td></tr>`).join('');
+    }
+
+    init();
+  </script>
+</body>
+</html>

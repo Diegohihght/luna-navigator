@@ -1,0 +1,12 @@
+[
+  {"id": "apollo11", "name": "Apolo 11 (Mar de la Tranquilidad)", "lat": 0.674, "lon": 23.473, "mission": "Apolo 11", "type": "historic", "verified": false},
+  {"id": "apollo12", "name": "Apolo 12 (Oceanus Procellarum)", "lat": -3.013, "lon": -23.422, "mission": "Apolo 12", "type": "historic", "verified": false},
+  {"id": "apollo14", "name": "Apolo 14 (Fra Mauro)", "lat": -3.645, "lon": -17.471, "mission": "Apolo 14", "type": "historic", "verified": false},
+  {"id": "apollo15", "name": "Apolo 15 (Hadley-Apenninus)", "lat": 26.132, "lon": 3.633, "mission": "Apolo 15", "type": "historic", "verified": false},
+  {"id": "apollo16", "name": "Apolo 16 (Descartes)", "lat": -8.973, "lon": 15.500, "mission": "Apolo 16", "type": "historic", "verified": false},
+  {"id": "apollo17", "name": "Apolo 17 (Taurus-Littrow)", "lat": 20.191, "lon": 30.772, "mission": "Apolo 17", "type": "historic", "verified": false},
+  {"id": "chandrayaan3", "name": "Chandrayaan-3 (Shiv Shakti)", "lat": -69.373, "lon": 32.319, "mission": "Chandrayaan-3", "type": "recent", "verified": false},
+  {"id": "im2", "name": "IM-2 (zona polar sur)", "lat": -84.79, "lon": 29.20, "mission": "CLPS IM-2", "type": "clps", "verified": false},
+  {"id": "shackleton", "name": "Borde del cráter Shackleton (aprox.)", "lat": -89.9, "lon": 129.8, "mission": "Candidato polo sur", "type": "candidate", "verified": false},
+  {"id": "south_pole", "name": "Polo sur lunar", "lat": -90.0, "lon": 0.0, "mission": "Referencia", "type": "reference", "verified": false}
+]

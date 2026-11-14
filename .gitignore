@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.DS_Store
+
+# Datos pesados: NO subir a Git (cada quien los descarga)
+data/dem/
+data/cache/
+data/kernels/
+*.bsp
+*.bpc
+*.tif
+*.img
