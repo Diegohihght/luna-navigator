@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Heatmap sitio × fecha — Lunar Landing Site Navigator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1.5rem auto; max-width: 1100px; padding: 0 1rem; }
+    .row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
+    label { display: flex; flex-direction: column; font-size: .85rem; gap: .2rem; }
+    #sites { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin-bottom: 1rem; }
+    #sites label { flex-direction: row; align-items: center; gap: .3rem; }
+    #banner { background: #fff3cd; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
+    #error { background: #f8d7da; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
+    #status { font-size: .85rem; color: #555; margin-bottom: .5rem; }
+  </style>
+</head>
+<body>
+  <h1>Heatmap sitio × fecha</h1>
+  <p>Filas: sitios. Columnas: ventanas de fechas consecutivas. Color: % de tiempo con el Sol visible sobre el horizonte local.</p>
+  <p><a href="/">← Volver al navegador</a></p>
+  <div id="banner">⚠ Datos simulados (mock): aún no hay cálculo real en algún módulo.</div>
+  <div id="error"></div>
+
+  <div class="row">
+    <label>Inicio <input type="date" id="start" value="2027-01-01"></label>
+    <label>Ventanas <input type="number" id="n" value="12" min="1" max="60" style="width:5rem"></label>
+    <label>Duración de ventana
+      <select id="dur">
+        <option value="1">1 día</option>
+        <option value="7">7 días</option>
+        <option value="29.5" selected>29.5 días (un día lunar)</option>
+      </select>
+    </label>
+    <label>Paso (min) <input type="number" id="step" value="60" min="1" max="1440" style="width:5rem"></label>
+    <button id="go">Calcular</button>
+  </div>
+  <div id="sites"></div>
+  <div id="status"></div>
+  <div id="chart" style="height:480px"></div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const CONCURRENCY = 4;
+    let sites = [];
+
+    const iso = d => d.toISOString().replace(/\.\d+Z$/, 'Z');
+    const day = d => d.toISOString().slice(0, 10);
+
+    async function init() {
+      sites = await (await fetch('/api/sites')).json();
+      $('sites').innerHTML = sites.map(s =>
+        `<label><input type="checkbox" value="${s.id}" checked> ${s.name}</label>`).join('');
+      $('go').onclick = run;
+      run();
+    }
+
+    function showError(msg) {
+      $('error').textContent = msg;
+      $('error').style.display = msg ? 'block' : 'none';
+    }
+
+    async function fetchWindow(ids, w, step) {
+      const q = new URLSearchParams({ sites: ids.join(','), start: iso(w.start), end: iso(w.end), step_min: step });
+      const r = await fetch(`/api/compare?${q}`);
+      if (!r.ok) {
+        let detail = r.statusText;
+        try { detail = (await r.json()).detail ?? detail; } catch (_) {}
+        throw new Error(`${r.status}: ${typeof detail === 'string' ? detail : JSON.stringify(detail)}`);
+      }
+      return r.json();
+    }
+
+    async function run() {
+      showError('');
+      const ids = [...document.querySelectorAll('#sites input:checked')].map(c => c.value);
+      if (!ids.length) { showError('Selecciona al menos un sitio.'); return; }
+      const n = Math.max(1, Math.min(60, +$('n').value || 1));
+      const durMs = +$('dur').value * 86400000;
+      const step = +$('step').value || 60;
+      const t0 = new Date($('start').value + 'T00:00:00Z');
+      if (isNaN(t0)) { showError('Fecha de inicio inválida.'); return; }
+
+      const wins = [...Array(n).keys()].map(k => ({
+        start: new Date(t0.getTime() + k * durMs),
+        end: new Date(t0.getTime() + (k + 1) * durMs),
+      }));
+
+      $('go').disabled = true;
+      const results = new Array(n);
+      let next = 0, done = 0;
+      $('status').textContent = `Calculando 0/${n}…`;
+      try {
+        const worker = async () => {
+          while (next < n) {
+            const k = next++;
+            results[k] = await fetchWindow(ids, wins[k], step);
+            $('status').textContent = `Calculando ${++done}/${n}…`;
+          }
+        };
+        await Promise.all(Array.from({ length: Math.min(CONCURRENCY, n) }, worker));
+      } catch (e) {
+        showError(`Error en /api/compare → ${e.message}`);
+        $('status').textContent = '';
+        $('go').disabled = false;
+        return;
+      }
+      $('go').disabled = false;
+      $('status').textContent = `${ids.length} sitios × ${n} ventanas.`;
+      draw(ids, wins, results);
+    }
+
+    function draw(ids, wins, results) {
+      // Las filas siguen el orden de `ids`; /api/compare devuelve en ese mismo orden, pero se indexa por id.
+      const names = {}, z = [], text = [];
+      let mock = false;
+      ids.forEach(() => { z.push([]); text.push([]); });
+      results.forEach((res, k) => {
+        const byId = Object.fromEntries(res.map(r => [r.id, r]));
+        ids.forEach((id, i) => {
+          const r = byId[id], m = r.metrics;
+          names[id] = r.name;
+          z[i][k] = m.sun_lit_pct;
+          text[i][k] = `${r.name}<br>${day(wins[k].start)} → ${day(wins[k].end)}` +
+            `<br>Sol visible: <b>${m.sun_lit_pct}%</b>` +
+            `<br>Noche más larga: ${m.longest_dark_h} h` +
+            `<br>Elevación solar máx.: ${m.sun_el_max_deg}°`;
+          const src = m.source || {};
+          if (src.ephemeris === 'mock' || src.horizon === 'mock') mock = true;
+        });
+      });
+      $('banner').style.display = mock ? 'block' : 'none';
+
+      Plotly.react('chart', [{
+        type: 'heatmap',
+        x: wins.map(w => day(w.start)),
+        y: ids.map(id => names[id]),
+        z, text, hoverinfo: 'text',
+        zmin: 0, zmax: 100,
+        colorscale: 'Viridis',
+        colorbar: { title: '% Sol' },
+      }], {
+        xaxis: { title: 'Inicio de ventana (UTC)', type: 'category' },
+        yaxis: { autorange: 'reversed', automargin: true },
+        margin: { l: 60, r: 20, t: 20, b: 70 },
+      }, { responsive: true });
+    }
+
+    init();
+  </script>
+</body>
+</html>
