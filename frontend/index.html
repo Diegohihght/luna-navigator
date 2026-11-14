@@ -1,88 +1,313 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Lunar Landing Site Navigator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 1.5rem auto; max-width: 1000px; padding: 0 1rem; }
-    .row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
-    label { display: flex; flex-direction: column; font-size: .85rem; gap: .2rem; }
-    #banner { background: #fff3cd; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
-    table { border-collapse: collapse; margin-top: 1rem; }
-    td { padding: .25rem .75rem; border-bottom: 1px solid #ddd; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lunar Landing Site Navigator</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --bg:#171b26; --panel:#202638; --panel2:#283048; --line:#343d58;
+  --text:#e8eaf2; --muted:#9aa3bd; --sun:#f4b942; --earth:#5ab0f0;
+  --ok:#5fcf9a; --bad:#ef7b6b; --accent:#b9a6ff;
+  --font:"Segoe UI","Helvetica Neue",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.moon{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 70% 30%,#f2f2f6 0,#b6b9c6 55%,#6f7486 100%);box-shadow:inset -9px -3px 0 rgba(23,27,38,.55)}
+h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.2px}
+.sub{color:var(--muted);font-size:13px}
+.tools{display:flex;align-items:center;gap:20px}
+.tools a{color:var(--accent);text-decoration:none;font-size:14px}
+.tools a:hover{text-decoration:underline}
+.switch{display:flex;align-items:center;gap:8px;color:var(--muted);cursor:pointer;user-select:none}
+.switch input{accent-color:var(--accent);width:16px;height:16px}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:20px;padding:20px 24px;max-width:1500px;margin:0 auto}
+@media(max-width:900px){.layout{grid-template-columns:1fr;padding:14px}}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;align-self:start;display:grid;gap:14px}
+label{display:grid;gap:5px;color:var(--muted);font-size:13px}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:9px 10px;width:100%}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{background:var(--accent);color:#1b1630;border:0;border-radius:8px;padding:11px;font-weight:650;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+#custom{display:none}
+#siteinfo{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+main{display:grid;gap:18px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.card h2{font-size:15px;margin:0 0 2px;font-weight:650}
+.card .hint{color:var(--muted);font-size:13px;margin:0 0 10px}
+#banner{display:none;background:#3a3020;border:1px solid #6b5628;color:#f5d98f;border-radius:8px;padding:9px 14px;font-size:13px}
+#err{display:none;background:#3a2226;border:1px solid #7a3a42;color:#ffb4ba;border-radius:8px;padding:9px 14px;font-size:13px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.m{background:var(--panel2);border-radius:8px;padding:12px 14px;border-left:3px solid var(--accent)}
+.m.sun{border-color:var(--sun)} .m.earth{border-color:var(--earth)}
+.m b{display:block;font-size:24px;font-weight:650;font-variant-numeric:tabular-nums}
+.m span{color:var(--muted);font-size:13px}
+.m small{display:none;margin-top:6px;color:#b8c0d8;font-size:12px;line-height:1.35}
+body.edu .m small{display:block}
+#chart{width:100%;background:#11141d;border-radius:8px;min-height:120px}
+#chart svg{display:block;width:100%;height:auto}
+.now{display:flex;gap:22px;flex-wrap:wrap;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:8px}
+.dot{width:12px;height:12px;border-radius:50%}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--panel2)}
+.tag.ok{color:var(--ok)} .tag.bad{color:var(--bad)}
+.timeline{display:flex;align-items:center;gap:12px;margin-top:12px}
+.timeline input[type=range]{accent-color:var(--accent);padding:0;border:0;background:none}
+#tlabel{min-width:150px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer;font-size:13px}
+.chip input{width:auto;accent-color:var(--accent);padding:0}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+td.best{color:var(--ok);font-weight:650}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+</style>
 </head>
 <body>
-  <h1>Lunar Landing Site Navigator</h1>
-  <p>Esqueleto mínimo (Luis lo reemplaza). Muestra el horizonte local y la posición del Sol y la Tierra.</p>
-  <div id="banner">⚠ Datos simulados (mock): aún no hay cálculo real en algún módulo.</div>
-
-  <div class="row">
-    <label>Sitio <select id="site"></select></label>
-    <label>Inicio <input type="date" id="start" value="2027-01-01"></label>
-    <label>Fin <input type="date" id="end" value="2027-01-31"></label>
-    <button id="load">Calcular</button>
+<header>
+  <div class="brand"><div class="moon" aria-hidden="true"></div>
+    <div><h1>Lunar Landing Site Navigator</h1><div class="sub">Sol y Tierra sobre el horizonte lunar, para elegir dónde y cuándo aterrizar</div></div></div>
+  <div class="tools">
+    <a href="/heatmap.html">Heatmap sitio × fecha</a>
+    <a href="/educativo.html">Explicación paso a paso</a>
+    <label class="switch"><input type="checkbox" id="edu"> Modo educativo</label>
   </div>
+</header>
 
-  <label>Momento (muestra) <input type="range" id="slider" min="0" max="0" value="0" style="width:100%"></label>
-  <div id="chart" style="height:420px"></div>
-  <table id="metrics"></table>
+<div class="layout">
+  <aside>
+    <label>Sitio de aterrizaje
+      <select id="site"></select></label>
+    <div id="custom" class="row">
+      <label>Latitud (°)<input id="lat" type="number" step="0.01" min="-90" max="90" value="-89.5"></label>
+      <label>Longitud (°)<input id="lon" type="number" step="0.01" min="-180" max="180" value="0"></label>
+    </div>
+    <label>Fecha de inicio (UTC)<input id="start" type="date" value="2027-01-01"></label>
+    <div class="row">
+      <label>Duración (días)<input id="days" type="number" min="1" max="60" value="14"></label>
+      <label>Paso (min)<select id="step"><option>15</option><option>30</option><option selected>60</option><option>180</option></select></label>
+    </div>
+    <button class="btn" id="go">Calcular escenario</button>
+    <div id="siteinfo">Elige un sitio y calcula.</div>
+  </aside>
 
-  <script>
-    const $ = id => document.getElementById(id);
-    let sites = [], eph, hor;
+  <main>
+    <div id="banner">Datos de demostración: el backend aún devuelve valores de prueba (mock). Los números no son reales todavía.</div>
+    <div id="err"></div>
 
-    async function init() {
-      sites = await (await fetch('/api/sites')).json();
-      $('site').innerHTML = sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      $('load').onclick = load;
-      $('slider').oninput = e => draw(+e.target.value);
-      load();
-    }
+    <section class="card">
+      <h2>Resumen del periodo</h2>
+      <p class="hint">Métricas calculadas sobre todo el rango de fechas elegido.</p>
+      <div class="metrics" id="metrics"><div class="empty">Sin datos todavía.</div></div>
+    </section>
 
-    async function load() {
-      const s = sites.find(x => x.id === $('site').value);
-      const q = new URLSearchParams({
-        lat: s.lat, lon: s.lon,
-        start: $('start').value + 'T00:00:00Z', end: $('end').value + 'T00:00:00Z', step_min: 60,
-      });
-      let met;
-      [eph, hor, met] = await Promise.all(
-        ['ephemeris', 'horizon', 'metrics'].map(p => fetch(`/api/${p}?${q}`).then(r => r.json()))
-      );
-      $('slider').max = eph.t.length - 1;
-      $('slider').value = 0;
-      $('banner').style.display = [eph.source, hor.source].includes('mock') ? 'block' : 'none';
-      draw(0);
-      showMetrics(met);
-    }
+    <section class="card">
+      <h2>Vista del horizonte</h2>
+      <p class="hint">Mirando desde el sitio: el eje horizontal es el azimut (0° = norte lunar, sentido horario) y el vertical la elevación. El Sol o la Tierra son visibles solo si quedan por encima del relieve gris.</p>
+      <div class="now" id="now"></div>
+      <div id="chart"></div>
+      <div class="timeline">
+        <button class="btn ghost" id="play" aria-label="Reproducir o pausar">▶ Reproducir</button>
+        <input type="range" id="slider" min="0" max="0" value="0" style="flex:1" aria-label="Momento del periodo">
+        <div id="tlabel">—</div>
+      </div>
+    </section>
 
-    function draw(i) {
-      const az = [...Array(360).keys()];
-      Plotly.react('chart', [
-        { x: az, y: hor.el, fill: 'tozeroy', name: 'Horizonte (terreno)', line: { color: '#777' } },
-        { x: [eph.sun.az[i]], y: [eph.sun.el[i]], mode: 'markers', name: 'Sol', marker: { size: 18, color: 'orange' } },
-        { x: [eph.earth.az[i]], y: [eph.earth.el[i]], mode: 'markers', name: 'Tierra', marker: { size: 14, color: 'dodgerblue' } },
-      ], {
-        title: eph.t[i],
-        xaxis: { title: 'Azimut (°)', range: [0, 360] },
-        yaxis: { title: 'Elevación (°)', range: [-10, 30] },
-      });
-    }
+    <section class="card">
+      <h2>Comparar sitios</h2>
+      <p class="hint">Marca dos o más sitios y compara el mismo periodo lado a lado. En verde, el mejor valor de cada fila.</p>
+      <div class="chips" id="chips"></div>
+      <button class="btn ghost" id="cmp" style="width:auto;padding:9px 18px">Comparar seleccionados</button>
+      <div id="cmpout" style="margin-top:14px;overflow-x:auto"></div>
+    </section>
+  </main>
+</div>
 
-    function showMetrics(m) {
-      const rows = [
-        ['Sol visible (%)', m.sun_lit_pct], ['Noche más larga (h)', m.longest_dark_h],
-        ['Elevación solar máx. (°)', m.sun_el_max_deg], ['Tierra visible (%)', m.earth_visible_pct],
-        ['Mayor corte de comunicación (h)', m.longest_comms_gap_h],
-        ['Horas hasta cambio del Sol', m.hours_to_sun_change], ['Horas hasta cambio de la Tierra', m.hours_to_earth_change],
-      ];
-      $('metrics').innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td><b>${v ?? '—'}</b></td></tr>`).join('');
-    }
+<script>
+const $ = id => document.getElementById(id);
+const S = {sites:[], eph:null, hor:null, met:null, i:0, timer:null, X:null, Y:null};
 
-    init();
-  </script>
+const METRICS = [
+  ["sun_lit_pct","Sol iluminado","%","Porcentaje del periodo con el Sol sobre el horizonte. Más luz, más energía solar.","sun",1],
+  ["longest_dark_h","Noche más larga","h","Mayor tramo continuo sin Sol. Define cuánta batería o calor necesita la misión.","sun",-1],
+  ["sun_el_max_deg","Elevación máx. del Sol","°","En el polo sur el Sol apenas sube unos grados, por eso las sombras son larguísimas.","sun",1],
+  ["earth_visible_pct","Tierra visible","%","Porcentaje del periodo con línea de vista directa a la Tierra para comunicarse.","earth",1],
+  ["longest_comms_gap_h","Mayor corte de comunicación","h","Tramo continuo más largo sin ver la Tierra.","earth",-1],
+  ["hours_to_sun_change","Hasta cambio de Sol","h","Tiempo hasta la próxima salida o puesta del Sol desde el momento elegido.","sun",0],
+  ["hours_to_earth_change","Hasta cambio de Tierra","h","Tiempo hasta que la Tierra aparezca o se oculte.","earth",0]
+];
+const fmt = v => v==null||isNaN(v) ? "—" : (Math.abs(v)>=100 ? v.toFixed(0) : v.toFixed(1));
+const fdate = t => t.replace("T"," ").replace(":00Z"," UTC").replace("Z"," UTC");
+
+function showErr(msg){ const e=$("err"); e.textContent=msg; e.style.display=msg?"block":"none"; }
+async function api(path, params){
+  const q = new URLSearchParams(params).toString();
+  const r = await fetch(`/api/${path}?${q}`);
+  if(!r.ok) throw new Error(`El servidor respondió ${r.status} en /api/${path}`);
+  return r.json();
+}
+
+/* ---------- Sitios ---------- */
+async function loadSites(){
+  try{ S.sites = await api("sites",{}); }
+  catch(e){ showErr("No se pudo cargar la lista de sitios. ¿Está corriendo el servidor (uvicorn backend.main:app --reload)?"); return; }
+  $("site").innerHTML = S.sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join("")
+    + `<option value="__custom">Coordenadas personalizadas…</option>`;
+  $("chips").innerHTML = S.sites.map((s,i)=>
+    `<label class="chip"><input type="checkbox" value="${s.id}" ${i<2?"checked":""}>${s.name}</label>`).join("");
+  updateSiteInfo();
+}
+function currentSite(){
+  const v = $("site").value;
+  if(v==="__custom") return {id:"custom", name:"Personalizado", lat:+$("lat").value, lon:+$("lon").value};
+  return S.sites.find(s=>s.id===v);
+}
+function updateSiteInfo(){
+  $("custom").style.display = $("site").value==="__custom" ? "grid" : "none";
+  const s = currentSite(); if(!s) return;
+  const extra = s.mission ? `<br>Misión: ${s.mission}` : "";
+  const warn = s.verified===false ? `<br><span style="color:#f5d98f">Coordenadas sin verificar con Quickmap.</span>` : "";
+  $("siteinfo").innerHTML = `Lat ${s.lat}°, Lon ${s.lon}°${extra}${warn}`;
+}
+function range(){
+  const start = new Date($("start").value+"T00:00:00Z");
+  const end = new Date(start.getTime()+ (+$("days").value)*86400000);
+  const z = d => d.toISOString().replace(".000Z","Z");
+  return {start:z(start), end:z(end), step_min:$("step").value};
+}
+
+/* ---------- Cálculo principal ---------- */
+async function run(){
+  const s = currentSite(); if(!s) return;
+  showErr(""); $("go").disabled = true; $("go").textContent = "Calculando…"; stop();
+  const base = {lat:s.lat, lon:s.lon};
+  try{
+    const [eph,hor,met] = await Promise.all([
+      api("ephemeris",{...base,...range()}),
+      api("horizon",{...base,radius_km:50}),
+      api("metrics",{...base,...range()})
+    ]);
+    S.eph=eph; S.hor=hor; S.met=met; S.i=0;
+    const mock = [eph.source, hor.source, JSON.stringify(met.source)].join().includes("mock");
+    $("banner").style.display = mock ? "block" : "none";
+    renderMetrics(); drawChart();
+    const sl=$("slider"); sl.max = eph.t.length-1; sl.value=0;
+    updateNow();
+  }catch(e){ showErr(e.message+". Revisa que el backend esté corriendo y los parámetros sean válidos."); }
+  $("go").disabled=false; $("go").textContent="Calcular escenario";
+}
+
+function renderMetrics(){
+  const m = S.met;
+  $("metrics").innerHTML = METRICS.map(([k,name,u,tip,cls])=>
+    `<div class="m ${cls}"><span>${name}</span><b>${fmt(m[k])} ${u}</b><small>${tip}</small></div>`).join("");
+}
+
+/* ---------- Horizonte (SVG nativo, sin librerías) ---------- */
+function horizonAt(az){
+  const el=S.hor.el, n=el.length;
+  return el[Math.round(((az%360)+360)%360/(360/n))%n];
+}
+function drawChart(){
+  const h=S.hor, e=S.eph, step=h.az_step_deg;
+  const W=1000, H=380, L=54, R=16, T=18, B=44;
+  const top = Math.max(8, Math.ceil(Math.max(...h.el, ...e.sun.el, ...e.earth.el)+3));
+  const bot = -6;
+  const X = a => L + a/360*(W-L-R);
+  const Y = v => T + (top-v)/(top-bot)*(H-T-B);
+  S.X=X; S.Y=Y;
+  const f = n => n.toFixed(1);
+
+  let grid="";
+  const ys = top<=14?2 : top<=30?5 : top<=60?10 : 20;
+  for(let v=Math.ceil(bot/ys)*ys; v<=top; v+=ys){
+    grid += `<line x1="${L}" x2="${W-R}" y1="${f(Y(v))}" y2="${f(Y(v))}" stroke="${v===0?"#5b6486":"#252b3f"}" stroke-width="${v===0?1.5:1}"/>`
+          + `<text x="${L-8}" y="${f(Y(v)+4)}" fill="#9aa3bd" font-size="12" text-anchor="end">${v}°</text>`;
+  }
+  const names={0:"N",45:"NE",90:"E",135:"SE",180:"S",225:"SO",270:"O",315:"NO",360:"N"};
+  for(const a of [0,45,90,135,180,225,270,315,360]){
+    grid += `<line x1="${f(X(a))}" x2="${f(X(a))}" y1="${T}" y2="${H-B}" stroke="#252b3f"/>`
+          + `<text x="${f(X(a))}" y="${H-B+18}" fill="#9aa3bd" font-size="12" text-anchor="middle">${names[a]} ${a}°</text>`;
+  }
+
+  let terrain = `M${f(X(0))} ${f(Y(bot))}`;
+  h.el.forEach((v,i)=>{ terrain += `L${f(X(i*step))} ${f(Y(v))}L${f(X((i+1)*step))} ${f(Y(v))}`; });
+  terrain += `L${f(X(360))} ${f(Y(bot))}Z`;
+
+  const dots = (az,el)=> az.map((a,i)=>`M${f(X(a))} ${f(Y(el[i]))}h0`).join("");
+
+  $("chart").innerHTML = `
+  <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Horizonte local con la posición del Sol y la Tierra">
+    <defs><clipPath id="clip"><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}"/></clipPath></defs>
+    ${grid}
+    <g clip-path="url(#clip)">
+      <path d="${terrain}" fill="rgba(138,143,158,.55)" stroke="#8a8f9e" stroke-width="1.5"/>
+      <path d="${dots(e.sun.az,e.sun.el)}" stroke="#f4b942" stroke-opacity=".3" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="${dots(e.earth.az,e.earth.el)}" stroke="#5ab0f0" stroke-opacity=".3" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <circle id="earthDot" r="8" fill="#5ab0f0" stroke="#fff" stroke-width="2"/>
+      <circle id="sunDot" r="11" fill="#f4b942" stroke="#fff" stroke-width="2"/>
+    </g>
+    <text x="${W/2}" y="${H-4}" fill="#9aa3bd" font-size="12" text-anchor="middle">Azimut</text>
+    <text transform="translate(14 ${H/2}) rotate(-90)" fill="#9aa3bd" font-size="12" text-anchor="middle">Elevación</text>
+    <circle cx="${L+14}" cy="${T+12}" r="5" fill="#f4b942"/><text x="${L+24}" y="${T+16}" fill="#c5cbe0" font-size="12">Sol</text>
+    <circle cx="${L+64}" cy="${T+12}" r="5" fill="#5ab0f0"/><text x="${L+74}" y="${T+16}" fill="#c5cbe0" font-size="12">Tierra</text>
+    <rect x="${L+130}" y="${T+7}" width="14" height="10" fill="rgba(138,143,158,.55)" stroke="#8a8f9e"/><text x="${L+150}" y="${T+16}" fill="#c5cbe0" font-size="12">Relieve</text>
+  </svg>`;
+}
+
+function updateNow(){
+  const e=S.eph, i=S.i; if(!e || !S.X) return;
+  const sa=e.sun.az[i], se=e.sun.el[i], ea=e.earth.az[i], ee=e.earth.el[i];
+  const vs = se>horizonAt(sa), ve = ee>horizonAt(ea);
+  const sd=$("sunDot"), ed=$("earthDot");
+  if(sd){ sd.setAttribute("cx",S.X(sa)); sd.setAttribute("cy",S.Y(se)); sd.setAttribute("fill-opacity",vs?1:.35); }
+  if(ed){ ed.setAttribute("cx",S.X(ea)); ed.setAttribute("cy",S.Y(ee)); ed.setAttribute("fill-opacity",ve?1:.35); }
+  const row=(c,n,az,el,v)=>`<span class="pill"><span class="dot" style="background:${c}"></span>${n}: elev. ${el.toFixed(1)}°, az ${az.toFixed(0)}° <span class="tag ${v?"ok":"bad"}">${v?"visible":"oculto"}</span></span>`;
+  $("now").innerHTML = row("var(--sun)","Sol",sa,se,vs)+row("var(--earth)","Tierra",ea,ee,ve);
+  $("tlabel").textContent = fdate(e.t[i]);
+}
+
+/* ---------- Línea de tiempo ---------- */
+function stop(){ clearInterval(S.timer); S.timer=null; $("play").textContent="▶ Reproducir"; }
+$("play").onclick = ()=>{
+  if(!S.eph) return;
+  if(S.timer){ stop(); return; }
+  $("play").textContent="⏸ Pausar";
+  S.timer = setInterval(()=>{
+    S.i = (S.i+1) % S.eph.t.length; $("slider").value=S.i; updateNow();
+  },80);
+};
+$("slider").oninput = e=>{ S.i=+e.target.value; updateNow(); };
+
+/* ---------- Comparación ---------- */
+$("cmp").onclick = async ()=>{
+  const ids=[...document.querySelectorAll("#chips input:checked")].map(c=>c.value);
+  if(ids.length<2){ $("cmpout").innerHTML='<div class="empty">Marca al menos dos sitios.</div>'; return; }
+  $("cmpout").innerHTML='<div class="empty">Calculando…</div>';
+  try{
+    const res = await api("compare",{sites:ids.join(","),...range()});
+    const head = res.map(r=>`<th>${r.name}</th>`).join("");
+    const rows = METRICS.map(([k,name,u,,,dir])=>{
+      const vals=res.map(r=>r.metrics[k]);
+      const best = dir===0 ? null : (dir>0?Math.max(...vals):Math.min(...vals));
+      return `<tr><th>${name}</th>${vals.map(v=>`<td class="${best!==null&&v===best&&new Set(vals).size>1?"best":""}">${fmt(v)} ${u}</td>`).join("")}</tr>`;
+    }).join("");
+    $("cmpout").innerHTML=`<table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){ $("cmpout").innerHTML=`<div class="empty">${e.message}</div>`; }
+};
+
+/* ---------- Eventos e inicio ---------- */
+$("site").onchange = updateSiteInfo;
+$("go").onclick = run;
+$("edu").onchange = e=>document.body.classList.toggle("edu", e.target.checked);
+loadSites().then(run);
+</script>
 </body>
 </html>
