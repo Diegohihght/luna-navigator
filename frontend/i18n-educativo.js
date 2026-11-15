@@ -216,4 +216,7 @@ I18N.add('es', {
   "ed.js.horizon_terrain_toward_the_sun": "Horizonte (terreno) hacia el Sol",
   "ed.js.percent_of_time_visible": "% del tiempo visible",
   "ed.js.lit": "con luz",
+  "ed.js.step_n": "Paso {n}",
+  "ed.js.show_fact": "▼ ver dato",
+  "ed.js.hide_fact": "▲ ocultar",
 });
