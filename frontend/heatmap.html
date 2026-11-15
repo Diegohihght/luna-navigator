@@ -27,6 +27,12 @@
     /* La gráfica no se comprime en pantallas estrechas: se desplaza en horizontal dentro del panel. */
     .chartscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     #chart { height: 520px; min-width: 640px; border: 0; background: none; }
+    #chart:empty { height: 0; min-width: 0; }
+    .empty-note { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    /* Errores: mensaje claro, detalle técnico aparte y botón para reintentar. */
+    #error { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+    #error .errdetail { flex-basis: 100%; order: 3; font-family: var(--mono); font-size: 12px; opacity: .8; }
+    #error .retry { padding: 4px 14px; font-size: 12px; border-radius: 999px; }
     .swipe { display: none; margin: 6px 0 0; font-size: 12px; color: var(--muted); }
     @media (max-width: 700px) { .swipe { display: block; } }
     @media (max-width: 560px) {
@@ -64,7 +70,7 @@
     </section>
 
     <div id="banner" hidden>⚠ Datos simulados (mock): aún no hay cálculo real en algún módulo. Los porcentajes sirven para probar la interfaz, no para decidir.</div>
-    <div id="error" hidden></div>
+    <div id="error" role="alert" hidden></div>
 
     <section class="panel">
       <div class="controls">
@@ -84,7 +90,7 @@
       <div class="sites-actions">
         <button class="btn ghost" id="all" type="button">Todos</button>
         <button class="btn ghost" id="none" type="button">Ninguno</button>
-        <span id="status"></span>
+        <span id="status" aria-live="polite"></span>
       </div>
       <div class="bar" style="margin-top:10px"><i id="prog"></i></div>
     </section>
@@ -99,8 +105,9 @@
           <button class="btn ghost" id="toggle" type="button">Ver como tabla</button>
         </div>
       </div>
+      <p class="empty-note" id="empty">Todavía no hay resultados. Elige los sitios y pulsa «Calcular».</p>
       <div class="chartscroll"><div id="chart"></div></div>
-      <p class="swipe" id="swipe">Desliza la gráfica hacia los lados para ver todas las ventanas.</p>
+      <p class="swipe" id="swipe" hidden>Desliza la gráfica hacia los lados para ver todas las ventanas.</p>
       <div id="tablewrap" hidden></div>
     </section>
   </div>
@@ -117,8 +124,17 @@
     const r1 = v => Math.round(v * 10) / 10;
 
     async function init() {
-      try { sites = await (await fetch('/api/sites')).json(); }
-      catch (e) { showError('No se pudo cargar la lista de sitios. ¿Está corriendo el servidor?'); return; }
+      showError('');
+      try {
+        const r = await fetch('/api/sites');
+        if (!r.ok) throw new Error(`/api/sites → ${r.status} ${r.statusText}`);
+        sites = await r.json();
+      } catch (e) {
+        $('go').disabled = true;
+        showError('No se pudo cargar la lista de sitios. Comprueba la conexión con el servidor y vuelve a intentarlo.', init, e.message);
+        return;
+      }
+      $('go').disabled = false;
       $('sites').innerHTML = sites.map(s =>
         `<label class="chip"><input type="checkbox" value="${s.id}" checked>${s.name}</label>`).join('');
       $('go').onclick = run;
@@ -133,7 +149,27 @@
       run();
     }
 
-    function showError(msg) { $('error').textContent = msg; $('error').hidden = !msg; }
+    /** Muestra un error comprensible; el detalle técnico va aparte y `retry` añade un botón Reintentar. */
+    function showError(msg, retry, detail) {
+      const box = $('error');
+      box.replaceChildren();
+      box.hidden = !msg;
+      if (!msg) return;
+      const text = document.createElement('span');
+      text.textContent = msg;
+      box.append(text);
+      if (retry) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn ghost retry'; b.textContent = 'Reintentar';
+        b.onclick = retry;
+        box.append(b);
+      }
+      if (detail) {
+        const d = document.createElement('small');
+        d.className = 'errdetail'; d.textContent = 'Detalle técnico: ' + detail;
+        box.append(d);
+      }
+    }
 
     async function fetchWindow(ids, w, step) {
       const q = new URLSearchParams({ sites: ids.join(','), start: iso(w.start), end: iso(w.end), step_min: step });
@@ -177,7 +213,8 @@
         };
         await Promise.all(Array.from({ length: Math.min(CONCURRENCY, n) }, worker));
       } catch (e) {
-        showError(`Error en /api/compare → ${e.message}`);
+        showError('No se pudo calcular el heatmap. Vuelve a intentarlo; si sigue fallando, prueba con menos ventanas o un paso mayor.',
+          run, `/api/compare → ${e.message}`);
         $('status').textContent = '';
         $('go').disabled = false;
         return;
@@ -206,6 +243,8 @@
         });
       });
       $('banner').hidden = !mock;
+      $('empty').hidden = true;
+      $('swipe').hidden = !$('tablewrap').hidden;
 
       // --- Indicadores resumen ---
       let best = { v: -1 }, zeros = 0, total = 0, sum = 0;
