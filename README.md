@@ -21,6 +21,30 @@ Pruebas: `pytest`
 
 En VS Code: `Ctrl+Shift+P` → "Python: Select Interpreter" → elige `.venv`.
 
+### Primera ejecución: kernels de JPL
+
+Las efemérides (posición del Sol y de la Tierra) se calculan con Skyfield y
+los datos de JPL/NASA. La primera vez que se calcula una efeméride, Skyfield
+descarga automáticamente estos archivos a `data/kernels/`:
+
+- `de421.bsp`: posiciones planetarias (JPL DE421)
+- `moon_080317.tf`, `pck00008.tpc` y `moon_pa_de421_1900-2050.bpc`:
+  orientación y marco de referencia de la Luna
+
+**Requiere conexión a internet** y puede tardar unos minutos según la conexión
+(son unas decenas de MB). Las siguientes ejecuciones usan los archivos locales
+y funcionan sin internet. La carpeta `data/kernels/` está en `.gitignore`: no se
+sube a Git.
+
+Para dejarlo listo antes de una demostración sin internet, ejecuta una vez con
+conexión:
+
+    python -c "from datetime import datetime, timezone; from backend.ephemeris import get_ephemeris; t = datetime(2027, 1, 1, tzinfo=timezone.utc); get_ephemeris(0, 0, t, t, 60)"
+
+Validación: `ephemeris.py` está comparado contra JPL Horizons en los 10 sitios
+curados (separación angular máxima 0.0064°). La tabla está en
+`tests/horizons_validation/validacion_horizons.md`.
+
 ## Equipo y módulos
 | Rol | Persona | Archivos |
 |---|---|---|
