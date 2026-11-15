@@ -1,0 +1,14 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+tests
+docs
+data/dem/*.TIF
+data/cache
+data/kernels/*
+!data/kernels/de421.bsp
+!data/kernels/moon_pa_de421_1900-2050.bpc
+!data/kernels/pck00008.tpc
+!data/kernels/moon_080317.tf

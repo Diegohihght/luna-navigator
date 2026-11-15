@@ -1,3 +1,10 @@
+---
+title: Lunar Landing Site Navigator
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Lunar Landing Site Navigator
 
 An interactive tool to compare lunar landing sites and dates. For a given site and time window, it shows where the **Sun** and the **Earth** sit relative to the **real local horizon** (computed from NASA LOLA topography), and derives energy and communication metrics: solar elevation, daylight, dark periods, Earth visibility, and time remaining until sunset or Earthset.
