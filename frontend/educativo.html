@@ -30,7 +30,7 @@
 
     /* ---------- Pestañas ---------- */
     .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; width: max-content; max-width: 100%; flex-wrap: wrap; }
-    .tabs button { padding: 7px 18px; border: 0; background: none; border-radius: 999px; cursor: pointer; color: var(--muted); font-size: 13.5px; transition: color .2s, background .2s, box-shadow .2s; }
+    .tabs button { padding: 7px 18px; border: 0; background: none; border-radius: 999px; cursor: pointer; color: var(--muted); font-size: 14px; transition: color .2s, background .2s, box-shadow .2s; }
     .tabs button:hover { color: var(--text); }
     .tabs button.on { background: rgba(76, 201, 240, .16); color: var(--text); box-shadow: inset 0 0 0 1px rgba(76, 201, 240, .5); }
     .pane { display: none; gap: 18px; }
@@ -84,7 +84,7 @@
     details.dd > summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 650; color: #fff; user-select: none; }
     details.dd > summary::-webkit-details-marker { display: none; }
     details.dd > summary > span { flex: 1; min-width: 0; }
-    details.dd .chev { flex: none; width: auto; height: auto; margin: 0; transform: none; font-style: normal; font-family: var(--mono); font-size: 12.5px; font-weight: 500; padding: 6px 14px; border-radius: 999px;
+    details.dd .chev { flex: none; width: auto; height: auto; margin: 0; transform: none; font-style: normal; font-family: var(--mono); font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 999px;
                        background: var(--accent); color: #04222d; border: 0; box-shadow: 0 4px 14px rgba(76,201,240,.35); transition: transform .2s, background .2s; }
     details.dd .chev::before { content: "Abrir ▾"; }
     @keyframes ddNudge { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(3px); } 90% { transform: translateY(-2px); } }
@@ -96,7 +96,7 @@
 
     /* ---------- Botones con movimiento ---------- */
     .mbtn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text);
-            padding: 9px 16px; border-radius: 999px; cursor: pointer; font-size: 13.5px; text-decoration: none; font-family: inherit;
+            padding: 9px 16px; border-radius: 999px; cursor: pointer; font-size: 14px; text-decoration: none; font-family: inherit;
             transition: transform .22s cubic-bezier(.3,1.7,.5,1), box-shadow .25s, background .25s, border-color .25s; }
     .mbtn:hover { transform: translateY(-3px); box-shadow: 0 10px 22px -10px rgba(76,201,240,.7); border-color: rgba(76,201,240,.65); }
     .mbtn:active { transform: translateY(0) scale(.95); }
@@ -118,12 +118,12 @@
     .slide.act { opacity: 1; transform: none; }
     .slide-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 22px; align-items: center; }
     @media (max-width: 900px) { .slide-grid { grid-template-columns: 1fr; } }
-    .kick { font-family: var(--mono); font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+    .kick { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
     .slide h3 { margin: 6px 0 10px; font-size: 22px; letter-spacing: -.2px; }
     .slide p { color: #c3cce2; margin: 0 0 12px; }
     .ctrls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 10px; align-items: center; }
     .ctrls input[type=range] { flex: 1 1 140px; min-width: 120px; accent-color: var(--accent); }
-    .slide-note { min-height: 44px; font-size: 13.5px; color: #d5dcee; background: rgba(5,9,20,.6); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+    .slide-note { min-height: 44px; font-size: 14px; color: #d5dcee; background: rgba(5,9,20,.6); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
     .slide-note b { color: #fff; font-family: var(--mono); font-weight: 600; }
     .slide-vis { background: radial-gradient(120% 120% at 50% 0%, #0d1530, #04060e); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
     .slide-vis canvas { display: block; width: 100%; height: auto; }
@@ -133,7 +133,7 @@
     .dots button:hover { transform: scale(1.4); }
     .dots button.on { width: 30px; border-radius: 6px; background: var(--accent); }
     .bars { display: grid; gap: 10px; margin: 4px 0 6px; }
-    .bar { display: grid; grid-template-columns: 150px 1fr 56px; gap: 10px; align-items: center; font-size: 13.5px; }
+    .bar { display: grid; grid-template-columns: 150px 1fr 56px; gap: 10px; align-items: center; font-size: 14px; }
     .bar i { display: block; height: 10px; border-radius: 6px; background: rgba(150,165,205,.16); overflow: hidden; }
     .bar i u { display: block; height: 100%; width: 0; border-radius: 6px; transition: width 1.1s cubic-bezier(.2,.8,.2,1); text-decoration: none; }
     .bar b { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
@@ -150,7 +150,7 @@
     .cast-card:hover { transform: translateY(-6px) rotate(-.4deg); border-color: rgba(76,201,240,.6); box-shadow: 0 18px 34px -18px rgba(76,201,240,.65); }
     .cast-card canvas { width: 150px; height: 150px; }
     .cast-card h4 { margin: 6px 0 4px; font-size: 16px; }
-    .cast-card ul { list-style: none; margin: 0; padding: 0; font-size: 12.5px; color: var(--muted); text-align: left; display: grid; gap: 3px; }
+    .cast-card ul { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--muted); text-align: left; display: grid; gap: 3px; }
     .cast-card li b { color: #dfe5f6; font-weight: 600; }
 
     /* ---------- Mitos (acordeón) ---------- */
