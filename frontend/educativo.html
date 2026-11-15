@@ -9,14 +9,24 @@
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script src="/theme.js"></script>
   <style>
-    .page { max-width: 1180px; margin: 0 auto; padding: 22px 28px 56px; display: grid; gap: 18px; }
+    .page { max-width: 1180px; margin: 0 auto; padding: 22px 28px 56px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
     .hero { display: flex; align-items: center; gap: 22px; }
     .hero h2 { margin: 2px 0 6px; font-size: 28px; line-height: 1.15; letter-spacing: -.3px; font-weight: 650; }
     .hero p { margin: 0; color: var(--muted); max-width: 70ch; }
     #heroMoon { width: 128px; height: 128px; flex: none; filter: drop-shadow(0 0 22px rgba(190,200,230,.18)); }
     .controls { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
     .controls input, .controls select, .controls .btn { height: 40px; }
+    .controls > * { min-width: 0; }
+    .controls select, .controls input { width: 100%; min-width: 0; }
     @media (max-width: 800px) { .controls { grid-template-columns: 1fr 1fr; } .hero { flex-direction: column; align-items: flex-start; } }
+    @media (max-width: 560px) {
+      .page { padding: 16px 16px 40px; }
+      .controls { grid-template-columns: 1fr; }
+      .hero { gap: 12px; }
+      .hero h2 { font-size: 23px; }
+      #heroMoon { width: 88px; height: 88px; }
+      .bar { grid-template-columns: 110px 1fr 48px; }
+    }
 
     /* ---------- Pestañas ---------- */
     .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; width: max-content; max-width: 100%; flex-wrap: wrap; }
