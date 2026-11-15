@@ -21,10 +21,10 @@ A tool to **quickly compare lunar landing sites and dates** (mainly the south po
 | C. Frontend | **Real.** 2D panorama, 3D views "from outside" and "from the site" with LOLA + Clementine relief, site comparison, timeline | `frontend/index.html`, `frontend/vista3d.js`, `frontend/data/relief/` |
 | D. Metrics and integration | **Real.** Metrics, site × date heatmap, educational mode, shared theme, README in English | `backend/metrics.py`, `backend/main.py`, `frontend/heatmap.html`, `frontend/educativo.html`, `frontend/theme.css`, `README.md` |
 
-Branches: **everything is in `main`**. Merged pull requests: #1–#12. Work in progress: Sennie's branch `sennie/verificar-sitios` (verified site coordinates; pull request pending).
+Branches: **everything is in `main`**. Merged pull requests: #1–#14. No branches in progress.
 
 What is **not** done yet:
-- Site coordinates in `data/sites.json` verified with Quickmap (`verified: false`). **Urgent for Shackleton** (see §8).
+- Site coordinates in `data/sites.json` verified with Quickmap: Shackleton is done (`verified: true`, PR #14); the other 9 sites are still `verified: false`.
 - Real terrain for custom coordinates: they currently use illustrative terrain, and the view says so.
 - Final captions, pitch script and pitch video.
 - Translation of the user-facing interface (HTML pages and 3D view text) and of `backend/horizon.py` and `tests/test_horizon.py`.
@@ -94,7 +94,7 @@ Next (optional):
 ### B. Terrain — Sennie (`backend/horizon.py`, `data/horizons/`, `data/dem/`)
 Done: real LOLA horizon with the local polar DEM (PR #5) and with the remote global DEM (PR #7); precomputed profiles for the 10 sites.
 Next:
-- Shackleton: with `-89.9, 129.8` the horizon reaches 33° and the Sun is down 0 % of the time. This suggests the point is inside the crater. Verify it against Quickmap (her branch `sennie/verificar-sitios` is in progress). If the coordinate changes, regenerate its profile with `python scripts/build_horizons.py shackleton`.
+- Shackleton: done (PR #14). The site moved from `-89.9, 129.8` (inside the crater, Sun 0 %) to the rim at `-89.954, -31.976`, verified with Quickmap. Whenever a coordinate changes, regenerate both its horizon (`python scripts/build_horizons.py <id>`) and its 3D ground relief (`python scripts/build_relief.py --ground`): the 3D view looks the relief up by coordinate.
 - Decide whether the fallback terrain for custom coordinates stays remote or a local global DEM is added.
 - Keep `tests/test_horizon.py` green.
 - After her pull request is merged, the docstrings in `backend/horizon.py` and `tests/test_horizon.py` will be translated to English (not yet done, to avoid conflicts with her work).
@@ -110,12 +110,12 @@ Next:
 ### D. Metrics and integration — Diego (`backend/metrics.py`, `backend/main.py`, `scripts/`, docs, pitch)
 Done: metrics, heatmap, educational mode, shared theme, relief and precomputed horizons, README in English, translation of the Python docstrings and comments in the in-scope modules.
 Next:
-- Update the figures in the README and the pitch with the final values once Sennie's Shackleton coordinate is merged.
+- Update the figures in the pitch with the final values. README figures are final. Shackleton, 2027-01-01 to 2027-01-31: Sun 47.2 %, Earth 53.4 %, maximum solar elevation 1.0°.
 - Captions and pitch script, in English, organized by the eight grading criteria.
 - Final review: `pytest`, a clean start from a fresh clone without the DEM, and the four pages without simulated-data warnings.
 
 ## 8. Team pending items
-- [ ] Verify the coordinates in `data/sites.json` against Quickmap (Shackleton first). Owner: Sennie (in progress).
+- [ ] Verify the remaining 9 coordinates in `data/sites.json` against Quickmap (Shackleton is done). Owner: Sennie.
 - [ ] Decide the final list of curated sites. Owner: everyone.
 - [ ] Confirm the Space Apps submission requirements (format, video, public repository). Owner: Diego.
 - [ ] Review the challenge's Resources tab and add the data links to the README. Owner: Diego.
@@ -151,7 +151,7 @@ Next:
 ## Status (summary)
 | Module | Status |
 |---|---|
-| Repository | on GitHub (`Diegohihght/luna-navigator`), `main` clean, no open pull requests, one branch in progress (`sennie/verificar-sitios`) |
+| Repository | on GitHub (`Diegohihght/luna-navigator`), `main` clean, no open pull requests |
 | A. Ephemerides | real (Skyfield DE421, validated against JPL Horizons at the 10 sites) |
 | B. Terrain | real for the 10 curated sites (LOLA); custom coordinates use illustrative relief |
 | C. Frontend | real (2D, 3D from outside and from the site, comparison, heatmap, educational) |
