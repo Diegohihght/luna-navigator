@@ -40,13 +40,24 @@ uvicorn backend.main:app --reload
 
 Open http://127.0.0.1:8000 (app) or http://127.0.0.1:8000/docs (API).
 
-**First run needs internet** for two things, both downloaded automatically:
-- The JPL planetary ephemeris `de421.bsp` (about 16 MB), saved to `data/kernels/`.
-- The LOLA global elevation model, read remotely for sites outside the south polar region (only the window around each site is read).
-
 Curated sites already have precomputed horizons and terrain in the repository (`data/horizons/`, `frontend/data/relief/`), so the app works for them without any large download. Custom coordinates are computed on demand and cached in `data/cache/`.
 
 Run the tests with `pytest`.
+
+### First run: JPL kernels and terrain
+
+**The first run needs internet**, for two things that are downloaded automatically:
+
+- **Planetary ephemerides.** The Sun and Earth positions are computed with Skyfield from JPL data. On the first calculation, Skyfield downloads `de421.bsp` (JPL DE421, about 16 MB) and the lunar frame files `moon_080317.tf`, `pck00008.tpc` and `moon_pa_de421_1900-2050.bpc`, into `data/kernels/`. Later runs use the local files and work offline. `data/kernels/` is in `.gitignore` and is not committed.
+- **Terrain for sites outside the south polar region.** The LOLA global elevation model is read remotely, and only the window around each site is downloaded.
+
+To prepare for a demonstration without internet, run once with a connection:
+
+```bash
+python -c "from datetime import datetime, timezone; from backend.ephemeris import get_ephemeris; t = datetime(2027, 1, 1, tzinfo=timezone.utc); get_ephemeris(0, 0, t, t, 60)"
+```
+
+**Validation.** The ephemeris values were compared against JPL Horizons for the 10 curated sites on 3 dates (2027-01-01, 2027-01-10 and 2027-01-20), at 00:00, 06:00, 12:00 and 18:00 UTC. The largest angular separation is 0.0064°, against a tolerance of 0.02°. The table is in [`tests/horizons_validation/validacion_horizons.md`](tests/horizons_validation/validacion_horizons.md).
 
 ## Data sources
 
@@ -55,7 +66,7 @@ All scientific inputs come from NASA or partner agencies.
 | Data | Used for | Source |
 |---|---|---|
 | JPL DE421 planetary ephemeris | Positions of the Sun and the Earth as seen from each site | NASA JPL, via [Skyfield](https://rhodesmill.org/skyfield/) |
-| JPL Horizons | Independent check of the ephemeris values (`tests/test_ephemeris_horizons.py`) | [NASA JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) |
+| JPL Horizons | Independent check of the ephemeris values (`tests/horizons_validation/`, `tests/test_ephemeris_horizons.py`) | [NASA JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) |
 | LOLA south polar DEM, `LDEM_80S_80MPP_ADJ` (80 m/px, 80–90°S) | Horizon and terrain near the south pole | NASA GSFC, [Planetary Geodesy Data Archive](https://pgda.gsfc.nasa.gov/products/90) |
 | LOLA Global LDEM, 118 m/px | Horizon and terrain for the rest of the Moon | [USGS Astrogeology](https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m) |
 | Clementine UVVIS 750 nm global mosaic, 118 m v2 | Surface tone (albedo) of the 3D Moon | USGS Astrogeology, `Lunar_Clementine_UVVIS_750nm_Global_Mosaic_118m_v2` in the [planetarymaps](https://planetarymaps.usgs.gov/mosaic/) archive |
@@ -74,7 +85,7 @@ The same LOLA data can be explored in [NASA Moon Trek](https://trek.nasa.gov/moo
 - The horizon uses the LOLA elevation models as published. Heights are not corrected for local rock or dust, and the 80 m and 118 m grids cannot resolve small craters.
 - The 3D surface away from the curated sites is illustrative and is labelled as such in the interface.
 - **Shackleton rim coordinates are still unverified.** At the current coordinate the horizon is high and the Sun is hidden for most of the period. This is being checked against LROC Quickmap; treat that site's numbers as provisional.
-- Earth libration is included implicitly, because the Earth position is computed for each site. This has not yet been cross-checked against JPL Horizons for all curated sites.
+- Earth libration is included implicitly, because the Earth position is computed for each site. The JPL check above covers the Sun and Earth positions, but libration has not been checked separately.
 - The Moon's orbital variations are included by the DE421 ephemeris.
 
 ## Repository layout
@@ -89,7 +100,7 @@ data/dem/             Optional local south polar DEM (not committed; see its REA
 data/kernels/         Ephemeris kernels, downloaded on first run (not committed)
 data/cache/           Runtime cache (not committed)
 scripts/              build_horizons.py, build_relief.py
-tests/                pytest suite
+tests/                pytest suite and the JPL Horizons validation table
 ```
 
 Regenerate the committed data when coordinates or sources change:
@@ -122,7 +133,7 @@ This project was built with the help of AI tools, as declared here in line with 
 
 - **Tool used:** Anthropic's Claude models, through Claude Code (command-line agent in the repository) and the claude.ai chat.
 - **What the AI helped with:** drafting and refactoring Python and JavaScript code, writing tests, debugging, drafting documentation (including this README), and suggesting visualization designs.
-- **What the team did:** defined the scientific scope, chose data sources, set the validation criteria, reviewed and ran every change, and decided what was kept. Astronomical values are being checked against JPL Horizons, and terrain values come directly from the published LOLA products. The validation table will be kept in `tests/`.
+- **What the team did:** defined the scientific scope, chose data sources, set the validation criteria, reviewed and ran every change, and decided what was kept. Astronomical values are checked against JPL Horizons, and terrain values come directly from the published LOLA products. The validation table is kept in `tests/horizons_validation/`.
 - **Limits we are aware of:** AI-generated code can contain errors, so every change was tested before merging, and open issues are listed in [CONTEXTO.md](CONTEXTO.md).
 
 ## References
