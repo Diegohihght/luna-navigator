@@ -16,3 +16,4 @@ data/kernels/
 data/dem/*.TIF
 data/cache/
 !data/dem/README.txt
+!data/dem/LDEM_80S_80MPP_ADJ_i16.tif
