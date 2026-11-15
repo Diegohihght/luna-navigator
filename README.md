@@ -59,6 +59,17 @@ python -c "from datetime import datetime, timezone; from backend.ephemeris impor
 
 **Validation.** The ephemeris values were compared against JPL Horizons for the 10 curated sites on 3 dates (2027-01-01, 2027-01-10 and 2027-01-20), at 00:00, 06:00, 12:00 and 18:00 UTC. The largest angular separation is 0.0064°, against a tolerance of 0.02°. The table is in [`tests/horizons_validation/validacion_horizons.md`](tests/horizons_validation/validacion_horizons.md).
 
+## What the ephemeris models
+
+The Sun and Earth positions come from the JPL DE421 ephemerides and the
+physical orientation of the Moon (JPL lunar PCK, Mean Earth frame), so they
+natively include libration, orbital eccentricity, axial tilt and observer
+parallax. Over a 28-day window (January 2027) the Earth's elevation swings by
+13° to 20° peak to peak depending on the site, and from the south pole it is
+above the geometric horizon only about 46% of the time, crossing it
+periodically. That 46% ignores terrain; the real figure is lower. The evidence
+is in `tests/test_libration.py` and `scripts/libration_table.py`.
+
 ## Data sources
 
 All scientific inputs come from NASA or partner agencies.

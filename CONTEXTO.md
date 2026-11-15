@@ -139,7 +139,7 @@ Next:
 ## 11. After the submission (long term)
 - LOLA horizon for any coordinate, with a local global DEM.
 - 2D polar map with the horizon and the light windows overlaid.
-- Real Earth libration and communication with more than one antenna.
+- Communication with more than one antenna.
 - More sites: CLPS missions and candidate sites from NASA and the Canadian Space Agency.
 - Automatic validation against JPL in continuous integration.
 

@@ -14,8 +14,6 @@ Output contract:
   "source": "mock" | "skyfield-de421" | ...
 }
 
-Validate against JPL Horizons (https://ssd.jpl.nasa.gov/horizons/) at 2-3 sites.
-
 Implementation notes:
 - Kernels are downloaded automatically on first run (requires internet) and
   stored in data/kernels/ (NOT committed to git).
@@ -25,6 +23,7 @@ Implementation notes:
 - The local basis (east, north, up) is built from planetocentric latitude and
   positive east longitude.
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
