@@ -127,9 +127,9 @@ This project was built with the help of AI tools, as declared here in line with 
 
 ## References
 
-- Folkner, W. M., Williams, J. G., Boggs, D. H., Park, R. S., & Kuchynka, P. (2008). *The Planetary and Lunar Ephemerides DE421*. JPL Interplanetary Network Progress Report 42-178.
-- Smith, D. E., Zuber, M. T., Neumann, G. A., Lemoine, F. G., Mazarico, E., Torrence, M. H., et al. (2010). The Lunar Orbiter Laser Altimeter investigation on the Lunar Reconnaissance Orbiter mission. *Space Science Reviews*, 150, 209–241.
-- Barker, M. K., et al. (2023). A new view of the lunar south pole from the Lunar Orbiter Laser Altimeter (LOLA). *The Planetary Science Journal*. [doi/record](https://doaj.org/article/210a43e5612a45e680189a9674460e93)
+- Folkner, W. M., Williams, J. G., & Boggs, D. H. (2009). The Planetary and Lunar Ephemerides DE421. JPL Interplanetary Network Progress Report 42-178.
+- Smith, D. E., Zuber, M. T., Neumann, G. A., Lemoine, F. G., Mazarico, E., Torrence, M. H., et al. (2010). The Lunar Orbiter Laser Altimeter investigation on the Lunar Reconnaissance Orbiter mission. Space Science Reviews, 150, 209–241. https://doi.org/10.1007/s11214-009-9512-y
+- Barker, M. K., Mazarico, E., Neumann, G. A., et al. (2023). A New View of the Lunar South Pole from the Lunar Orbiter Laser Altimeter (LOLA). The Planetary Science Journal, 4(9), 183. https://doi.org/10.3847/PSJ/acf3e1 ([record](https://doaj.org/article/210a43e5612a45e680189a9674460e93))
 - Rhodes, B. (2019). Skyfield: High precision research-grade positions for planets and Earth satellites generator. Astrophysics Source Code Library, ascl:1907.024.
 - NASA Lunar Reconnaissance Orbiter (LRO) mission: https://lunar.gsfc.nasa.gov/
 - NASA Moon Trek: https://trek.nasa.gov/moon/
