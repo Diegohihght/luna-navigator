@@ -1,13 +1,15 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Heatmap sitio × fecha — Lunar Landing Site Navigator</title>
+  <title data-i18n="hm.title">Site × date heatmap — Lunar Landing Site Navigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/theme.css">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script src="/theme.js"></script>
+  <script src="/i18n.js"></script>
+  <script src="/i18n-heatmap.js"></script>
   <style>
     .page { max-width: 1280px; margin: 0 auto; padding: 22px 28px 48px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
     .hero { display: flex; align-items: center; gap: 22px; }
@@ -46,50 +48,176 @@
     #tablewrap th:first-child, #tablewrap td:first-child { font-family: var(--font); position: sticky; left: 0; background: #0d1426; }
     .scale { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; font-family: var(--mono); }
     .scale i { display: block; width: 180px; height: 10px; border-radius: 99px; background: linear-gradient(90deg, #1a1626, #3a2230, #6b3418, #a8531a, #e07b1c, #ffb43b, #fff0b8); border: 1px solid var(--line); }
+
+    /* ===================== Estilo sobrio (solo esta página) =====================
+       Sobrescribe el tema compartido sin tocar theme.css, que también usa index.html.
+       Fondo plano, paneles planos, una escala de títulos (32 / 18 / 15 / 13 / 12 px),
+       espaciado en múltiplos de 8 px y controles sin brillo. */
+    :root { --s-bg: #0b0e14; --s-surface: #121722; --s-surface-2: #171d29; --s-line: rgba(255, 255, 255, .08);
+            --s-line-2: rgba(255, 255, 255, .16); --s-text: #e6e9ef; --s-muted: #a3acbd; }
+    html { background: var(--s-bg); background-image: none; }
+    body::before, body::after { display: none; }
+    body { color: var(--s-text); line-height: 1.6; }
+    .topbar { background: rgba(11, 14, 20, .94); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom: 1px solid var(--s-line); padding: 12px 32px; }
+    .topbar .moon { width: 22px; height: 22px; box-shadow: none; }
+    .brand h1 { font-size: 15px; font-weight: 600; letter-spacing: 0; }
+    .nav a { border-radius: 6px; font-size: 14px; padding: 6px 12px; }
+    .nav a.on { background: none; border-color: transparent; box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+    .page { max-width: 1120px; padding: 48px 32px 80px; gap: 24px; }
+    .hero { display: block; }
+    .eyebrow { font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: .12em; }
+    .hero h2 { font-size: 32px; line-height: 1.2; font-weight: 600; letter-spacing: -.02em; margin: 8px 0 12px; }
+    .hero p { font-size: 16px; color: var(--s-muted); max-width: 62ch; }
+    .card, .panel { background: var(--s-surface); border: 1px solid var(--s-line); border-radius: 10px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 24px; }
+    .card h2, .panel h2 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 4px; }
+    .hint { font-size: 14px; color: var(--s-muted); }
+    label { font-size: 13px; color: var(--s-muted); gap: 6px; }
+    input, select { background: var(--s-bg); border: 1px solid var(--s-line-2); border-radius: 6px; }
+    .btn, button.btn { background: var(--accent); color: #04222d; box-shadow: none; border-radius: 6px; font-weight: 600; }
+    .btn:hover { filter: none; background: #72d6f4; }
+    .btn.ghost { background: transparent; color: var(--s-text); border: 1px solid var(--s-line-2); font-weight: 500; }
+    .btn.ghost:hover { background: rgba(255, 255, 255, .06); }
+    .chip { background: transparent; border: 1px solid var(--s-line-2); border-radius: 6px; font-size: 14px; }
+    #banner, #error { border-radius: 6px; font-size: 14px; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 560px) {
+      .topbar { padding: 10px 16px; }
+      .page { padding: 28px 16px 56px; gap: 16px; }
+      .hero h2 { font-size: 26px; }
+      .card, .panel { padding: 16px; }
+    }
+
+    /* --- Específico del heatmap --- */
+    .kpis { gap: 16px; }
+    .kpi { background: var(--s-surface); border: 1px solid var(--s-line); border-radius: 10px; padding: 16px 20px; }
+    .kpi::before { display: none; }
+    .kpi span { font-size: 12px; letter-spacing: .08em; }
+    .kpi b { font-size: 28px; font-weight: 500; letter-spacing: -.01em; margin: 6px 0 2px; }
+    .kpi small { color: var(--s-muted); font-size: 13px; }
+    .bar { background: var(--s-line); }
+    .bar > i { background: var(--accent); }
+    .sites-actions button { border-radius: 6px; }
+    #tablewrap th:first-child, #tablewrap td:first-child { background: var(--s-surface); }
+
+    /* ===================== Capa de movimiento e interacción =====================
+       Entradas escalonadas, título palabra a palabra, foco de luz que sigue al cursor,
+       barra de lectura, banners desplegables y panel de detalle al hacer clic en una celda.
+       Todo se desactiva con "reducir movimiento" del sistema. */
+    #scrollbar { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 60; transform: scaleX(0); transform-origin: 0 50%;
+                 background: linear-gradient(90deg, var(--accent), var(--sun)); pointer-events: none; }
+    .fx .fx-in { opacity: 0; transform: translateY(24px); filter: blur(6px);
+             transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1), filter .8s ease; transition-delay: var(--d, 0s); }
+    .fx .fx-in.on { opacity: 1; transform: none; filter: none; }
+    .hero h2 .w { display: inline-block; opacity: 0; transform: translateY(.55em) rotate(2deg); filter: blur(8px);
+                  animation: wordIn .9s cubic-bezier(.2, .7, .2, 1) forwards; animation-delay: calc(var(--i) * 70ms + .1s); }
+    @keyframes wordIn { to { opacity: 1; transform: none; filter: none; } }
+    /* Foco de luz que sigue al cursor en tarjetas y paneles. */
+    .spot { position: relative; isolation: isolate; transition: border-color .3s ease; }
+    .spot::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; opacity: 0; transition: opacity .35s ease;
+                   background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(76, 201, 240, .11), transparent 45%); }
+    .spot:hover::after { opacity: 1; }
+    .spot:hover { border-color: rgba(76, 201, 240, .32); }
+    /* Botones y chips con respuesta al pulsar. */
+    .btn { transition: transform .18s cubic-bezier(.3, 1.6, .5, 1), background .2s ease; }
+    .btn:active { transform: scale(.96); }
+    .chip { transition: border-color .2s ease, background .2s ease, transform .15s ease; }
+    .chip:active { transform: scale(.96); }
+    .chip:has(input:checked) { border-color: rgba(76, 201, 240, .55); background: rgba(76, 201, 240, .08); }
+    /* Barra de cálculo con brillo mientras trabaja. */
+    .bar.busy > i { background: linear-gradient(90deg, var(--accent), #e9fbff, var(--accent)); background-size: 200% 100%; animation: shimmer 1.1s linear infinite; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    /* La gráfica aparece con un barrido de izquierda a derecha. */
+    .chartscroll.sweep #chart { animation: sweep 1.1s cubic-bezier(.2, .7, .2, 1) both; }
+    @keyframes sweep { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+    #chart .nsewdrag { cursor: pointer; }
+    /* Banners desplegables. */
+    .xbanners { display: grid; gap: 12px; }
+    .xban { background: var(--s-surface); border: 1px solid var(--s-line); border-radius: 10px; overflow: hidden; }
+    .xban > button { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; font-weight: 600; font-size: 15px; }
+    .xban > button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 10px; }
+    .xic { width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; flex: none; background: rgba(76, 201, 240, .12); color: var(--accent); font-family: var(--mono); font-size: 13px; }
+    .plus { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--s-line-2); display: grid; place-items: center; flex: none; font-weight: 400;
+            transition: transform .45s cubic-bezier(.2, .7, .2, 1), background .3s ease, color .3s ease, border-color .3s ease; }
+    .xban.open .plus { transform: rotate(135deg); background: var(--accent); border-color: var(--accent); color: #04222d; }
+    .xbody { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .55s cubic-bezier(.2, .7, .2, 1); }
+    .xban.open .xbody { grid-template-rows: 1fr; }
+    .xbody > div { overflow: hidden; }
+    .xin { padding: 0 20px 18px 62px; color: var(--s-muted); font-size: 15px; opacity: 0; transform: translateY(-8px); transition: opacity .4s ease .12s, transform .4s ease .12s; }
+    .xban.open .xin { opacity: 1; transform: none; }
+    .xin p { margin: 0 0 8px; } .xin p:last-child { margin: 0; }
+    /* Panel de detalle de una celda. */
+    .cellwrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .55s cubic-bezier(.2, .7, .2, 1); }
+    .cellwrap.open { grid-template-rows: 1fr; }
+    .cellwrap > div { overflow: hidden; }
+    .cellcard { margin-top: 20px; border: 1px solid rgba(76, 201, 240, .35); border-radius: 10px; padding: 20px 22px;
+                background: linear-gradient(135deg, rgba(76, 201, 240, .08), rgba(255, 180, 59, .05) 60%, transparent), var(--s-surface-2); }
+    .cellcard.swap { animation: cardIn .6s cubic-bezier(.2, .7, .2, 1) both; }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(-10px) scale(.99); } to { opacity: 1; transform: none; } }
+    .cc-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+    .cc-head h3 { margin: 6px 0 2px; font-size: 20px; font-weight: 600; }
+    .cc-head p { margin: 0; color: var(--s-muted); font-family: var(--mono); font-size: 13px; }
+    .cc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+    .cc-m { border: 1px solid var(--s-line); border-radius: 8px; padding: 12px 14px; background: var(--s-bg); }
+    .cc-m span { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--s-muted); }
+    .cc-m b { display: block; font-family: var(--mono); font-size: 24px; font-weight: 500; margin-top: 4px; }
+    .cc-m.sun b { color: var(--sun); } .cc-m.earth b { color: var(--earth); }
+    .cc-cmp { margin-top: 16px; font-size: 14px; color: var(--s-muted); }
+    .cc-track { position: relative; height: 8px; border-radius: 99px; background: var(--s-line); margin-top: 10px; }
+    .cc-track i { position: absolute; top: 0; bottom: 0; left: 0; width: var(--v); border-radius: 99px; background: linear-gradient(90deg, #a8531a, var(--sun));
+                  transform-origin: 0 50%; animation: grow 1s cubic-bezier(.2, .7, .2, 1) both; }
+    .cc-track u { position: absolute; top: -4px; bottom: -4px; left: var(--v); width: 2px; background: var(--s-text); }
+    @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @media (max-width: 560px) { .xin { padding: 0 16px 16px; } .xban > button { padding: 14px 16px; } .cc-head { flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) {
+      .fx-in, .hero h2 .w { opacity: 1 !important; transform: none !important; filter: none !important; animation: none !important; transition: none !important; }
+      .chartscroll.sweep #chart, .cellcard.swap, .cc-track i, .bar.busy > i { animation: none !important; }
+      .xbody, .xin, .plus, .cellwrap { transition: none !important; }
+      #scrollbar { display: none; }
+    }
   </style>
 </head>
 <body>
+  <div id="scrollbar" aria-hidden="true"></div>
   <header class="topbar">
     <div class="brand"><div class="moon" aria-hidden="true"></div>
-      <div><h1>Lunar Landing Site Navigator</h1><div class="sub">Heatmap sitio × fecha</div></div></div>
+      <div><h1>Lunar Landing Site Navigator</h1></div></div>
     <nav class="nav">
-      <a href="/">Navegador</a>
-      <a href="/heatmap.html" class="on">Heatmap</a>
-      <a href="/educativo.html">Educativo</a>
+      <a href="/" data-i18n="nav.navigator">Navigator</a>
+      <a href="/heatmap.html" class="on" data-i18n="nav.heatmap">Heatmap</a>
+      <a href="/educativo.html" data-i18n="nav.edu">Educational</a>
     </nav>
   </header>
 
   <div class="page">
     <section class="hero">
-      <div class="moon-orb big" aria-hidden="true"></div>
       <div>
-        <div class="eyebrow">Planificación de lanzamiento</div>
-        <h2>¿Qué pasa si se retrasa el lanzamiento?</h2>
-        <p>Cada celda es el porcentaje de tiempo con el Sol sobre el horizonte local de un sitio, durante una ventana de fechas. Las filas son sitios; las columnas, ventanas consecutivas.</p>
+        <div class="eyebrow fx-in" data-i18n="hm.eyebrow">Launch planning</div>
+        <h2 data-i18n="hm.h2">What happens if the launch slips?</h2>
+        <p class="fx-in" style="--d:.45s" data-i18n="hm.lead">Each cell is the percentage of time with the Sun above the local horizon of a site, during a date window. Rows are sites; columns are consecutive windows.</p>
       </div>
     </section>
 
-    <div id="banner" hidden>⚠ Datos simulados (mock): aún no hay cálculo real en algún módulo. Los porcentajes sirven para probar la interfaz, no para decidir.</div>
+    <div id="banner" hidden data-i18n="hm.banner">⚠ Simulated data (mock): there is still no real calculation in some module. The percentages are useful to test the interface, not to decide.</div>
     <div id="error" role="alert" hidden></div>
 
-    <section class="panel">
+    <section class="panel spot fx-in" style="--d:.55s">
       <div class="controls">
-        <label>Inicio (UTC) <input type="date" id="start" value="2027-01-01"></label>
-        <label>Ventanas <input type="number" id="n" value="12" min="1" max="60"></label>
-        <label>Duración de ventana
+        <label><span data-i18n="hm.start">Start (UTC)</span> <input type="date" id="start" value="2027-01-01"></label>
+        <label><span data-i18n="hm.windows">Windows</span> <input type="number" id="n" value="12" min="1" max="60"></label>
+        <label><span data-i18n="hm.wlen">Window length</span>
           <select id="dur">
-            <option value="1">1 día</option>
-            <option value="7">7 días</option>
-            <option value="29.5" selected>29.5 días (un día lunar)</option>
+            <option value="1" data-i18n="hm.w1">1 day</option>
+            <option value="7" data-i18n="hm.w7">7 days</option>
+            <option value="29.5" selected data-i18n="hm.w29">29.5 days (one lunar day)</option>
           </select>
         </label>
-        <label>Paso (min) <input type="number" id="step" value="60" min="1" max="1440"></label>
-        <button class="btn" id="go">Calcular</button>
+        <label><span data-i18n="hm.step">Step (min)</span> <input type="number" id="step" value="60" min="1" max="1440"></label>
+        <button class="btn" id="go" data-i18n="hm.go">Calculate</button>
       </div>
       <div class="sites" id="sites"></div>
       <div class="sites-actions">
-        <button class="btn ghost" id="all" type="button">Todos</button>
-        <button class="btn ghost" id="none" type="button">Ninguno</button>
+        <button class="btn ghost" id="all" type="button" data-i18n="hm.all">All</button>
+        <button class="btn ghost" id="none" type="button" data-i18n="hm.none">None</button>
         <span id="status" aria-live="polite"></span>
       </div>
       <div class="bar" style="margin-top:10px"><i id="prog"></i></div>
@@ -97,20 +225,101 @@
 
     <section class="kpis" id="kpis"></section>
 
-    <section class="panel">
+    <section class="panel spot fx-in">
       <div class="head">
-        <div><h2>Sol visible por sitio y ventana</h2><p class="hint" style="margin:0">Pasa el cursor o toca una celda para ver el detalle. Más claro = más Sol.</p></div>
+        <div><h2 data-i18n="hm.panel">Sun visible by site and window</h2><p class="hint" style="margin:0" data-i18n="hm.panel.hint">Click a cell to see its detail. Lighter = more Sun.</p></div>
         <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
           <div class="scale">0 %<i></i>100 %</div>
-          <button class="btn ghost" id="toggle" type="button">Ver como tabla</button>
+          <button class="btn ghost" id="toggle" type="button">View as table</button>
         </div>
       </div>
-      <p class="empty-note" id="empty">Todavía no hay resultados. Elige los sitios y pulsa «Calcular».</p>
+      <p class="empty-note" id="empty" data-i18n="hm.empty">No results yet. Choose the sites and press “Calculate”.</p>
       <div class="chartscroll"><div id="chart"></div></div>
-      <p class="swipe" id="swipe" hidden>Desliza la gráfica hacia los lados para ver todas las ventanas.</p>
+      <p class="swipe" id="swipe" hidden data-i18n="hm.swipe">Swipe the chart sideways to see all the windows.</p>
       <div id="tablewrap" hidden></div>
+      <div class="cellwrap" id="cellwrap" aria-live="polite"><div><div class="cellcard" id="cellcard"></div></div></div>
+    </section>
+
+    <section class="xbanners fx-in" aria-label="About the heatmap" data-i18n-attr="aria-label:hm.info.label">
+      <div class="xban spot">
+        <button type="button" aria-expanded="false"><span class="xic" aria-hidden="true">?</span><span data-i18n="hm.b1.title">How to read this heatmap?</span><span class="plus" aria-hidden="true">+</span></button>
+        <div class="xbody"><div><div class="xin">
+          <p data-i18n="hm.b1.p1">Each row is a site and each column is a window of consecutive dates. The number is the percentage of time with the Sun above the local horizon, terrain included: lighter means more solar energy available.</p>
+          <p data-i18n="hm.b1.p2">Click a cell to see the longest night, the maximum Sun elevation and the Earth’s visibility in that window.</p>
+        </div></div></div>
+      </div>
+      <div class="xban spot">
+        <button type="button" aria-expanded="false"><span class="xic" aria-hidden="true">S</span><span data-i18n="hm.b2.title">Why does the south pole change so much between windows?</span><span class="plus" aria-hidden="true">+</span></button>
+        <div class="xbody"><div><div class="xin">
+          <p data-i18n="hm.b2.p1">Near the pole the Sun never rises more than a few degrees, because the Moon’s axis is tilted only ~1.5°. Over the year, that small change in height decides whether the Sun peeks over the mountains or stays hidden.</p>
+          <p data-i18n="hm.b2.p2">At the equator, by contrast, the Sun rises and sets every lunar day, and the percentage stays close to 50 %.</p>
+        </div></div></div>
+      </div>
+      <div class="xban spot">
+        <button type="button" aria-expanded="false"><span class="xic" aria-hidden="true">i</span><span data-i18n="hm.b3.title">Where does the data come from?</span><span class="plus" aria-hidden="true">+</span></button>
+        <div class="xbody"><div><div class="xin">
+          <p data-i18n="hm.b3.p1">Sun and Earth positions: NASA JPL DE421 ephemerides, checked against JPL Horizons.</p>
+          <p data-i18n="hm.b3.p2">Terrain: LOLA laser altimeter on NASA’s LRO spacecraft, at 80 m per pixel at the south pole and 118 m per pixel on the rest of the Moon.</p>
+        </div></div></div>
+      </div>
     </section>
   </div>
+
+  <script>
+    /* Capa de movimiento de esta página (sin librerías). Respeta "reducir movimiento". */
+    document.documentElement.classList.add('fx');   // solo con JS activo se ocultan los elementos para animarlos
+    window.FX = (() => {
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+      }), { threshold: .12 }) : null;
+      /** Hace aparecer los elementos .fx-in cuando entran en pantalla. */
+      function reveal(root = document) {
+        root.querySelectorAll('.fx-in:not(.on)').forEach(el => (reduce || !io) ? el.classList.add('on') : io.observe(el));
+      }
+      /** Cuenta desde cero hasta el primer número del texto de cada [data-count]. */
+      function count(root = document) {
+        root.querySelectorAll('[data-count]').forEach(el => {
+          const txt = el.textContent, m = txt.match(/-?\d+(?:\.\d+)?/);
+          if (!m || reduce) return;
+          const to = parseFloat(m[0]), dec = (m[0].split('.')[1] || '').length, t0 = performance.now(), dur = 1100;
+          const step = now => {
+            const k = Math.max(0, Math.min(1, (now - t0) / dur)), e = 1 - Math.pow(1 - k, 4);
+            el.textContent = txt.replace(m[0], (to * e).toFixed(dec));
+            if (k < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        });
+      }
+      /** Vuelve a lanzar una animación CSS quitando y poniendo su clase. */
+      function replay(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+      document.addEventListener('DOMContentLoaded', () => {
+        const h = document.querySelector('.hero h2');
+        if (h && !reduce) {
+          const words = h.textContent.trim().split(/\s+/);
+          h.innerHTML = words.map((w, i) => `<span class="w" style="--i:${i}">${w}</span>`).join(' ');
+        }
+        reveal();
+        const bar = document.getElementById('scrollbar');
+        const upd = () => {
+          const d = document.documentElement, p = d.scrollTop / ((d.scrollHeight - d.clientHeight) || 1);
+          bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p))})`;
+        };
+        addEventListener('scroll', upd, { passive: true }); upd();
+      });
+      document.addEventListener('pointermove', e => {
+        const c = e.target.closest && e.target.closest('.spot'); if (!c) return;
+        const r = c.getBoundingClientRect();
+        c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      }, { passive: true });
+      document.addEventListener('click', e => {
+        const b = e.target.closest && e.target.closest('.xban > button'); if (!b) return;
+        const x = b.parentElement, open = !x.classList.contains('open');
+        x.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+      });
+      return { reveal, count, replay, reduce };
+    })();
+  </script>
 
   <script>
     const $ = id => document.getElementById(id);
@@ -121,6 +330,7 @@
     const iso = d => d.toISOString().replace(/\.\d+Z$/, 'Z');
     const day = d => d.toISOString().slice(0, 10);
     const short = n => n.replace(/\s*\(.*$/, '');
+    let LAST_RUN = null, openCell = null;   // última consulta (para repintar al cambiar de idioma) y celda abierta
     const r1 = v => Math.round(v * 10) / 10;
 
     async function init() {
@@ -131,22 +341,32 @@
         sites = await r.json();
       } catch (e) {
         $('go').disabled = true;
-        showError('No se pudo cargar la lista de sitios. Comprueba la conexión con el servidor y vuelve a intentarlo.', init, e.message);
+        showError(t('hm.err.sites', 'Could not load the site list. Check the connection to the server and try again.'), init, e.message);
         return;
       }
       $('go').disabled = false;
-      $('sites').innerHTML = sites.map(s =>
-        `<label class="chip"><input type="checkbox" value="${s.id}" checked>${s.name}</label>`).join('');
+      renderChips();
       $('go').onclick = run;
       $('all').onclick = () => document.querySelectorAll('#sites input').forEach(c => c.checked = true);
       $('none').onclick = () => document.querySelectorAll('#sites input').forEach(c => c.checked = false);
       $('toggle').onclick = () => {
         const t = $('tablewrap').hidden;
         $('tablewrap').hidden = !t; $('chart').hidden = t; $('swipe').hidden = t;
-        $('toggle').textContent = t ? 'Ver como gráfica' : 'Ver como tabla';
+        setToggleLabel();
         if (!t && last) Plotly.Plots.resize('chart');
       };
       run();
+    }
+
+    /** Casillas de sitios en el idioma activo; conserva cuáles estaban marcadas. */
+    function renderChips() {
+      const prev = new Set([...document.querySelectorAll('#sites input:checked')].map(c => c.value));
+      const first = !document.querySelector('#sites input');
+      $('sites').innerHTML = sites.map(s =>
+        `<label class="chip"><input type="checkbox" value="${s.id}" ${first || prev.has(s.id) ? 'checked' : ''}>${I18N.siteName(s)}</label>`).join('');
+    }
+    function setToggleLabel() {
+      $('toggle').textContent = $('tablewrap').hidden ? t('hm.totable', 'View as table') : t('hm.tochart', 'View as chart');
     }
 
     /** Muestra un error comprensible; el detalle técnico va aparte y `retry` añade un botón Reintentar. */
@@ -160,13 +380,13 @@
       box.append(text);
       if (retry) {
         const b = document.createElement('button');
-        b.type = 'button'; b.className = 'btn ghost retry'; b.textContent = 'Reintentar';
+        b.type = 'button'; b.className = 'btn ghost retry'; b.textContent = t('hm.err.retry', 'Retry');
         b.onclick = retry;
         box.append(b);
       }
       if (detail) {
         const d = document.createElement('small');
-        d.className = 'errdetail'; d.textContent = 'Detalle técnico: ' + detail;
+        d.className = 'errdetail'; d.textContent = t('hm.err.detail', 'Technical detail: {d}', { d: detail });
         box.append(d);
       }
     }
@@ -185,12 +405,12 @@
     async function run() {
       showError('');
       const ids = [...document.querySelectorAll('#sites input:checked')].map(c => c.value);
-      if (!ids.length) { showError('Selecciona al menos un sitio.'); return; }
+      if (!ids.length) { showError(t('hm.err.nosites', 'Select at least one site.')); return; }
       const n = Math.max(1, Math.min(60, +$('n').value || 1));
       const durMs = +$('dur').value * 86400000;
       const step = +$('step').value || 60;
       const t0 = new Date($('start').value + 'T00:00:00Z');
-      if (isNaN(t0)) { showError('Fecha de inicio inválida.'); return; }
+      if (isNaN(t0)) { showError(t('hm.err.date', 'Invalid start date.')); return; }
 
       const wins = [...Array(n).keys()].map(k => ({
         start: new Date(t0.getTime() + k * durMs),
@@ -198,46 +418,51 @@
       }));
 
       $('go').disabled = true; $('prog').style.width = '0';
+      $('prog').parentElement.classList.add('busy');
       const results = new Array(n);
       let next = 0, done = 0;
-      $('status').textContent = `Calculando 0/${n}…`;
+      $('status').textContent = t('hm.status.run', 'Calculating {done}/{n}…', { done: 0, n });
       try {
         const worker = async () => {
           while (next < n) {
             const k = next++;
             results[k] = await fetchWindow(ids, wins[k], step);
             done++;
-            $('status').textContent = `Calculando ${done}/${n}…`;
+            $('status').textContent = t('hm.status.run', 'Calculating {done}/{n}…', { done, n });
             $('prog').style.width = (100 * done / n) + '%';
           }
         };
         await Promise.all(Array.from({ length: Math.min(CONCURRENCY, n) }, worker));
       } catch (e) {
-        showError('No se pudo calcular el heatmap. Vuelve a intentarlo; si sigue fallando, prueba con menos ventanas o un paso mayor.',
+        showError(t('hm.err.compute', 'Could not compute the heatmap. Try again; if it keeps failing, use fewer windows or a larger step.'),
           run, `/api/compare → ${e.message}`);
         $('status').textContent = '';
         $('go').disabled = false;
+        $('prog').parentElement.classList.remove('busy');
         return;
       }
       $('go').disabled = false;
-      $('status').textContent = `${ids.length} sitios × ${n} ventanas`;
+      $('prog').parentElement.classList.remove('busy');
+      $('status').textContent = t('hm.status.done', '{sites} sites × {n} windows', { sites: ids.length, n });
+      LAST_RUN = { ids, wins, results, n };
       draw(ids, wins, results);
     }
 
-    function draw(ids, wins, results) {
-      const names = {}, z = [], text = [], rowMeta = [];
+    function draw(ids, wins, results, quiet) {
+      const names = {}, z = [], text = [], cells = [];
       let mock = false;
-      ids.forEach(() => { z.push([]); text.push([]); });
+      ids.forEach(() => { z.push([]); text.push([]); cells.push([]); });
       results.forEach((res, k) => {
         const byId = Object.fromEntries(res.map(r => [r.id, r]));
         ids.forEach((id, i) => {
           const r = byId[id], m = r.metrics;
-          names[id] = r.name;
+          names[id] = I18N.nameById(id, r.name);
           z[i][k] = m.sun_lit_pct;
-          text[i][k] = `<b>${r.name}</b><br>${day(wins[k].start)} → ${day(wins[k].end)}` +
-            `<br>Sol visible: <b>${m.sun_lit_pct}%</b>` +
-            `<br>Noche más larga: ${m.longest_dark_h} h` +
-            `<br>Elevación solar máx.: ${m.sun_el_max_deg}°`;
+          cells[i][k] = { name: I18N.nameById(id, r.name), id, m, start: wins[k].start, end: wins[k].end };
+          text[i][k] = `<b>${I18N.nameById(id, r.name)}</b><br>${day(wins[k].start)} → ${day(wins[k].end)}` +
+            `<br>${t('hm.hover.sun', 'Sun visible')}: <b>${m.sun_lit_pct}%</b>` +
+            `<br>${t('hm.hover.dark', 'Longest night')}: ${m.longest_dark_h} h` +
+            `<br>${t('hm.hover.el', 'Max. Sun elevation')}: ${m.sun_el_max_deg}°`;
           const src = m.source || {};
           if (src.ephemeris === 'mock' || src.horizon === 'mock') mock = true;
         });
@@ -256,11 +481,12 @@
       const bi = means.indexOf(Math.max(...means));
       const wi = means.indexOf(Math.min(...means));
       $('kpis').innerHTML = [
-        ['', 'Mejor combinación', `${r1(best.v)} %`, `${short(names[ids[best.i]])} · ${day(wins[best.k].start)}`],
-        ['sun', 'Mejor sitio (promedio)', `${r1(means[bi])} %`, short(names[ids[bi]])],
-        ['earth', 'Sitio con menos Sol', `${r1(means[wi])} %`, short(names[ids[wi]])],
-        ['', 'Celdas sin Sol', `${zeros} / ${total}`, `${r1(100 * zeros / total)} % de las combinaciones`],
-      ].map(([c, a, b, s]) => `<div class="kpi ${c}"><span>${a}</span><b>${b}</b><small>${s}</small></div>`).join('');
+        ['', t('hm.kpi.best', 'Best combination'), `${r1(best.v)} %`, `${short(names[ids[best.i]])} · ${day(wins[best.k].start)}`],
+        ['sun', t('hm.kpi.bestsite', 'Best site (average)'), `${r1(means[bi])} %`, short(names[ids[bi]])],
+        ['earth', t('hm.kpi.worstsite', 'Site with least Sun'), `${r1(means[wi])} %`, short(names[ids[wi]])],
+        ['', t('hm.kpi.zero', 'Cells without Sun'), `${zeros} / ${total}`, t('hm.kpi.zero.sub', '{p} % of the combinations', { p: r1(100 * zeros / total) })],
+      ].map(([c, a, b, s], j) => `<div class="kpi spot fx-in ${quiet ? 'on ' : ''}${c}" style="--d:${j * 0.09}s"><span>${a}</span><b ${quiet ? '' : 'data-count'}>${b}</b><small>${s}</small></div>`).join('');
+      if (!quiet) { FX.reveal($('kpis')); FX.count($('kpis')); }
 
       // --- Heatmap ---
       const xs = wins.map(w => day(w.start));
@@ -276,16 +502,71 @@
       $('chart').style.height = Math.min(760, 150 + rows * 42) + 'px';
       Plotly.react('chart', [trace], T.layout({
         margin: { t: 8, l: 150, r: 10, b: 96 },
-        xaxis: { title: { text: 'Inicio de ventana (UTC)', standoff: 18 }, type: 'category', tickangle: -35, showgrid: false },
+        xaxis: { title: { text: t('hm.axis.x', 'Window start (UTC)'), standoff: 18 }, type: 'category', tickangle: -35, showgrid: false },
         yaxis: { autorange: 'reversed', automargin: true, showgrid: false },
       }), T.config);
+      if (!FX.reduce && !quiet) FX.replay($('chart').parentElement, 'sweep');
+      if (!$('chart')._cellClick) {   // clic en una celda: panel de detalle desplegable
+        $('chart').on('plotly_click', ev => {
+          const p = ev.points && ev.points[0];
+          if (!p || !last) return;
+          const i = last.ys.indexOf(p.y), k = last.xs.indexOf(p.x);
+          if (i >= 0 && k >= 0) showCell(i, k);
+        });
+        $('chart')._cellClick = true;
+      }
+      if (!quiet) closeCell();
 
       // --- Tabla (misma información, accesible) ---
-      $('tablewrap').innerHTML = `<table><thead><tr><th>Sitio</th>${xs.map(x => `<th>${x.slice(5)}</th>`).join('')}</tr></thead><tbody>` +
+      $('tablewrap').innerHTML = `<table><thead><tr><th>${t('hm.table.site', 'Site')}</th>${xs.map(x => `<th>${x.slice(5)}</th>`).join('')}</tr></thead><tbody>` +
         ids.map((id, i) => `<tr><td>${short(names[id])}</td>${z[i].map(v => `<td>${r1(v)}</td>`).join('')}</tr>`).join('') +
         `</tbody></table>`;
-      last = { ids, wins };
+      last = { ids, wins, xs, ys, cells, means };
+      setToggleLabel();
     }
+
+    /** Despliega el detalle de la celda (sitio i, ventana k), comparado con el promedio del sitio. */
+    function showCell(i, k, quiet) {
+      openCell = { i, k };
+      const c = last.cells[i][k], mean = last.means[i], diff = c.m.sun_lit_pct - mean;
+      const cmp = Math.abs(diff) < 0.05 ? t('hm.cell.same', 'This window has the same percentage as the site average ({mean} %).', { mean: r1(mean) })
+        : diff > 0 ? t('hm.cell.more', 'This window has {d} points more than the site average ({mean} %).', { d: r1(diff), mean: r1(mean) })
+        : t('hm.cell.less', 'This window has {d} points less than the site average ({mean} %).', { d: r1(-diff), mean: r1(mean) });
+      $('cellcard').innerHTML = `
+        <div class="cc-head">
+          <div><div class="eyebrow">${t('hm.cell.eyebrow', 'Cell detail')}</div><h3>${c.name}</h3><p>${day(c.start)} → ${day(c.end)}</p></div>
+          <button class="btn ghost" type="button" id="cellclose">${t('hm.cell.close', 'Close')}</button>
+        </div>
+        <div class="cc-grid">
+          <div class="cc-m sun"><span>${t('hm.cell.sun', 'Sun visible')}</span><b ${quiet ? '' : 'data-count'}>${r1(c.m.sun_lit_pct)} %</b></div>
+          <div class="cc-m"><span>${t('hm.cell.dark', 'Longest night')}</span><b ${quiet ? '' : 'data-count'}>${r1(c.m.longest_dark_h)} h</b></div>
+          <div class="cc-m"><span>${t('hm.cell.el', 'Max. Sun elevation')}</span><b ${quiet ? '' : 'data-count'}>${r1(c.m.sun_el_max_deg)}°</b></div>
+          <div class="cc-m earth"><span>${t('hm.cell.earth', 'Earth visible')}</span><b ${quiet ? '' : 'data-count'}>${r1(c.m.earth_visible_pct)} %</b></div>
+        </div>
+        <div class="cc-cmp">${cmp}
+          <div class="cc-track" aria-hidden="true"><i style="--v:${c.m.sun_lit_pct}%"></i><u style="--v:${mean}%"></u></div>
+        </div>`;
+      $('cellclose').onclick = closeCell;
+      $('cellwrap').classList.add('open');
+      if (!quiet) {
+        FX.replay($('cellcard'), 'swap');
+        FX.count($('cellcard'));
+        $('cellwrap').scrollIntoView({ behavior: FX.reduce ? 'auto' : 'smooth', block: 'nearest' });
+      }
+    }
+    function closeCell() { openCell = null; $('cellwrap').classList.remove('open'); }
+
+    /* Al cambiar de idioma: repinta chips, etiquetas y resultados con los datos ya cargados (sin pedirlos otra vez). */
+    I18N.onChange(() => {
+      if (sites.length) renderChips();
+      setToggleLabel();
+      if (LAST_RUN) {
+        $('status').textContent = t('hm.status.done', '{sites} sites × {n} windows', { sites: LAST_RUN.ids.length, n: LAST_RUN.n });
+        const keep = openCell;
+        draw(LAST_RUN.ids, LAST_RUN.wins, LAST_RUN.results, true);
+        if (keep) showCell(keep.i, keep.k, true);
+      }
+    });
 
     init();
   </script>

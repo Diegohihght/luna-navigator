@@ -10,6 +10,7 @@
  */
 (function () {
   "use strict";
+  const L10 = (key, en, params) => I18N.t(key, en, params);   // alias propio: `t` y `tr` se usan como variables locales más abajo
   const chart = document.getElementById("chart");
   if (!chart || typeof S === "undefined") return;
 
@@ -52,16 +53,17 @@
   const bar = document.createElement("div");
   bar.className = "viewbar";
   bar.innerHTML =
-    '<button class="vtab on" data-mode="2d">Panorámica 2D</button>' +
-    '<button class="vtab" data-mode="orbit">3D desde fuera</button>' +
-    '<button class="vtab" data-mode="first">3D desde el sitio</button>' +
-    '<label class="vexag vfollow" title="La cámara gira y se inclina para mantener al Sol en pantalla"><input type="checkbox" id="vfollow"> La cámara sigue al Sol</label>' +
-    '<label class="vexag">Exagerar alturas <select id="vexag">' + EXAGS.map(k => '<option value="' + k + '">' + (k === 1 ? "×1 (real)" : "×" + k) + '</option>').join("") + '</select></label>';
+    '<button class="vtab on" data-mode="2d" data-i18n="v3.tab.2d">2D panorama</button>' +
+    '<button class="vtab" data-mode="orbit" data-i18n="v3.tab.orbit">3D from outside</button>' +
+    '<button class="vtab" data-mode="first" data-i18n="v3.tab.first">3D from the site</button>' +
+    '<label class="vexag vfollow" title="The camera turns and tilts to keep the Sun on screen" data-i18n-attr="title:v3.follow.title"><input type="checkbox" id="vfollow"> <span data-i18n="v3.follow">Camera follows the Sun</span></label>' +
+    '<label class="vexag"><span data-i18n="v3.exag">Exaggerate heights</span> <select id="vexag">' + EXAGS.map(k => '<option value="' + k + '">' + (k === 1 ? "×1 (real)" : "×" + k) + '</option>').join("") + '</select></label>';
   canvas = document.createElement("canvas");
   canvas.id = "view3d";
   const hint = document.createElement("p");
   hint.className = "vhint";
-  hint.textContent = "Arrastra para girar · rueda del ratón para acercar o alejar · doble clic para reiniciar · + / − o el control de distancia alejan y acercan · «Ver de lado» coloca la cámara para ver cómo la luz recorre la Luna · atajos: 1/2/3 cambian de vista, Z aleja o acerca. En la vista desde fuera, el Sol y la Tierra se dibujan lejos de la Luna para que se vea cómo la luz la recorre; el segmento punteado une el sitio con el Sol. Relieve: altímetro LOLA de la sonda LRO (NASA); tono de la Luna: mosaico Clementine 750 nm. En la vista desde el sitio, el suelo suma un microdetalle ilustrativo (cráteres pequeños y grano) a la forma real del terreno. Se ilumina con la posición real del Sol; la exageración estira el relieve con suavidad y los astros se dibujan más grandes que en la realidad para que se vean.";
+  hint.setAttribute("data-i18n", "v3.hint");
+  hint.textContent = "Drag to rotate · mouse wheel to zoom in or out · double-click to reset · + / − or the distance control zoom out and in · “Side view” places the camera to see how light travels across the Moon · shortcuts: 1/2/3 switch view, Z zooms out or in. In the outside view, the Sun and the Earth are drawn far from the Moon so you can see how the light travels across it; the dotted segment joins the site with the Sun. Relief: LOLA laser altimeter on NASA’s LRO spacecraft; Moon tone: Clementine 750 nm mosaic. In the site view, the ground adds illustrative micro-detail (small craters and grain) to the real shape of the terrain. It is lit by the real position of the Sun; the exaggeration stretches the relief smoothly and the bodies are drawn larger than in reality so they can be seen.";
   chart.parentNode.insertBefore(bar, chart);
   // La vista 3D va dentro de un "escenario" para poder poner los controles de cámara sobre la pantalla negra, abajo a la derecha.
   const stage = document.createElement("div");
@@ -69,15 +71,15 @@
   const over = document.createElement("div");
   over.className = "vover";
   over.innerHTML =
-    '<button class="vbtn" id="vzoom" title="Aleja o acerca la cámara (atajo: Z)">🔭 Alejar vista</button>' +
-    '<button class="vbtn" id="vside" title="Pone la cámara de lado para ver cómo la luz recorre la Luna (atajo: V)">↔ Ver de lado</button>' +
-    '<label class="vzslide" title="Distancia de la cámara (también: rueda del ratón, + y −)">Distancia <input type="range" id="vzr" min="' + DIST_MIN + '" max="' + DIST_MAX + '" step="0.1"></label>';
+    '<button class="vbtn" id="vzoom" title="Zooms the camera out or in (shortcut: Z)" data-i18n-attr="title:v3.zoom.title">🔭 Zoom out</button>' +
+    '<button class="vbtn" id="vside" title="Places the camera to the side to see how light travels across the Moon (shortcut: V)" data-i18n="v3.side" data-i18n-attr="title:v3.side.title">↔ Side view</button>' +
+    '<label class="vzslide" title="Camera distance (also: mouse wheel, + and −)" data-i18n-attr="title:v3.dist.title"><span data-i18n="v3.dist">Distance</span> <input type="range" id="vzr" min="' + DIST_MIN + '" max="' + DIST_MAX + '" step="0.1"></label>';
   stage.appendChild(canvas); stage.appendChild(over);
   chart.parentNode.insertBefore(stage, chart.nextSibling);
   stage.parentNode.insertBefore(hint, stage.nextSibling);
   const exagBox = bar.querySelector(".vexag:not(.vfollow)"), followBox = bar.querySelector(".vfollow"), zoomBtn = over.querySelector("#vzoom"),
     sideBtn = over.querySelector("#vside"), zBox = over.querySelector(".vzslide"), zr = over.querySelector("#vzr");
-  const updateZoomBtn = () => { zoomBtn.textContent = st.orbit.dist >= (DIST_NEAR + DIST_FAR) / 2 ? "🔍 Acercar vista" : "🔭 Alejar vista"; zr.value = st.orbit.dist; };
+  const updateZoomBtn = () => { zoomBtn.textContent = st.orbit.dist >= (DIST_NEAR + DIST_FAR) / 2 ? L10("v3.zoomin", "🔍 Zoom in") : L10("v3.zoomout", "🔭 Zoom out"); zr.value = st.orbit.dist; };
   bar.querySelector("#vexag").value = String(st.exag);
   bar.querySelector("#vfollow").checked = st.follow;
 
@@ -215,7 +217,7 @@
       tex.moon = addGrad({ hm, al, Wt: g.w, Ht: g.h, real: true });
       real.state = "ready";
     } catch (err) {
-      console.warn("Relieve LOLA no disponible; uso relieve ilustrativo.", err);
+      console.warn("LOLA relief not available; using illustrative relief.", err);
       real.state = "failed";
     }
     draw3D();
@@ -417,9 +419,9 @@
       ctx.fillStyle = color; ctx.beginPath(); ctx.arc(q.x, q.y, 4, 0, 7); ctx.fill();
       ctx.fillStyle = "#e8eaf2"; ctx.font = "12px 'Public Sans', system-ui, sans-serif"; ctx.fillText(label, q.x + 8, q.y + 4);
     };
-    mark(0, 0, EARTH_C, "Cara visible (mira a la Tierra)");
-    mark(90, 0, "#c5cbe0", "Polo norte"); mark(-90, 0, "#c5cbe0", "Polo sur");
-    ctx.fillStyle = "#c5cbe0"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText("LUNA", cq.x - 20, Math.min(H - 6, cq.y + sr + 18));
+    mark(0, 0, EARTH_C, L10("v3.near", "Near side (faces the Earth)"));
+    mark(90, 0, "#c5cbe0", L10("v3.northpole", "North pole")); mark(-90, 0, "#c5cbe0", L10("v3.southpole", "South pole"));
+    ctx.fillStyle = "#c5cbe0"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText(L10("v3.moon", "MOON"), cq.x - 20, Math.min(H - 6, cq.y + sr + 18));
   }
 
   /* Suelo: plano iluminado. Gran escala = pendientes reales del DEM de LOLA (suavizado y sobremuestreado);
@@ -488,7 +490,7 @@
     g.addColorStop(0, "#fffef5"); g.addColorStop(0.65, "#ffeeb0"); g.addColorStop(0.92, "#ffc860"); g.addColorStop(1, "#ff9c30");
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(q.x, q.y, r, 0, 7); ctx.fill();
     if (!vis) { ctx.setLineDash([4, 4]); ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(q.x, q.y, r + 4, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
-    ctx.fillStyle = "#e8eaf2"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText("Sol" + (vis ? "" : " (oculto)"), q.x + r + 8, q.y + 4);
+    ctx.fillStyle = "#e8eaf2"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText(vis ? L10("v3.sun", "Sun") : L10("v3.sun.hidden", "Sun (hidden)"), q.x + r + 8, q.y + 4);
     ctx.restore();
   }
 
@@ -526,7 +528,7 @@
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(q.x, q.y, r * 1.5, 0, 7); ctx.fill();
     ctx.drawImage(B.c, q.x - c, q.y - c);
     if (!vis) { ctx.setLineDash([4, 4]); ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(q.x, q.y, r + 4, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
-    ctx.fillStyle = "#e8eaf2"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText("Tierra" + (vis ? "" : " (oculta)"), q.x + r + 8, q.y + 4);
+    ctx.fillStyle = "#e8eaf2"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText(vis ? L10("v3.earth", "Earth") : L10("v3.earth.hidden", "Earth (hidden)"), q.x + r + 8, q.y + 4);
     ctx.restore();
   }
 
@@ -542,14 +544,14 @@
     if (st.mode === "2d" || !ctx || !S.eph || !S.hor) return;
     const orbit = st.mode === "orbit";
     if (real.state === "idle") loadReal();
-    if (real.state === "loading") { message("Cargando relieve LOLA (NASA)…"); return; }
+    if (real.state === "loading") { message(L10("v3.loading.relief", "Loading LOLA relief (NASA)…")); return; }
     if (!orbit) {
       const g = groundFor(siteNow());
-      if (g === "loading") { message("Cargando el terreno LOLA del sitio…"); return; }
+      if (g === "loading") { message(L10("v3.loading.ground", "Loading the site’s LOLA terrain…")); return; }
       tex.groundSite = g;
     }
     if (!tex.earth || (orbit && !tex.moon) || (!orbit && !tex.ground)) {
-      message("Generando relieve de la Luna…");
+      message(L10("v3.loading.gen", "Generating the Moon’s relief…"));
       if (!loading) { loading = true; setTimeout(() => { if (!tex.earth) tex.earth = genEarth(); if (st.mode === "orbit" && !tex.moon) tex.moon = genMoon(); if (st.mode === "first" && !tex.ground) tex.ground = genGround(); loading = false; draw3D(); }, 30); }
       return;
     }
@@ -649,21 +651,21 @@
       if (b && t) {
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(t.x, t.y); ctx.stroke();
         ctx.fillStyle = "#ef7b6b"; ctx.beginPath(); ctx.arc(t.x, t.y, 5, 0, 7); ctx.fill();
-        ctx.fillStyle = "#e8eaf2"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText("Estás aquí: " + site.name, t.x + 10, t.y + 4);
+        ctx.fillStyle = "#e8eaf2"; ctx.font = "600 13px 'Public Sans', system-ui, sans-serif"; ctx.fillText(L10("v3.here", "You are here: {name}", { name: I18N.siteName(site) }), t.x + 10, t.y + 4);
       }
     }
     ctx.fillStyle = "#9aa3bd"; ctx.font = "12px 'Public Sans', system-ui, sans-serif";
-    ctx.fillText((st.exag === 1 ? "Alturas reales" : "Alturas exageradas ×" + st.exag) + " · " + site.name + " (" + (+site.lat).toFixed(2) + "°, " + (+site.lon).toFixed(2) + "°)", 12, 20);
+    ctx.fillText((st.exag === 1 ? L10("v3.heights.real", "True heights") : L10("v3.heights.exag", "Exaggerated heights ×{k}", { k: st.exag })) + " · " + I18N.siteName(site) + " (" + (+site.lat).toFixed(2) + "°, " + (+site.lon).toFixed(2) + "°)", 12, 20);
     const relief = orbit
-      ? (tex.moon && tex.moon.real ? "Relieve: LOLA (NASA LRO) · tono: Clementine 750 nm" : "Relieve del globo ilustrativo (datos LOLA no cargados)")
-      : (tex.groundSite ? "Suelo: " + tex.groundSite.source + " · ±8 km + microdetalle ilustrativo · vista desde ~300 m" : "Suelo ilustrativo: no hay datos LOLA locales para este punto");
+      ? (tex.moon && tex.moon.real ? L10("v3.relief.moon", "Relief: LOLA (NASA LRO) · tone: Clementine 750 nm") : L10("v3.relief.moon.fake", "Illustrative globe relief (LOLA data not loaded)"))
+      : (tex.groundSite ? L10("v3.relief.ground", "Ground: {src} · ±8 km + illustrative micro-detail · view from ~300 m", { src: tex.groundSite.source }) : L10("v3.relief.ground.fake", "Illustrative ground: no local LOLA data for this point"));
     ctx.fillStyle = tex.groundSite || (orbit && tex.moon && tex.moon.real) ? "#7fd8b0" : "#f5d98f";
     ctx.fillText(relief, 12, 38);
     const notes = [];
-    if (orbit && sunHid) notes.push("El Sol queda detrás de la Luna desde esta cámara: pulsa «Ver de lado» o gira la vista.");
-    if (!sunVis) notes.push("Es de noche aquí: el Sol está bajo el horizonte (se muestra en transparencia).");
-    if (!orbit && st.follow && !sunVis) notes.push("La cámara apunta hacia donde saldría el Sol (ahora está bajo el horizonte).");
-    if (tr.earthFixed) notes.push("La Tierra casi no se mueve en el cielo lunar: es normal, la Luna siempre muestra la misma cara.");
+    if (orbit && sunHid) notes.push(L10("v3.note.behind", "The Sun is behind the Moon from this camera: press “Side view” or rotate the view."));
+    if (!sunVis) notes.push(L10("v3.note.night", "It is night here: the Sun is below the horizon (shown translucent)."));
+    if (!orbit && st.follow && !sunVis) notes.push(L10("v3.note.aim", "The camera points to where the Sun would rise (it is now below the horizon)."));
+    if (tr.earthFixed) notes.push(L10("v3.note.earth", "The Earth barely moves in the lunar sky: that is normal, the Moon always shows the same face."));
     ctx.fillStyle = "#f5d98f";
     notes.forEach((t, k) => ctx.fillText(t, 12, H - 12 - 18 * (notes.length - 1 - k)));
   }
@@ -714,6 +716,8 @@
   });
   bar.querySelector("#vexag").addEventListener("change", ev => { st.exag = +ev.target.value; st.cache = null; savePrefs(); draw3D(); });
   window.addEventListener("resize", () => { if (st.mode !== "2d") { fit(); draw3D(); } });
+  /* Al cambiar de idioma: el botón de zoom cambia de texto según la distancia, y el lienzo se vuelve a dibujar. */
+  I18N.onChange(() => { updateZoomBtn(); if (st.mode !== "2d") draw3D(); });
 
   let drag = null;
   canvas.addEventListener("pointerdown", ev => { drag = { x: ev.clientX, y: ev.clientY }; canvas.setPointerCapture(ev.pointerId); });

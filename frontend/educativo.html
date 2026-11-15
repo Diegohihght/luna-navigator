@@ -1,13 +1,15 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Modo educativo — Lunar Landing Site Navigator</title>
+  <title data-i18n="ed.title">Educational mode — Lunar Landing Site Navigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/theme.css">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script src="/theme.js"></script>
+  <script src="/i18n.js"></script>
+  <script src="/i18n-educativo.js"></script>
   <style>
     .page { max-width: 1180px; margin: 0 auto; padding: 22px 28px 56px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
     .hero { display: flex; align-items: center; gap: 22px; }
@@ -172,17 +174,140 @@
     #error .errdetail { flex-basis: 100%; order: 3; font-family: var(--mono); font-size: 12px; opacity: .8; }
     #error .retry { padding: 4px 14px; font-size: 12px; border-radius: 999px; }
     .loading { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
+    /* ===================== Estilo sobrio (solo esta página) =====================
+       Sobrescribe el tema compartido sin tocar theme.css, que también usa index.html.
+       Fondo plano, paneles planos, una escala de títulos (32 / 20 / 18 / 15 / 13 / 12 px),
+       espaciado en múltiplos de 8 px y controles sin brillo. */
+    :root { --s-bg: #0b0e14; --s-surface: #121722; --s-surface-2: #171d29; --s-line: rgba(255, 255, 255, .08);
+            --s-line-2: rgba(255, 255, 255, .16); --s-text: #e6e9ef; --s-muted: #a3acbd; }
+    html { background: var(--s-bg); background-image: none; }
+    body::before, body::after { display: none; }
+    body { color: var(--s-text); line-height: 1.6; }
+    .topbar { background: rgba(11, 14, 20, .94); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom: 1px solid var(--s-line); padding: 12px 32px; }
+    .topbar .moon { width: 22px; height: 22px; box-shadow: none; }
+    .brand h1 { font-size: 15px; font-weight: 600; letter-spacing: 0; }
+    .nav a { border-radius: 6px; font-size: 14px; padding: 6px 12px; }
+    .nav a.on { background: none; border-color: transparent; box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+    .page { max-width: 1120px; padding: 48px 32px 80px; gap: 24px; }
+    .hero { display: block; }
+    #heroMoon { display: none; }
+    .eyebrow { font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: .12em; }
+    .hero h2 { font-size: 32px; line-height: 1.2; font-weight: 600; letter-spacing: -.02em; margin: 8px 0 12px; }
+    .hero p { font-size: 16px; color: var(--s-muted); max-width: 62ch; }
+    .card, .panel { background: var(--s-surface); border: 1px solid var(--s-line); border-radius: 10px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 24px; }
+    .card h2, .panel h2 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 4px; }
+    .hint { font-size: 14px; color: var(--s-muted); }
+    label { font-size: 13px; color: var(--s-muted); gap: 6px; }
+    input, select { background: var(--s-bg); border: 1px solid var(--s-line-2); border-radius: 6px; }
+    .btn, button.btn { background: var(--accent); color: #04222d; box-shadow: none; border-radius: 6px; font-weight: 600; }
+    .btn:hover { filter: none; background: #72d6f4; }
+    .btn.ghost { background: transparent; color: var(--s-text); border: 1px solid var(--s-line-2); font-weight: 500; }
+    .btn.ghost:hover { background: rgba(255, 255, 255, .06); }
+    .chip { background: transparent; border: 1px solid var(--s-line-2); border-radius: 6px; font-size: 14px; }
+    #banner, #error { border-radius: 6px; font-size: 14px; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 560px) {
+      .topbar { padding: 10px 16px; }
+      .page { padding: 28px 16px 56px; gap: 16px; }
+      .hero h2 { font-size: 26px; }
+      .card, .panel { padding: 16px; }
+    }
+
+    /* --- Específico del educativo --- */
+    /* Pestañas como texto subrayado, no como cápsulas. */
+    .tabs { width: 100%; background: none; border: 0; border-bottom: 1px solid var(--s-line); border-radius: 0; padding: 0; gap: 24px; }
+    .tabs button { border-radius: 0; padding: 10px 0; font-size: 15px; color: var(--s-muted); }
+    .tabs button.on { background: none; color: var(--s-text); box-shadow: inset 0 -2px 0 var(--accent); }
+    /* Lecciones. */
+    .lesson { gap: 16px; }
+    .lesson h2 { font-size: 20px; font-weight: 600; letter-spacing: -.01em; }
+    .num { width: 32px; height: 32px; border-radius: 6px; font-size: 12px; }
+    .why, .slide p { color: #c9d0dd; font-size: 15px; }
+    .readout { background: var(--s-bg); border-color: var(--s-line); border-radius: 8px; padding: 14px 16px; font-size: 14px; color: var(--s-muted); }
+    .stat { background: var(--s-surface-2); border-color: var(--s-line); border-radius: 6px; padding: 10px 12px; }
+    .stat:hover { transform: none; border-color: var(--s-line); }
+    .stat span { font-size: 12px; }
+    .stat b { font-size: 22px; font-weight: 500; }
+    /* Desplegables con gráficas: fila plana con un botón neutro. */
+    details.dd { background: var(--s-surface-2); border: 1px solid var(--s-line); border-left: 1px solid var(--s-line); border-radius: 8px; }
+    details.dd:hover { border-color: var(--s-line-2); }
+    details.dd[open] { box-shadow: none; }
+    details.dd > summary { font-size: 15px; font-weight: 500; color: var(--s-text); padding: 12px 16px; }
+    details.dd .chev { background: transparent; color: var(--accent); border: 1px solid var(--s-line-2); box-shadow: none; border-radius: 6px; padding: 4px 12px; }
+    details.dd:hover .chev { transform: none; }
+    details.dd .chev::before { content: "Ver gráfica ▾"; }
+    details.dd[open] .chev { background: transparent; color: var(--s-muted); }
+    details.dd[open] .chev::before { content: "Ocultar ▴"; }
+    summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 8px; }
+    /* Botones del paso a paso: sin salto ni onda al pulsar. */
+    .mbtn { border-radius: 6px; background: transparent; border-color: var(--s-line-2); font-size: 14px; }
+    .mbtn:hover { transform: none; box-shadow: none; background: rgba(255, 255, 255, .06); border-color: var(--s-line-2); }
+    .mbtn.primary { background: var(--accent); color: #04222d; }
+    .mbtn.primary:hover { background: #72d6f4; }
+    .mbtn.on { background: rgba(76, 201, 240, .14); border-color: var(--accent); box-shadow: none; }
+    .ripple { display: none; }
+    .slide h3 { font-size: 20px; font-weight: 600; }
+    .kick { font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: .12em; }
+    .slide-note, .verdict { background: var(--s-bg); border-color: var(--s-line); border-radius: 8px; }
+    .slide-vis { background: var(--s-bg); border-color: var(--s-line); border-radius: 8px; }
+    .cast-card { background: var(--s-surface); border-color: var(--s-line); border-radius: 10px; }
+    .cast-card:hover { transform: none; box-shadow: none; border-color: var(--s-line-2); }
+    /* Mitos: el botón usa "all: unset", que también quita el foco; se devuelve aquí. */
+    .myth { background: var(--s-surface); border-color: var(--s-line); border-radius: 10px; }
+    .myth:hover { border-color: var(--s-line-2); }
+    .myth button.q:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+    /* ===================== Capa de movimiento e interacción =====================
+       Entradas escalonadas, título palabra a palabra, foco de luz que sigue al cursor,
+       barra de lectura y banners desplegables. Todo se desactiva con "reducir movimiento". */
+    #scrollbar { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 60; transform: scaleX(0); transform-origin: 0 50%;
+                 background: linear-gradient(90deg, var(--accent), var(--sun)); pointer-events: none; }
+    .fx .fx-in { opacity: 0; transform: translateY(24px); filter: blur(6px);
+             transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1), filter .8s ease; transition-delay: var(--d, 0s); }
+    .fx .fx-in.on { opacity: 1; transform: none; filter: none; }
+    .hero h2 .w { display: inline-block; opacity: 0; transform: translateY(.55em) rotate(2deg); filter: blur(8px);
+                  animation: wordIn .9s cubic-bezier(.2, .7, .2, 1) forwards; animation-delay: calc(var(--i) * 70ms + .1s); }
+    @keyframes wordIn { to { opacity: 1; transform: none; filter: none; } }
+    .spot { position: relative; isolation: isolate; transition: border-color .3s ease; }
+    .spot::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; opacity: 0; transition: opacity .35s ease;
+                   background: radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%), rgba(76, 201, 240, .09), transparent 45%); }
+    .spot:hover::after { opacity: 1; }
+    .spot:hover { border-color: rgba(76, 201, 240, .3); }
+    .btn { transition: transform .18s cubic-bezier(.3, 1.6, .5, 1), background .2s ease; }
+    .btn:active, .mbtn:active { transform: scale(.96); }
+    .xbanners { display: grid; gap: 12px; }
+    .xban { background: var(--s-surface); border: 1px solid var(--s-line); border-radius: 10px; overflow: hidden; }
+    .xban > button { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; font-weight: 600; font-size: 15px; }
+    .xban > button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 10px; }
+    .xic { width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; flex: none; background: rgba(76, 201, 240, .12); color: var(--accent); font-family: var(--mono); font-size: 13px; }
+    .plus { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--s-line-2); display: grid; place-items: center; flex: none; font-weight: 400;
+            transition: transform .45s cubic-bezier(.2, .7, .2, 1), background .3s ease, color .3s ease, border-color .3s ease; }
+    .xban.open .plus { transform: rotate(135deg); background: var(--accent); border-color: var(--accent); color: #04222d; }
+    .xbody { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .55s cubic-bezier(.2, .7, .2, 1); }
+    .xban.open .xbody { grid-template-rows: 1fr; }
+    .xbody > div { overflow: hidden; }
+    .xin { padding: 0 20px 18px 62px; color: var(--s-muted); font-size: 15px; opacity: 0; transform: translateY(-8px); transition: opacity .4s ease .12s, transform .4s ease .12s; }
+    .xban.open .xin { opacity: 1; transform: none; }
+    .xin p { margin: 0 0 8px; } .xin p:last-child { margin: 0; }
+    @media (max-width: 560px) { .xin { padding: 0 16px 16px; } .xban > button { padding: 14px 16px; } }
+    @media (prefers-reduced-motion: reduce) {
+      .fx-in, .hero h2 .w { opacity: 1 !important; transform: none !important; filter: none !important; animation: none !important; transition: none !important; }
+      .xbody, .xin, .plus { transition: none !important; }
+      #scrollbar { display: none; }
+    }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
+  <div id="scrollbar" aria-hidden="true"></div>
   <header class="topbar">
     <div class="brand"><div class="moon" aria-hidden="true"></div>
-      <div><h1>Lunar Landing Site Navigator</h1><div class="sub">Modo educativo</div></div></div>
+      <div><h1>Lunar Landing Site Navigator</h1></div></div>
     <nav class="nav">
-      <a href="/">Navegador</a>
-      <a href="/heatmap.html">Heatmap</a>
-      <a href="/educativo.html" class="on">Educativo</a>
+      <a href="/" data-i18n="nav.navigator">Navigator</a>
+      <a href="/heatmap.html" data-i18n="nav.heatmap">Heatmap</a>
+      <a href="/educativo.html" class="on" data-i18n="nav.edu">Educational</a>
     </nav>
   </header>
 
@@ -190,91 +315,109 @@
     <section class="hero">
       <canvas id="heroMoon" width="200" height="200" aria-hidden="true"></canvas>
       <div>
-        <div class="eyebrow">Cómo se ve el cielo desde la Luna</div>
-        <h2>Cinco preguntas, respondidas con los datos de tu sitio</h2>
-        <p>Elige un sitio y un periodo. Las cifras de cada lección se calculan para ese lugar: el Sol, la Tierra y el relieve del horizonte. Si prefieres ir despacio, usa la pestaña <b>Paso a paso</b>.</p>
+        <div class="eyebrow fx-in" data-i18n="ed.eyebrow">How the sky looks from the Moon</div>
+        <h2 data-i18n="ed.h2">Five questions, answered with your site’s data</h2>
+        <p class="fx-in" style="--d:.45s" data-i18n="ed.lead">Choose a site and a period. The figures in each lesson are computed for that place: the Sun, the Earth and the terrain of the horizon.</p>
       </div>
     </section>
 
-    <div id="banner" class="banner" hidden>⚠ Datos simulados (mock): alguna cifra de abajo es de prueba y no describe la Luna real. Los textos explicativos sí son válidos.</div>
+    <div id="banner" class="banner" hidden data-i18n="ed.banner">⚠ Simulated data (mock): some figures below are test values and do not describe the real Moon. The explanatory texts are still valid.</div>
     <div id="error" role="alert" hidden></div>
 
-    <section class="panel">
+    <section class="panel spot fx-in" style="--d:.55s">
       <div class="controls">
-        <label>Sitio <select id="site"></select></label>
-        <label>Inicio (UTC) <input type="date" id="start" value="2027-01-01"></label>
-        <label>Fin (UTC) <input type="date" id="end" value="2027-01-31"></label>
-        <button class="btn" id="load">Explicar</button>
+        <label><span data-i18n="ed.site">Site</span> <select id="site"></select></label>
+        <label><span data-i18n="ed.start">Start (UTC)</span> <input type="date" id="start" value="2027-01-01"></label>
+        <label><span data-i18n="ed.end">End (UTC)</span> <input type="date" id="end" value="2027-01-31"></label>
+        <button class="btn" id="load" data-i18n="ed.explain">Explain</button>
       </div>
-      <p class="loading" id="loading" aria-live="polite" hidden>Cargando los datos del sitio…</p>
+      <p class="loading" id="loading" aria-live="polite" hidden data-i18n="ed.loading">Loading the site’s data…</p>
+    </section>
+
+    <section class="xbanners fx-in" style="--d:.65s" aria-label="About this page" data-i18n-attr="aria-label:ed.info.label">
+      <div class="xban spot">
+        <button type="button" aria-expanded="false"><span class="xic" aria-hidden="true">?</span><span data-i18n="ed.b1.title">How to use this page?</span><span class="plus" aria-hidden="true">+</span></button>
+        <div class="xbody"><div><div class="xin">
+          <p data-i18n-html="ed.b1.p1"><b>Your site</b>: five questions answered with the figures of the site and period you choose above.</p>
+          <p data-i18n-html="ed.b1.p2"><b>Step by step</b>: the same ideas, one by one, with animations you can control.</p>
+          <p data-i18n-html="ed.b1.p3"><b>Myths and facts</b>: common ideas about the Moon, and what the data says.</p>
+        </div></div></div>
+      </div>
+      <div class="xban spot">
+        <button type="button" aria-expanded="false"><span class="xic" aria-hidden="true">i</span><span data-i18n="ed.b2.title">Where does this data come from?</span><span class="plus" aria-hidden="true">+</span></button>
+        <div class="xbody"><div><div class="xin">
+          <p data-i18n="ed.b2.p1">Sun and Earth positions: NASA JPL DE421 ephemerides, checked against JPL Horizons.</p>
+          <p data-i18n="ed.b2.p2">Terrain: LOLA laser altimeter on NASA’s LRO spacecraft, at 80 m per pixel at the south pole and 118 m per pixel on the rest of the Moon.</p>
+        </div></div></div>
+      </div>
     </section>
 
     <div class="tabs" role="tablist">
-      <button id="tab-q" class="on" role="tab" data-tab="q" aria-selected="true" aria-controls="pane-q">Tu sitio</button>
-      <button id="tab-s" role="tab" data-tab="s" aria-selected="false" aria-controls="pane-s">Paso a paso</button>
-      <button id="tab-m" role="tab" data-tab="m" aria-selected="false" aria-controls="pane-m">Mitos y datos</button>
+      <button id="tab-q" class="on" role="tab" data-tab="q" aria-selected="true" aria-controls="pane-q" data-i18n="ed.tab.q">Your site</button>
+      <button id="tab-s" role="tab" data-tab="s" aria-selected="false" aria-controls="pane-s" data-i18n="ed.tab.s">Step by step</button>
+      <button id="tab-m" role="tab" data-tab="m" aria-selected="false" aria-controls="pane-m" data-i18n="ed.tab.m">Myths and facts</button>
     </div>
 
     <!-- ======================= TU SITIO: 5 lecciones ======================= -->
     <section id="pane-q" class="pane on" role="tabpanel" aria-labelledby="tab-q">
       <article class="card lesson reveal">
-        <div class="lesson-head"><span class="num sun">01</span><h2>¿Por qué el Sol casi no sube en el polo sur?</h2></div>
+        <div class="lesson-head"><span class="num sun">01</span><h2 data-i18n="ed.l1.h">Why does the Sun barely rise at the south pole?</h2></div>
         <div class="split">
           <div>
-            <p class="why">El eje de la Luna está inclinado solo ~1.5° respecto a su órbita (el de la Tierra, 23.4°). Por eso no hay estaciones marcadas, y cerca de los polos el Sol da vueltas casi pegado al horizonte. Las sombras son larguísimas.</p>
+            <p class="why" data-i18n="ed.l1.p">The Moon’s axis is tilted only ~1.5° relative to its orbit (the Earth’s is 23.4°). That is why there are no marked seasons, and near the poles the Sun circles almost glued to the horizon. Shadows are extremely long.</p>
             <div class="readout" id="d1"></div>
             <div class="tiltpair">
-              <figure class="sph earthg"><canvas id="cvE" width="220" height="220" role="img" aria-label="La Tierra con su eje inclinado 23.4°"></canvas>
-                <svg viewBox="0 0 200 200" aria-label="Eje de la Tierra inclinado 23.4 grados">
+              <figure class="sph earthg"><canvas id="cvE" width="220" height="220" role="img" aria-label="The Earth with its axis tilted 23.4°" data-i18n-attr="aria-label:ed.l1.earth.cv"></canvas>
+                <svg viewBox="0 0 200 200" aria-label="Earth’s axis tilted 23.4 degrees" data-i18n-attr="aria-label:ed.l1.earth.svg">
                   <line x1="100" y1="6" x2="100" y2="194" stroke="rgba(142,155,186,.5)" stroke-dasharray="4 4"/>
                   <g transform="rotate(23.4 100 100)"><line x1="100" y1="2" x2="100" y2="198" stroke="#ffb43b" stroke-width="2.6" stroke-linecap="round"/></g>
                   <path d="M100 16 A84 84 0 0 1 133.2 22.9" fill="none" stroke="#ffb43b" stroke-width="1.6"/>
                   <text x="128" y="14" fill="#ffb43b" font-size="12" font-family="DM Mono, ui-monospace, Menlo, monospace">23.4°</text>
-                </svg><figcaption>Tierra</figcaption></figure>
-              <figure class="sph moong"><canvas id="cvM" width="220" height="220" role="img" aria-label="La Luna con su eje inclinado 1.5°"></canvas>
-                <svg viewBox="0 0 200 200" aria-label="Eje de la Luna inclinado 1.5 grados">
+                </svg><figcaption data-i18n="ed.earth">Earth</figcaption></figure>
+              <figure class="sph moong"><canvas id="cvM" width="220" height="220" role="img" aria-label="The Moon with its axis tilted 1.5°" data-i18n-attr="aria-label:ed.l1.moon.cv"></canvas>
+                <svg viewBox="0 0 200 200" aria-label="Moon’s axis tilted 1.5 degrees" data-i18n-attr="aria-label:ed.l1.moon.svg">
                   <line x1="100" y1="6" x2="100" y2="194" stroke="rgba(142,155,186,.5)" stroke-dasharray="4 4"/>
                   <g transform="rotate(1.5 100 100)"><line x1="100" y1="2" x2="100" y2="198" stroke="#4cc9f0" stroke-width="2.6" stroke-linecap="round"/></g>
                   <text x="110" y="14" fill="#4cc9f0" font-size="12" font-family="DM Mono, ui-monospace, Menlo, monospace">1.5°</text>
-                </svg><figcaption>Luna</figcaption></figure>
+                </svg><figcaption data-i18n="ed.moon">Moon</figcaption></figure>
             </div>
           </div>
           <div>
             <div id="c1" class="plot"></div>
           </div>
         </div>
-        <details class="dd" data-plot="c1b"><summary><span>Elevación máxima del Sol, día por día</span><i class="chev"></i></summary><div class="dd-body"><div id="c1b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c1b"><summary><span data-i18n="ed.c1b">Maximum Sun elevation, day by day</span><i class="chev"></i></summary><div class="dd-body"><div id="c1b" class="plot sm"></div></div></details>
       </article>
 
       <article class="card lesson reveal">
-        <div class="lesson-head"><span class="num earth">02</span><h2>¿Por qué la Tierra casi no se mueve en el cielo?</h2></div>
+        <div class="lesson-head"><span class="num earth">02</span><h2 data-i18n="ed.l2.h">Why does the Earth barely move in the sky?</h2></div>
         <div class="split">
           <div>
-            <p class="why">La Luna siempre muestra la misma cara a la Tierra (rotación sincrónica). Desde la cara visible, la Tierra queda casi fija en el cielo y solo oscila por la libración. Desde la cara oculta nunca se ve directamente. Desde el polo sur queda cerca del horizonte, y el terreno la tapa con facilidad.</p>
+            <p class="why" data-i18n="ed.l2.p">The Moon always shows the same face to the Earth (synchronous rotation). From the near side, the Earth stays almost fixed in the sky and only wobbles because of libration. From the far side it is never seen directly. From the south pole it sits close to the horizon, and the terrain easily blocks it.</p>
             <div class="readout" id="d2"></div>
           </div>
           <div id="c2" class="plot"></div>
         </div>
-        <details class="dd" data-plot="c2b"><summary><span>Vista de cielo (círculo): dónde cae la Tierra</span><i class="chev"></i></summary><div class="dd-body"><div id="c2b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c2b"><summary><span data-i18n="ed.c2b">Sky view (circle): where the Earth falls</span><i class="chev"></i></summary><div class="dd-body"><div id="c2b" class="plot sm"></div></div></details>
       </article>
 
       <article class="card lesson reveal">
-        <div class="lesson-head"><span class="num">03</span><h2>¿Qué cambia el terreno?</h2></div>
+        <div class="lesson-head"><span class="num">03</span><h2 data-i18n="ed.l3.h">What does the terrain change?</h2></div>
         <div class="split">
           <div>
-            <p class="why">En la Luna no hay atmósfera, así que no hay refracción: el horizonte es geométrico y lo define el relieve. Un horizonte plano deja ver el Sol apenas supera 0°; con relieve, una montaña de pocos grados basta para taparlo. Aquí se compara el mismo cálculo con y sin terreno.</p>
+            <p class="why" data-i18n="ed.l3.p">The Moon has no atmosphere, so there is no refraction: the horizon is geometric and set by the terrain. With a flat horizon you see the Sun as soon as it rises above 0°; with terrain, a mountain of a few degrees is enough to block it. Here the same calculation is compared with and without terrain.</p>
             <div class="readout" id="d3"></div>
           </div>
           <div id="c3" class="plot"></div>
         </div>
-        <details class="dd" data-plot="c3b"><summary><span>El relieve visto desde arriba (perfil circular)</span><i class="chev"></i></summary><div class="dd-body"><div id="c3b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c3b"><summary><span data-i18n="ed.c3b">The terrain seen from above (circular profile)</span><i class="chev"></i></summary><div class="dd-body"><div id="c3b" class="plot sm"></div></div></details>
       </article>
 
       <article class="card lesson reveal">
-        <div class="lesson-head"><span class="num ok">04</span><h2>¿Cuánto dura un día lunar?</h2></div>
+        <div class="lesson-head"><span class="num ok">04</span><h2 data-i18n="ed.l4.h">How long is a lunar day?</h2></div>
         <div class="split">
           <div>
-            <p class="why">Un día lunar (de amanecer a amanecer) dura ≈ 29.5 días terrestres: es el tiempo que tarda la Luna en repetir su fase. Es más largo que lo que tarda en girar sobre su eje (27.3 d) porque, mientras gira, la Tierra y la Luna también avanzan alrededor del Sol. Una noche puede durar unas dos semanas; en el polo sur, con el relieve, los ciclos se acortan y se mezclan.</p>
+            <p class="why" data-i18n="ed.l4.p">A lunar day (sunrise to sunrise) lasts ≈ 29.5 Earth days: it is the time the Moon takes to repeat its phase. It is longer than the time it takes to spin on its axis (27.3 d) because, while it spins, the Earth and the Moon also move around the Sun. A night can last about two weeks; at the south pole, with the terrain, the cycles get shorter and blend together.</p>
             <div class="readout" id="d4"></div>
           </div>
           <div id="c4" class="plot"></div>
@@ -282,31 +425,31 @@
       </article>
 
       <article class="card lesson reveal">
-        <div class="lesson-head"><span class="num bad">05</span><h2>¿Qué pasa en un lugar que casi nunca ve el Sol?</h2></div>
+        <div class="lesson-head"><span class="num bad">05</span><h2 data-i18n="ed.l5.h">What happens in a place that almost never sees the Sun?</h2></div>
         <div class="split">
           <div>
-            <p class="why">En el polo sur hay cráteres cuyo fondo nunca recibe luz directa: el Sol queda siempre por debajo del borde. Esas «trampas frías» pueden bajar de −200 °C y se han detectado indicios de hielo de agua, por eso interesan tanto. Aquí se separa el tiempo en tres estados: Sol visible, Sol tapado por el terreno y noche (Sol bajo 0°).</p>
+            <p class="why" data-i18n="ed.l5.p">At the south pole there are craters whose floor never receives direct light: the Sun always stays below the rim. These “cold traps” can drop below −200 °C and signs of water ice have been detected, which is why they are so interesting. Here the time is split into three states: Sun visible, Sun blocked by the terrain, and night (Sun below 0°).</p>
             <div class="readout" id="d5"></div>
           </div>
           <div id="c5" class="plot"></div>
         </div>
-        <details class="dd" data-plot="c5b"><summary><span>El recorrido del Sol contra el horizonte</span><i class="chev"></i></summary><div class="dd-body"><div id="c5b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c5b"><summary><span data-i18n="ed.c5b">The Sun’s path against the horizon</span><i class="chev"></i></summary><div class="dd-body"><div id="c5b" class="plot sm"></div></div></details>
       </article>
     </section>
 
     <!-- ======================= PASO A PASO ======================= -->
     <section id="pane-s" class="pane" role="tabpanel" aria-labelledby="tab-s">
       <div class="cast reveal">
-        <div class="cast-head"><h3>Los protagonistas</h3>
+        <div class="cast-head"><h3 data-i18n="ed.cast">The protagonists</h3>
           <div style="display:flex;gap:8px">
-            <button class="mbtn" id="castL" aria-label="Anterior"><span class="ico l">←</span></button>
-            <button class="mbtn" id="castR" aria-label="Siguiente"><span class="ico r">→</span></button>
+            <button class="mbtn" id="castL" aria-label="Previous" data-i18n-attr="aria-label:ed.prev"><span class="ico l">←</span></button>
+            <button class="mbtn" id="castR" aria-label="Next" data-i18n-attr="aria-label:ed.next"><span class="ico r">→</span></button>
           </div></div>
         <div class="cast-row" id="castRow">
-          <div class="cast-card"><canvas id="cs0" width="240" height="240" aria-hidden="true"></canvas><h4>El Sol</h4><ul><li>Diámetro: <b>1.39 millones km</b></li><li>Distancia: <b>≈ 150 millones km</b></li><li>Su luz tarda <b>≈ 8 min 20 s</b> en llegar</li></ul></div>
-          <div class="cast-card"><canvas id="cs1" width="240" height="240" aria-hidden="true"></canvas><h4>La Tierra</h4><ul><li>Diámetro: <b>12,742 km</b></li><li>Inclinación del eje: <b>23.4°</b></li><li>Desde la Luna se ve <b>≈ 3.7×</b> más ancha que la Luna desde aquí</li></ul></div>
-          <div class="cast-card"><canvas id="cs2" width="240" height="240" aria-hidden="true"></canvas><h4>La Luna</h4><ul><li>Diámetro: <b>3,474 km</b></li><li>Inclinación del eje: <b>1.5°</b></li><li>Gira en <b>27.3 d</b>; su día solar dura <b>29.5 d</b></li></ul></div>
-          <div class="cast-card"><canvas id="cs3" width="240" height="240" aria-hidden="true"></canvas><h4>El polo sur</h4><ul><li>El Sol apenas sube <b>unos pocos grados</b></li><li>Cráteres en <b>sombra permanente</b></li><li>Picos con <b>luz casi continua</b></li></ul></div>
+          <div class="cast-card"><canvas id="cs0" width="240" height="240" aria-hidden="true"></canvas><h4 data-i18n="ed.cast.sun">The Sun</h4><ul data-i18n-html="ed.cast.sun.ul"><li>Diameter: <b>1.39 million km</b></li><li>Distance: <b>≈ 150 million km</b></li><li>Its light takes <b>≈ 8 min 20 s</b> to arrive</li></ul></div>
+          <div class="cast-card"><canvas id="cs1" width="240" height="240" aria-hidden="true"></canvas><h4 data-i18n="ed.cast.earth">The Earth</h4><ul data-i18n-html="ed.cast.earth.ul"><li>Diameter: <b>12,742 km</b></li><li>Axis tilt: <b>23.4°</b></li><li>From the Moon it looks <b>≈ 3.7×</b> wider than the Moon does from here</li></ul></div>
+          <div class="cast-card"><canvas id="cs2" width="240" height="240" aria-hidden="true"></canvas><h4 data-i18n="ed.cast.moon">The Moon</h4><ul data-i18n-html="ed.cast.moon.ul"><li>Diameter: <b>3,474 km</b></li><li>Axis tilt: <b>1.5°</b></li><li>It spins in <b>27.3 d</b>; its solar day lasts <b>29.5 d</b></li></ul></div>
+          <div class="cast-card"><canvas id="cs3" width="240" height="240" aria-hidden="true"></canvas><h4 data-i18n="ed.cast.pole">The south pole</h4><ul data-i18n-html="ed.cast.pole.ul"><li>The Sun barely rises <b>a few degrees</b></li><li>Craters in <b>permanent shadow</b></li><li>Peaks with <b>almost continuous light</b></li></ul></div>
         </div>
       </div>
 
@@ -318,115 +461,115 @@
             <div class="slide act">
               <div class="slide-grid">
                 <div>
-                  <span class="kick">Paso 1 de 6</span>
-                  <h3>La Luna siempre muestra la misma cara</h3>
-                  <p>Gira sobre su eje justo al ritmo en que orbita la Tierra. El punto rojo marca el lugar que siempre mira hacia nosotros: desde allí la Tierra queda casi fija en el cielo. Mueve la Luna y mira cómo cambia lo que ilumina el Sol.</p>
+                  <span class="kick" data-i18n="ed.kick1">Step 1 of 6</span>
+                  <h3 data-i18n="ed.s1.h">The Moon always shows the same face</h3>
+                  <p data-i18n="ed.s1.p">It spins on its axis at exactly the rate it orbits the Earth. The red dot marks the place that always faces us: from there the Earth stays almost fixed in the sky. Move the Moon and watch how what the Sun lights up changes.</p>
                   <div class="ctrls">
                     <button class="mbtn" id="s1play"><span class="ico s">⏸</span> Pausar</button>
-                    <button class="mbtn" data-ph="0"><span class="ico s">●</span> Nueva</button>
-                    <button class="mbtn" data-ph="1.5708"><span class="ico s">◑</span> Cuarto</button>
-                    <button class="mbtn" data-ph="3.1416"><span class="ico s">○</span> Llena</button>
+                    <button class="mbtn" data-ph="0"><span class="ico s">●</span> <span data-i18n="ed.new">New</span></button>
+                    <button class="mbtn" data-ph="1.5708"><span class="ico s">◑</span> <span data-i18n="ed.quarter">Quarter</span></button>
+                    <button class="mbtn" data-ph="3.1416"><span class="ico s">○</span> <span data-i18n="ed.full">Full</span></button>
                   </div>
                   <div class="slide-note" id="n1"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv1" role="img" aria-label="Animación: la Luna siempre muestra la misma cara a la Tierra"></canvas></div>
+                <div class="slide-vis"><canvas id="cv1" role="img" aria-label="Animation: the Moon always shows the same face to the Earth" data-i18n-attr="aria-label:ed.s1.cv"></canvas></div>
               </div>
-              <details class="dd" data-plot="p1"><summary><span>Cuánta Luna ilumina el Sol, mes a mes</span><i class="chev"></i></summary><div class="dd-body"><div id="p1" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p1"><summary><span data-i18n="ed.p1">How much of the Moon the Sun lights, month by month</span><i class="chev"></i></summary><div class="dd-body"><div id="p1" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 2 -->
             <div class="slide">
               <div class="slide-grid">
                 <div>
-                  <span class="kick">Paso 2 de 6</span>
-                  <h3>Un eje casi vertical: el Sol se queda bajo</h3>
-                  <p>Desde el polo, la altura máxima del Sol es igual a la inclinación del eje. En la Tierra son 23.4°; en la Luna, solo 1.5°. Cambia la inclinación y mira el ángulo entre el rayo de luz y el horizonte local (la línea blanca).</p>
+                  <span class="kick" data-i18n="ed.kick2">Step 2 of 6</span>
+                  <h3 data-i18n="ed.s2.h">An almost vertical axis: the Sun stays low</h3>
+                  <p data-i18n="ed.s2.p">From the pole, the Sun’s maximum height equals the axis tilt. On the Earth that is 23.4°; on the Moon, only 1.5°. Change the tilt and watch the angle between the light ray and the local horizon (the white line).</p>
                   <div class="ctrls">
-                    <button class="mbtn on" data-tilt="23.4" data-body="earth">Tierra 23.4°</button>
-                    <button class="mbtn" data-tilt="1.5" data-body="moon">Luna 1.5°</button>
-                    <button class="mbtn" data-tilt="0" data-body="moon"><span class="ico s">⊘</span> Sin inclinación</button>
+                    <button class="mbtn on" data-tilt="23.4" data-body="earth" data-i18n="ed.tilt.earth">Earth 23.4°</button>
+                    <button class="mbtn" data-tilt="1.5" data-body="moon" data-i18n="ed.tilt.moon">Moon 1.5°</button>
+                    <button class="mbtn" data-tilt="0" data-body="moon"><span class="ico s">⊘</span> <span data-i18n="ed.tilt.none">No tilt</span></button>
                   </div>
                   <div class="slide-note" id="n2"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv2" role="img" aria-label="Animación: con un eje casi vertical, el Sol se queda bajo en el polo"></canvas></div>
+                <div class="slide-vis"><canvas id="cv2" role="img" aria-label="Animation: with an almost vertical axis, the Sun stays low at the pole" data-i18n-attr="aria-label:ed.s2.cv"></canvas></div>
               </div>
-              <details class="dd" data-plot="p2"><summary><span>Altura máxima del Sol según la latitud</span><i class="chev"></i></summary><div class="dd-body"><div id="p2" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p2"><summary><span data-i18n="ed.p2">Maximum Sun height by latitude</span><i class="chev"></i></summary><div class="dd-body"><div id="p2" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 3 -->
             <div class="slide">
               <div class="slide-grid">
                 <div>
-                  <span class="kick">Paso 3 de 6</span>
-                  <h3>El Sol visto desde tu sitio</h3>
-                  <p>Mirando desde el lugar de aterrizaje: eje horizontal = dirección (azimut), vertical = altura. El Sol solo ilumina si queda por encima del relieve gris. Reproduce los días con los datos reales de tu sitio.</p>
+                  <span class="kick" data-i18n="ed.kick3">Step 3 of 6</span>
+                  <h3 data-i18n="ed.s3.h">The Sun seen from your site</h3>
+                  <p data-i18n="ed.s3.p">Looking from the landing site: horizontal axis = direction (azimuth), vertical = height. The Sun only lights the site if it is above the grey terrain. Play the days with your site’s real data.</p>
                   <div class="ctrls">
                     <button class="mbtn primary" id="s3play"><span class="ico s">▶</span> Reproducir</button>
                     <button class="mbtn on" data-sp="1">1×</button><button class="mbtn" data-sp="3">3×</button><button class="mbtn" data-sp="10">10×</button>
-                    <button class="mbtn" id="s3rise">Ir al amanecer</button>
-                    <input type="range" id="s3rng" min="0" max="0" value="0" aria-label="Momento">
+                    <button class="mbtn" id="s3rise" data-i18n="ed.s3.rise">Go to sunrise</button>
+                    <input type="range" id="s3rng" min="0" max="0" value="0" aria-label="Moment" data-i18n-attr="aria-label:ed.moment">
                   </div>
                   <div class="slide-note" id="n3"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv3" role="img" aria-label="Animación: el recorrido del Sol visto desde tu sitio"></canvas></div>
+                <div class="slide-vis"><canvas id="cv3" role="img" aria-label="Animation: the Sun’s path seen from your site" data-i18n-attr="aria-label:ed.s3.cv"></canvas></div>
               </div>
-              <details class="dd" data-plot="p3"><summary><span>Los primeros 5 días: Sol contra el terreno</span><i class="chev"></i></summary><div class="dd-body"><div id="p3" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p3"><summary><span data-i18n="ed.p3">The first 5 days: Sun against the terrain</span><i class="chev"></i></summary><div class="dd-body"><div id="p3" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 4 -->
             <div class="slide">
               <div class="slide-grid">
                 <div>
-                  <span class="kick">Paso 4 de 6</span>
-                  <h3>El terreno decide: sin atmósfera, el horizonte es geométrico</h3>
-                  <p>No hay refracción que «levante» la luz sobre las montañas. Si el Sol queda más bajo que la cresta, desaparece. Prueba combinaciones de relieve y altura del Sol.</p>
+                  <span class="kick" data-i18n="ed.kick4">Step 4 of 6</span>
+                  <h3 data-i18n="ed.s4.h">The terrain decides: with no atmosphere, the horizon is geometric</h3>
+                  <p data-i18n="ed.s4.p">There is no refraction to “lift” the light over the mountains. If the Sun is lower than the ridge, it disappears. Try combinations of terrain and Sun height.</p>
                   <div class="ctrls">
-                    <button class="mbtn" data-mt="0">Plano 0°</button>
-                    <button class="mbtn on" data-mt="3">Colina 3°</button>
-                    <button class="mbtn" data-mt="8">Montaña 8°</button>
+                    <button class="mbtn" data-mt="0" data-i18n="ed.mt0">Flat 0°</button>
+                    <button class="mbtn on" data-mt="3" data-i18n="ed.mt3">Hill 3°</button>
+                    <button class="mbtn" data-mt="8" data-i18n="ed.mt8">Mountain 8°</button>
                   </div>
                   <div class="ctrls" style="margin-top:0">
-                    <button class="mbtn" data-se="1">Sol 1°</button>
-                    <button class="mbtn on" data-se="2">Sol 2°</button>
-                    <button class="mbtn" data-se="6">Sol 6°</button>
+                    <button class="mbtn" data-se="1" data-i18n="ed.se1">Sun 1°</button>
+                    <button class="mbtn on" data-se="2" data-i18n="ed.se2">Sun 2°</button>
+                    <button class="mbtn" data-se="6" data-i18n="ed.se6">Sun 6°</button>
                   </div>
                   <div class="slide-note" id="n4"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv4" role="img" aria-label="Animación: el relieve tapa el Sol cuando está bajo"></canvas></div>
+                <div class="slide-vis"><canvas id="cv4" role="img" aria-label="Animation: the terrain blocks the Sun when it is low" data-i18n-attr="aria-label:ed.s4.cv"></canvas></div>
               </div>
-              <details class="dd" data-plot="p4"><summary><span>El horizonte real de tu sitio</span><i class="chev"></i></summary><div class="dd-body"><div id="p4" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p4"><summary><span data-i18n="ed.p4">Your site’s real horizon</span><i class="chev"></i></summary><div class="dd-body"><div id="p4" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 5 -->
             <div class="slide">
               <div class="slide-grid">
                 <div>
-                  <span class="kick">Paso 5 de 6</span>
-                  <h3>La Tierra: casi quieta, a veces tapada</h3>
-                  <p>Para comunicarse sin relevo hace falta línea de vista a la Tierra. Cada punto es una hora: la Tierra apenas se mueve (libración). Si está bajo el relieve, no hay enlace directo.</p>
+                  <span class="kick" data-i18n="ed.kick5">Step 5 of 6</span>
+                  <h3 data-i18n="ed.s5.h">The Earth: almost still, sometimes blocked</h3>
+                  <p data-i18n="ed.s5.p">To communicate without a relay you need a line of sight to the Earth. Each dot is one hour: the Earth barely moves (libration). If it is behind the terrain, there is no direct link.</p>
                   <div class="ctrls">
                     <button class="mbtn primary" id="s5play"><span class="ico s">▶</span> Reproducir</button>
-                    <button class="mbtn" data-show="earth">Solo Tierra</button>
-                    <button class="mbtn on" data-show="both">Sol y Tierra</button>
-                    <input type="range" id="s5rng" min="0" max="0" value="0" aria-label="Momento">
+                    <button class="mbtn" data-show="earth" data-i18n="ed.show.earth">Earth only</button>
+                    <button class="mbtn on" data-show="both" data-i18n="ed.show.both">Sun and Earth</button>
+                    <input type="range" id="s5rng" min="0" max="0" value="0" aria-label="Moment" data-i18n-attr="aria-label:ed.moment">
                   </div>
                   <div class="slide-note" id="n5"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv5" role="img" aria-label="Animación: la Tierra casi quieta en el cielo, a veces tapada por el relieve"></canvas></div>
+                <div class="slide-vis"><canvas id="cv5" role="img" aria-label="Animation: the Earth almost still in the sky, sometimes blocked by the terrain" data-i18n-attr="aria-label:ed.s5.cv"></canvas></div>
               </div>
-              <details class="dd" data-plot="p5"><summary><span>Cuánto se mueve la Tierra en el cielo</span><i class="chev"></i></summary><div class="dd-body"><div id="p5" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p5"><summary><span data-i18n="ed.p5">How much the Earth moves in the sky</span><i class="chev"></i></summary><div class="dd-body"><div id="p5" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 6 -->
             <div class="slide">
               <div class="slide-grid">
                 <div>
-                  <span class="kick">Paso 6 de 6</span>
-                  <h3>Juntando todo: ¿es buen sitio y buena fecha?</h3>
-                  <p>Un buen candidato tiene mucho Sol (energía), buena línea de vista a la Tierra (comunicación) y noches o cortes cortos. Cambia el sitio o las fechas arriba y compara.</p>
+                  <span class="kick" data-i18n="ed.kick6">Step 6 of 6</span>
+                  <h3 data-i18n="ed.s6.h">Putting it all together: is it a good site and a good date?</h3>
+                  <p data-i18n="ed.s6.p">A good candidate has plenty of Sun (energy), a good line of sight to the Earth (communications) and short nights or gaps. Change the site or the dates above and compare.</p>
                   <div class="ctrls">
-                    <a class="mbtn primary" href="/">Abrir el navegador</a>
-                    <a class="mbtn" href="/heatmap.html">Heatmap sitio × fecha</a>
+                    <a class="mbtn primary" href="/" data-i18n="ed.open.nav">Open the navigator</a>
+                    <a class="mbtn" href="/heatmap.html" data-i18n="ed.nav.heatmap">Site × date heatmap</a>
                   </div>
                   <div class="slide-note" id="n6"></div>
                 </div>
@@ -435,13 +578,13 @@
                   <div class="verdict" id="verdict6"></div>
                 </div>
               </div>
-              <details class="dd" data-plot="p6"><summary><span>Perfil del sitio (radar)</span><i class="chev"></i></summary><div class="dd-body"><div id="p6" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p6"><summary><span data-i18n="ed.p6">Site profile (radar)</span><i class="chev"></i></summary><div class="dd-body"><div id="p6" class="plot sm"></div></div></details>
             </div>
 
           </div>
         </div>
         <div class="car-ctrl">
-          <button class="mbtn" id="prev"><span class="ico l">←</span> Anterior</button>
+          <button class="mbtn" id="prev"><span class="ico l">←</span> <span data-i18n="ed.prev.btn">Previous</span></button>
           <div class="dots" id="dots"></div>
           <button class="mbtn primary" id="next">Siguiente <span class="ico r">→</span></button>
         </div>
@@ -450,13 +593,56 @@
 
     <!-- ======================= MITOS ======================= -->
     <section id="pane-m" class="pane myths" role="tabpanel" aria-labelledby="tab-m">
-      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"En la Luna hay un lado oscuro donde nunca llega el Sol."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Todos los puntos reciben Sol; el día lunar dura ≈ 29.5 días terrestres. Lo que cambia es el lado que mira a la Tierra: el lado oculto nunca la ve, pero sí tiene días y noches.</div></div></div></div>
-      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"El cielo lunar se ve azul de día."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Sin atmósfera no hay dispersión de luz ni refracción: el cielo es negro incluso con el Sol sobre el horizonte.</div></div></div></div>
-      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"El Sol sube alto en todas partes."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>En el ecuador sube hasta el cenit, pero en el polo sur apenas unos pocos grados por la inclinación axial de ~1.5°. Por eso interesa el polo sur: hay cráteres en sombra permanente y picos con luz casi continua.</div></div></div></div>
-      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"La Tierra sale y se pone como la Luna en nuestro cielo."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Desde la Luna, la Tierra está casi fija en el cielo (con oscilación por libración) o no se ve nunca, según el sitio.</div></div></div></div>
-      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"Si el Sol está sobre 0°, hay luz."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Hay luz solo si el Sol está por encima del <i>horizonte local</i>, que incluye el terreno. En el polo sur esa diferencia puede ser decisiva.</div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab" data-i18n="ed.myth.lab">Myth</span><span data-i18n="ed.m1.q">"There is a dark side of the Moon where the Sun never reaches."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab" data-i18n="ed.fact.lab">Fact</span><span data-i18n="ed.m1.a">Every point receives Sunlight; the lunar day lasts ≈ 29.5 Earth days. What differs is the side that faces the Earth: the far side never sees it, but it does have days and nights.</span></div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab" data-i18n="ed.myth.lab">Myth</span><span data-i18n="ed.m2.q">"The lunar sky looks blue in the daytime."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab" data-i18n="ed.fact.lab">Fact</span><span data-i18n="ed.m2.a">With no atmosphere there is no light scattering or refraction: the sky is black even with the Sun above the horizon.</span></div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab" data-i18n="ed.myth.lab">Myth</span><span data-i18n="ed.m3.q">"The Sun rises high everywhere."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab" data-i18n="ed.fact.lab">Fact</span><span data-i18n="ed.m3.a">At the equator it climbs to the zenith, but at the south pole only a few degrees because of the ~1.5° axial tilt. That is why the south pole is interesting: there are craters in permanent shadow and peaks with almost continuous light.</span></div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab" data-i18n="ed.myth.lab">Myth</span><span data-i18n="ed.m4.q">"The Earth rises and sets like the Moon does in our sky."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab" data-i18n="ed.fact.lab">Fact</span><span data-i18n="ed.m4.a">From the Moon, the Earth is almost fixed in the sky (with a libration wobble) or is never seen at all, depending on the site.</span></div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab" data-i18n="ed.myth.lab">Myth</span><span data-i18n="ed.m5.q">"If the Sun is above 0°, there is light."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab" data-i18n="ed.fact.lab">Fact</span><span data-i18n-html="ed.m5.a">There is light only if the Sun is above the <i>local horizon</i>, which includes the terrain. At the south pole that difference can be decisive.</span></div></div></div></div>
     </section>
   </div>
+
+  <script>
+    /* Capa de movimiento de esta página (sin librerías). Respeta "reducir movimiento". */
+    document.documentElement.classList.add('fx');   // solo con JS activo se ocultan los elementos para animarlos
+    window.FX = (() => {
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+      }), { threshold: .12 }) : null;
+      /** Hace aparecer los elementos .fx-in cuando entran en pantalla. */
+      function reveal(root = document) {
+        root.querySelectorAll('.fx-in:not(.on)').forEach(el => (reduce || !io) ? el.classList.add('on') : io.observe(el));
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        const h = document.querySelector('.hero h2');
+        if (h && !reduce) {
+          const words = h.textContent.trim().split(/\s+/);
+          h.setAttribute('aria-label', h.textContent.trim());
+          h.innerHTML = words.map((w, i) => `<span class="w" aria-hidden="true" style="--i:${i}">${w}</span>`).join(' ');
+        }
+        // Foco de luz en lecciones, tarjetas de protagonistas y mitos.
+        document.querySelectorAll('.lesson, .cast-card, .myth').forEach(el => el.classList.add('spot'));
+        reveal();
+        const bar = document.getElementById('scrollbar');
+        const upd = () => {
+          const d = document.documentElement, p = d.scrollTop / ((d.scrollHeight - d.clientHeight) || 1);
+          bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p))})`;
+        };
+        addEventListener('scroll', upd, { passive: true }); upd();
+      });
+      document.addEventListener('pointermove', e => {
+        const c = e.target.closest && e.target.closest('.spot'); if (!c) return;
+        const r = c.getBoundingClientRect();
+        c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      }, { passive: true });
+      document.addEventListener('click', e => {
+        const b = e.target.closest && e.target.closest('.xban > button'); if (!b) return;
+        const x = b.parentElement, open = !x.classList.contains('open');
+        x.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+      });
+      return { reveal, reduce };
+    })();
+  </script>
 
   <script>
   'use strict';
@@ -488,7 +674,7 @@
   function countUps(root) {
     root.querySelectorAll('[data-v]').forEach(el => {
       const v = +el.dataset.v, d = +el.dataset.d || 0, s = el.dataset.s || '', t0 = performance.now();
-      const f = now => { const k = Math.min(1, (now - t0) / 800), e = 1 - Math.pow(1 - k, 3); el.textContent = (v * e).toFixed(d) + s; if (k < 1) requestAnimationFrame(f); };
+      const f = now => { const k = Math.max(0, Math.min(1, (now - t0) / 800)), e = 1 - Math.pow(1 - k, 3); el.textContent = (v * e).toFixed(d) + s; if (k < 1) requestAnimationFrame(f); };
       requestAnimationFrame(f);
     });
   }
@@ -534,7 +720,7 @@
       const e = D.eph, th = [...Array(360).keys()];
       plot('c2b', [
         { type: 'scatterpolar', mode: 'lines', r: [...D.hor.el.map(v => 90 - v), 90 - D.hor.el[0]], theta: [...th, 360], fill: 'toself', fillcolor: 'rgba(138,150,180,.3)', line: { color: C.terrainLine, width: 1.5 }, name: 'Terreno', hoverinfo: 'skip' },
-        { type: 'scatterpolar', mode: 'markers', r: e.earth.el.map(v => 90 - v), theta: e.earth.az, name: 'Tierra', marker: { size: 6, color: e.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#9fd2ff']], opacity: .9 }, hovertemplate: 'Az %{theta:.0f}° · Elev %{customdata:.1f}°<extra>Tierra</extra>', customdata: e.earth.el },
+        { type: 'scatterpolar', mode: 'markers', r: e.earth.el.map(v => 90 - v), theta: e.earth.az, name: 'Tierra', marker: { size: 6, color: e.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#9fd2ff']], opacity: .9 }, hovertemplate: 'Az %{theta:.0f}° · Elev %{customdata:.1f}°<extra data-i18n="ed.earth">Earth</extra>', customdata: e.earth.el },
       ], { polar: { bgcolor: 'rgba(0,0,0,0)', angularaxis: { rotation: 90, direction: 'clockwise', gridcolor: C.grid, tickvals: [0, 90, 180, 270], ticktext: ['N', 'E', 'S', 'O'] },
         radialaxis: { range: [0, 90], tickvals: [0, 30, 60, 90], ticktext: ['90°', '60°', '30°', '0°'], gridcolor: C.grid, angle: 90 } }, margin: { l: 40, r: 40, t: 30, b: 30 } });
     },
@@ -768,7 +954,7 @@
     const sunFlat = pct(eph.sun.el.map(e => e > 0)), sunTerr = pct(D.lit), earthFlat = pct(eph.earth.el.map(e => e > 0)), earthTerr = pct(D.eVis);
 
     // 1. Sol
-    $('d1').innerHTML = `<b>${s.name}</b> · ${span}<div class="row">${stat('sun', 'Elevación máx.', met.sun_el_max_deg, 1, '°')}${stat('sun', 'Sol visible', met.sun_lit_pct, 1, '%')}${stat('bad', 'Noche más larga', met.longest_dark_h, 1, ' h')}</div>`;
+    $('d1').innerHTML = `Periodo: ${span}<div class="row">${stat('sun', 'Elevación máx.', met.sun_el_max_deg, 1, '°')}${stat('sun', 'Sol visible', met.sun_lit_pct, 1, '%')}${stat('bad', 'Noche más larga', met.longest_dark_h, 1, ' h')}</div>`;
     plot('c1', [
       { x: eph.t, y: D.hz, name: 'Horizonte (terreno) hacia el Sol', mode: 'lines', line: { color: C.terrainLine, width: 1.2, shape: 'hv' }, fill: 'tozeroy', fillcolor: C.terrain, hovertemplate: 'Terreno: %{y:.1f}°<extra></extra>' },
       { x: eph.t, y: eph.sun.el, name: 'Elevación del Sol', mode: 'lines', line: { color: C.sun, width: 2.6, shape: 'spline', smoothing: .6 }, fill: 'tozeroy', fillgradient: grad('255,180,59', .0, .42), fillcolor: 'rgba(255,180,59,.12)', hovertemplate: '%{y:.2f}°<extra>Sol</extra>' },
@@ -778,11 +964,11 @@
 
     // 2. Tierra
     const earthLine = met.earth_visible_pct === 0 ? `En este periodo <b>no se ve la Tierra</b> desde este sitio.` : `La Tierra está sobre el horizonte local parte del periodo.`;
-    $('d2').innerHTML = `<b>${s.name}</b><div style="margin-top:6px">${earthLine}</div><div class="row">${stat('earth', 'Tierra visible', met.earth_visible_pct, 1, '%')}${stat('bad', 'Mayor corte', met.longest_comms_gap_h, 1, ' h')}</div>`;
+    $('d2').innerHTML = `${earthLine}<div class="row">${stat('earth', 'Tierra visible', met.earth_visible_pct, 1, '%')}${stat('bad', 'Mayor corte', met.longest_comms_gap_h, 1, ' h')}</div>`;
     plot('c2', [
       { x: [...Array(360).keys()], y: hor.el, name: 'Horizonte (terreno)', mode: 'lines', fill: 'tozeroy', fillgradient: grad('138,150,180', .1, .55), line: { color: C.terrainLine, width: 1.6, shape: 'spline' }, fillcolor: C.terrain, hoverinfo: 'skip' },
       { x: eph.earth.az, y: eph.earth.el, name: 'Tierra (cada hora)', mode: 'markers', marker: { size: 7, color: eph.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#a9d8ff']], opacity: .9, line: { color: 'rgba(255,255,255,.5)', width: .6 } },
-        customdata: eph.t.map(t => t.slice(0, 16).replace('T', ' ')), hovertemplate: '%{customdata}<br>Az %{x:.0f}° · Elev %{y:.1f}°<extra>Tierra</extra>' },
+        customdata: eph.t.map(t => t.slice(0, 16).replace('T', ' ')), hovertemplate: '%{customdata}<br>Az %{x:.0f}° · Elev %{y:.1f}°<extra data-i18n="ed.earth">Earth</extra>' },
     ], { xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360], tickvals: [0, 90, 180, 270, 360], ticktext: ['N', 'E', 'S', 'O', 'N'] }, yaxis: { title: { text: 'Elevación (°)' } } });
 
     // 3. Terreno
