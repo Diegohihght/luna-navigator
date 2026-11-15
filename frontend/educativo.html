@@ -617,7 +617,6 @@
         const h = document.querySelector('.hero h2');
         if (h && !reduce) {
           const words = h.textContent.trim().split(/\s+/);
-          h.setAttribute('aria-label', h.textContent.trim());
           h.innerHTML = words.map((w, i) => `<span class="w" aria-hidden="true" style="--i:${i}">${w}</span>`).join(' ');
         }
         // Foco de luz en lecciones, tarjetas de protagonistas y mitos.
@@ -713,64 +712,64 @@
 
   const JOBS = {
     c1b() {
-      plot('c1b', [{ type: 'bar', x: D.dayLab, y: D.dailyMax, name: 'Máx. del día', marker: { color: D.dailyMax, colorscale: [[0, '#6b4a14'], [1, C.sun]], cornerradius: 4 }, hovertemplate: '%{x}<br>%{y:.2f}°<extra></extra>' }],
-        { xaxis: { title: { text: 'Día (UTC)' } }, yaxis: { title: { text: 'Elevación máx. (°)' } }, showlegend: false, bargap: .25 });
+      plot('c1b', [{ type: 'bar', x: D.dayLab, y: D.dailyMax, name: t('ed.js.max_of_the_day', 'Max. of the day'), marker: { color: D.dailyMax, colorscale: [[0, '#6b4a14'], [1, C.sun]], cornerradius: 4 }, hovertemplate: '%{x}<br>%{y:.2f}°<extra></extra>' }],
+        { xaxis: { title: { text: t('ed.js.day_utc', 'Day (UTC)') } }, yaxis: { title: { text: t('ed.js.max_elevation', 'Max. elevation (°)') } }, showlegend: false, bargap: .25 });
     },
     c2b() {
       const e = D.eph, th = [...Array(360).keys()];
       plot('c2b', [
-        { type: 'scatterpolar', mode: 'lines', r: [...D.hor.el.map(v => 90 - v), 90 - D.hor.el[0]], theta: [...th, 360], fill: 'toself', fillcolor: 'rgba(138,150,180,.3)', line: { color: C.terrainLine, width: 1.5 }, name: 'Terreno', hoverinfo: 'skip' },
-        { type: 'scatterpolar', mode: 'markers', r: e.earth.el.map(v => 90 - v), theta: e.earth.az, name: 'Tierra', marker: { size: 6, color: e.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#9fd2ff']], opacity: .9 }, hovertemplate: 'Az %{theta:.0f}° · Elev %{customdata:.1f}°<extra data-i18n="ed.earth">Earth</extra>', customdata: e.earth.el },
+        { type: 'scatterpolar', mode: 'lines', r: [...D.hor.el.map(v => 90 - v), 90 - D.hor.el[0]], theta: [...th, 360], fill: 'toself', fillcolor: 'rgba(138,150,180,.3)', line: { color: C.terrainLine, width: 1.5 }, name: t('ed.js.terrain', 'Terrain'), hoverinfo: 'skip' },
+        { type: 'scatterpolar', mode: 'markers', r: e.earth.el.map(v => 90 - v), theta: e.earth.az, name: t('ed.js.earth', 'Earth'), marker: { size: 6, color: e.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#9fd2ff']], opacity: .9 }, hovertemplate: 'Az %{theta:.0f}° · Elev %{customdata:.1f}°<extra>Earth</extra>', customdata: e.earth.el },
       ], { polar: { bgcolor: 'rgba(0,0,0,0)', angularaxis: { rotation: 90, direction: 'clockwise', gridcolor: C.grid, tickvals: [0, 90, 180, 270], ticktext: ['N', 'E', 'S', 'O'] },
         radialaxis: { range: [0, 90], tickvals: [0, 30, 60, 90], ticktext: ['90°', '60°', '30°', '0°'], gridcolor: C.grid, angle: 90 } }, margin: { l: 40, r: 40, t: 30, b: 30 } });
     },
     c3b() {
       const th = [...Array(360).keys()];
-      plot('c3b', [{ type: 'scatterpolar', mode: 'lines', r: [...D.hor.el, D.hor.el[0]], theta: [...th, 360], fill: 'toself', fillcolor: 'rgba(138,150,180,.32)', line: { color: '#b9c3de', width: 1.6 }, name: 'Altura del horizonte', hovertemplate: 'Az %{theta:.0f}° · %{r:.1f}°<extra></extra>' }],
+      plot('c3b', [{ type: 'scatterpolar', mode: 'lines', r: [...D.hor.el, D.hor.el[0]], theta: [...th, 360], fill: 'toself', fillcolor: 'rgba(138,150,180,.32)', line: { color: '#b9c3de', width: 1.6 }, name: t('ed.js.horizon_height', 'Horizon height'), hovertemplate: 'Az %{theta:.0f}° · %{r:.1f}°<extra></extra>' }],
         { polar: { bgcolor: 'rgba(0,0,0,0)', angularaxis: { rotation: 90, direction: 'clockwise', gridcolor: C.grid, tickvals: [0, 90, 180, 270], ticktext: ['N', 'E', 'S', 'O'] }, radialaxis: { gridcolor: C.grid, ticksuffix: '°', angle: 90, range: [0, Math.max(5, Math.ceil(D.horMax + 1))] } }, margin: { l: 40, r: 40, t: 30, b: 30 }, showlegend: false });
     },
     c5b() {
-      const e = D.eph, groups = [[0, 'Sol visible', C.sun], [1, 'Tapado por terreno', '#8a96b4'], [2, 'Noche', '#3a4a86']];
-      const traces = [{ x: [...Array(360).keys()], y: D.hor.el, name: 'Horizonte', mode: 'lines', fill: 'tozeroy', line: { color: C.terrainLine, width: 1.5 }, fillcolor: C.terrain, hoverinfo: 'skip' }];
+      const e = D.eph, groups = [[0, t('ed.js.sun_visible', 'Sun visible'), C.sun], [1, t('ed.js.blocked_by_terrain', 'Blocked by terrain'), '#8a96b4'], [2, t('ed.js.night', 'Night'), '#3a4a86']];
+      const traces = [{ x: [...Array(360).keys()], y: D.hor.el, name: t('ed.js.horizon', 'Horizon'), mode: 'lines', fill: 'tozeroy', line: { color: C.terrainLine, width: 1.5 }, fillcolor: C.terrain, hoverinfo: 'skip' }];
       groups.forEach(([k, name, col]) => { const idx = e.sun.el.map((_, i) => i).filter(i => D.cat[i] === k); traces.push({ x: idx.map(i => e.sun.az[i]), y: idx.map(i => e.sun.el[i]), name, mode: 'markers', marker: { size: 6, color: col, opacity: .85 }, hovertemplate: 'Az %{x:.0f}° · Elev %{y:.1f}°<extra>' + name + '</extra>' }); });
-      plot('c5b', traces, { xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360] }, yaxis: { title: { text: 'Elevación (°)' } } });
+      plot('c5b', traces, { xaxis: { title: { text: t('ed.js.azimuth', 'Azimuth (°)') }, range: [0, 360] }, yaxis: { title: { text: t('ed.js.elevation', 'Elevation (°)') } } });
     },
     p1() {
       const x = [], y = []; for (let d = 0; d <= 29.53; d += .25) { x.push(d); y.push((1 - Math.cos(TAU * d / 29.53)) / 2 * 100); }
-      plot('p1', [{ x, y, mode: 'lines', fill: 'tozeroy', fillgradient: grad('255,226,150', .05, .6), fillcolor: 'rgba(255,226,150,.2)', line: { color: '#ffe29a', width: 2.5, shape: 'spline' }, hovertemplate: 'Día %{x:.1f}<br>%{y:.0f}% iluminado<extra></extra>' }],
-        { xaxis: { title: { text: 'Días desde Luna nueva' }, range: [0, 29.53] }, yaxis: { title: { text: '% iluminado (visto desde la Tierra)' }, range: [0, 105] }, showlegend: false,
-          annotations: [{ x: 0.3, y: 6, text: 'Nueva', showarrow: false, font: { color: C.ink } }, { x: 14.8, y: 100, text: 'Llena', showarrow: false, yshift: 12, font: { color: C.ink } }, { x: 29, y: 6, text: 'Nueva', showarrow: false, font: { color: C.ink } }] });
+      plot('p1', [{ x, y, mode: 'lines', fill: 'tozeroy', fillgradient: grad('255,226,150', .05, .6), fillcolor: 'rgba(255,226,150,.2)', line: { color: '#ffe29a', width: 2.5, shape: 'spline' }, hovertemplate: t('ed.js.day_x_1f_br_y_0f_lit_extra_extra', 'Day %{x:.1f}<br>%{y:.0f}% lit<extra></extra>') }],
+        { xaxis: { title: { text: t('ed.js.days_since_new_moon', 'Days since new Moon') }, range: [0, 29.53] }, yaxis: { title: { text: t('ed.js.illuminated_seen_from_earth', '% illuminated (seen from Earth)') }, range: [0, 105] }, showlegend: false,
+          annotations: [{ x: 0.3, y: 6, text: t('ed.js.new', 'New'), showarrow: false, font: { color: C.ink } }, { x: 14.8, y: 100, text: t('ed.js.full', 'Full'), showarrow: false, yshift: 12, font: { color: C.ink } }, { x: 29, y: 6, text: t('ed.js.new', 'New'), showarrow: false, font: { color: C.ink } }] });
     },
     p2() {
       const lat = [], ea = [], mo = []; for (let l = 55; l <= 90; l += 1) { lat.push(l); ea.push(90 - l + 23.44); mo.push(90 - l + 1.54); }
       plot('p2', [
-        { x: lat, y: ea, name: 'Tierra (23.4°)', mode: 'lines', line: { color: C.earth, width: 3 }, fill: 'tozeroy', fillgradient: grad('77,163,255', .02, .35), fillcolor: 'rgba(77,163,255,.15)' },
-        { x: lat, y: mo, name: 'Luna (1.5°)', mode: 'lines', line: { color: '#d5d9e6', width: 3 }, fill: 'tozeroy', fillcolor: 'rgba(213,217,230,.18)' }],
-        { xaxis: { title: { text: 'Latitud (°)' } }, yaxis: { title: { text: 'Altura máx. del Sol (°)' }, rangemode: 'tozero' }, annotations: [{ x: 90, y: 1.54, text: 'Polo: 1.5°', ax: -40, ay: -40, font: { color: '#fff' }, arrowcolor: '#d5d9e6' }] });
+        { x: lat, y: ea, name: t('ed.js.earth_23_4', 'Earth (23.4°)'), mode: 'lines', line: { color: C.earth, width: 3 }, fill: 'tozeroy', fillgradient: grad('77,163,255', .02, .35), fillcolor: 'rgba(77,163,255,.15)' },
+        { x: lat, y: mo, name: t('ed.js.moon_1_5', 'Moon (1.5°)'), mode: 'lines', line: { color: '#d5d9e6', width: 3 }, fill: 'tozeroy', fillcolor: 'rgba(213,217,230,.18)' }],
+        { xaxis: { title: { text: t('ed.js.latitude', 'Latitude (°)') } }, yaxis: { title: { text: t('ed.js.max_sun_height', 'Max. Sun height (°)') }, rangemode: 'tozero' }, annotations: [{ x: 90, y: 1.54, text: 'Polo: 1.5°', ax: -40, ay: -40, font: { color: '#fff' }, arrowcolor: '#d5d9e6' }] });
     },
     p3() {
       const k = Math.min(D.n, Math.round(120 / D.stepH));
       plot('p3', [
-        { x: D.eph.t.slice(0, k), y: D.hz.slice(0, k), name: 'Horizonte en la dirección del Sol', mode: 'lines', fill: 'tozeroy', line: { color: C.terrainLine, width: 1.2, shape: 'hv' }, fillcolor: C.terrain },
-        { x: D.eph.t.slice(0, k), y: D.eph.sun.el.slice(0, k), name: 'Elevación del Sol', mode: 'lines', line: { color: C.sun, width: 2.5, shape: 'spline' }, fill: 'tozeroy', fillgradient: grad('255,180,59', 0, .3), fillcolor: 'rgba(255,180,59,.1)' }],
-        { yaxis: { title: { text: 'Elevación (°)' } } });
+        { x: D.eph.t.slice(0, k), y: D.hz.slice(0, k), name: t('ed.js.horizon_in_the_sun_s_direction', 'Horizon in the Sun’s direction'), mode: 'lines', fill: 'tozeroy', line: { color: C.terrainLine, width: 1.2, shape: 'hv' }, fillcolor: C.terrain },
+        { x: D.eph.t.slice(0, k), y: D.eph.sun.el.slice(0, k), name: t('ed.js.sun_elevation', 'Sun elevation'), mode: 'lines', line: { color: C.sun, width: 2.5, shape: 'spline' }, fill: 'tozeroy', fillgradient: grad('255,180,59', 0, .3), fillcolor: 'rgba(255,180,59,.1)' }],
+        { yaxis: { title: { text: t('ed.js.elevation', 'Elevation (°)') } } });
     },
     p4() {
       plot('p4', [{ x: [...Array(360).keys()], y: D.hor.el, mode: 'lines', fill: 'tozeroy', fillgradient: grad('138,150,180', .08, .55), fillcolor: C.terrain, line: { color: '#b9c3de', width: 1.8, shape: 'spline' }, hovertemplate: 'Az %{x}° · %{y:.1f}°<extra></extra>' }],
-        { xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360], tickvals: [0, 90, 180, 270, 360], ticktext: ['N', 'E', 'S', 'O', 'N'] }, yaxis: { title: { text: 'Altura del horizonte (°)' }, rangemode: 'tozero' }, showlegend: false,
-          annotations: [{ x: D.hor.el.indexOf(D.horMax), y: D.horMax, text: 'Cresta máx. ' + r1(D.horMax) + '°', ax: 50, ay: -30, font: { color: '#fff' }, arrowcolor: '#b9c3de' }] });
+        { xaxis: { title: { text: t('ed.js.azimuth', 'Azimuth (°)') }, range: [0, 360], tickvals: [0, 90, 180, 270, 360], ticktext: ['N', 'E', 'S', 'O', 'N'] }, yaxis: { title: { text: t('ed.js.horizon_height', 'Horizon height (°)') }, rangemode: 'tozero' }, showlegend: false,
+          annotations: [{ x: D.hor.el.indexOf(D.horMax), y: D.horMax, text: t('ed.js.max_ridge', 'Max. ridge ') + r1(D.horMax) + '°', ax: 50, ay: -30, font: { color: '#fff' }, arrowcolor: '#b9c3de' }] });
     },
     p5() {
       const e = D.eph;
       plot('p5', [
-        { x: e.t, y: e.earth.el, name: 'Elevación', mode: 'lines', line: { color: C.earth, width: 2.5, shape: 'spline' }, yaxis: 'y' },
-        { x: e.t, y: e.earth.az, name: 'Azimut', mode: 'lines', line: { color: '#9fd2ff', width: 1.6, dash: 'dot' }, yaxis: 'y2' }],
-        { yaxis: { title: { text: 'Elevación (°)' } }, yaxis2: { title: { text: 'Azimut (°)' }, overlaying: 'y', side: 'right', showgrid: false } });
+        { x: e.t, y: e.earth.el, name: t('ed.js.elevation', 'Elevation'), mode: 'lines', line: { color: C.earth, width: 2.5, shape: 'spline' }, yaxis: 'y' },
+        { x: e.t, y: e.earth.az, name: t('ed.js.azimuth', 'Azimuth'), mode: 'lines', line: { color: '#9fd2ff', width: 1.6, dash: 'dot' }, yaxis: 'y2' }],
+        { yaxis: { title: { text: t('ed.js.elevation', 'Elevation (°)') } }, yaxis2: { title: { text: t('ed.js.azimuth', 'Azimuth (°)') }, overlaying: 'y', side: 'right', showgrid: false } });
     },
     p6() {
       const m = D.met, tot = D.n * D.stepH;
       const r = [m.sun_lit_pct, m.earth_visible_pct, 100 * (1 - m.longest_dark_h / tot), 100 * (1 - m.longest_comms_gap_h / tot), 100 * (1 - D.horMax / 30)].map(v => clamp(v, 0, 100));
-      const th = ['Sol', 'Tierra visible', 'Noches cortas', 'Cortes cortos', 'Horizonte bajo'];
+      const th = [t('ed.js.sun', 'Sun'), t('ed.js.earth_visible', 'Earth visible'), t('ed.js.short_nights', 'Short nights'), t('ed.js.short_gaps', 'Short gaps'), t('ed.js.low_horizon', 'Low horizon')];
       plot('p6', [{ type: 'scatterpolar', r: [...r, r[0]], theta: [...th, th[0]], fill: 'toself', fillcolor: 'rgba(76,201,240,.25)', line: { color: C.accent, width: 2.5 }, marker: { size: 7, color: C.accent }, hovertemplate: '%{theta}: %{r:.0f}/100<extra></extra>' }],
         { polar: { bgcolor: 'rgba(0,0,0,0)', radialaxis: { range: [0, 100], gridcolor: C.grid, tickvals: [0, 50, 100] }, angularaxis: { gridcolor: C.grid } }, showlegend: false, margin: { l: 50, r: 50, t: 30, b: 30 } });
     },
@@ -954,47 +953,47 @@
     const sunFlat = pct(eph.sun.el.map(e => e > 0)), sunTerr = pct(D.lit), earthFlat = pct(eph.earth.el.map(e => e > 0)), earthTerr = pct(D.eVis);
 
     // 1. Sol
-    $('d1').innerHTML = `Periodo: ${span}<div class="row">${stat('sun', 'Elevación máx.', met.sun_el_max_deg, 1, '°')}${stat('sun', 'Sol visible', met.sun_lit_pct, 1, '%')}${stat('bad', 'Noche más larga', met.longest_dark_h, 1, ' h')}</div>`;
+    $('d1').innerHTML = `${t('ed.js.period', 'Period: ')}${span}<div class="row">${stat('sun', t('ed.js.max_elevation', 'Max. elevation'), met.sun_el_max_deg, 1, '°')}${stat('sun', t('ed.js.sun_visible', 'Sun visible'), met.sun_lit_pct, 1, '%')}${stat('bad', t('ed.js.longest_night', 'Longest night'), met.longest_dark_h, 1, ' h')}</div>`;
     plot('c1', [
-      { x: eph.t, y: D.hz, name: 'Horizonte (terreno) hacia el Sol', mode: 'lines', line: { color: C.terrainLine, width: 1.2, shape: 'hv' }, fill: 'tozeroy', fillcolor: C.terrain, hovertemplate: 'Terreno: %{y:.1f}°<extra></extra>' },
-      { x: eph.t, y: eph.sun.el, name: 'Elevación del Sol', mode: 'lines', line: { color: C.sun, width: 2.6, shape: 'spline', smoothing: .6 }, fill: 'tozeroy', fillgradient: grad('255,180,59', .0, .42), fillcolor: 'rgba(255,180,59,.12)', hovertemplate: '%{y:.2f}°<extra>Sol</extra>' },
-      { x: [eph.t[eph.sun.el.indexOf(D.maxSun)]], y: [D.maxSun], name: 'Máximo', mode: 'markers', marker: { size: 11, color: '#fff', line: { color: C.sun, width: 3 } }, hovertemplate: 'Máx. %{y:.2f}°<extra></extra>' },
-    ], { yaxis: { title: { text: 'Elevación (°)' } }, xaxis: { title: { text: 'UTC' } }, hovermode: 'x unified',
+      { x: eph.t, y: D.hz, name: t('ed.js.horizon_terrain_toward_the_sun', 'Horizon (terrain) toward the Sun'), mode: 'lines', line: { color: C.terrainLine, width: 1.2, shape: 'hv' }, fill: 'tozeroy', fillcolor: C.terrain, hovertemplate: t('ed.js.terrain_y_1f_extra_extra', 'Terrain: %{y:.1f}°<extra></extra>') },
+      { x: eph.t, y: eph.sun.el, name: t('ed.js.sun_elevation', 'Sun elevation'), mode: 'lines', line: { color: C.sun, width: 2.6, shape: 'spline', smoothing: .6 }, fill: 'tozeroy', fillgradient: grad('255,180,59', .0, .42), fillcolor: 'rgba(255,180,59,.12)', hovertemplate: t('ed.js.y_2f_extra_sun_extra', '%{y:.2f}°<extra>Sun</extra>') },
+      { x: [eph.t[eph.sun.el.indexOf(D.maxSun)]], y: [D.maxSun], name: t('ed.js.maximum', 'Maximum'), mode: 'markers', marker: { size: 11, color: '#fff', line: { color: C.sun, width: 3 } }, hovertemplate: t('ed.js.max_y_2f_extra_extra', 'Max. %{y:.2f}°<extra></extra>') },
+    ], { yaxis: { title: { text: t('ed.js.elevation', 'Elevation (°)') } }, xaxis: { title: { text: 'UTC' } }, hovermode: 'x unified',
          shapes: [{ type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 0, y1: 0, line: { color: 'rgba(255,255,255,.35)', width: 1, dash: 'dash' } }] });
 
     // 2. Tierra
-    const earthLine = met.earth_visible_pct === 0 ? `En este periodo <b>no se ve la Tierra</b> desde este sitio.` : `La Tierra está sobre el horizonte local parte del periodo.`;
-    $('d2').innerHTML = `${earthLine}<div class="row">${stat('earth', 'Tierra visible', met.earth_visible_pct, 1, '%')}${stat('bad', 'Mayor corte', met.longest_comms_gap_h, 1, ' h')}</div>`;
+    const earthLine = met.earth_visible_pct === 0 ? `${t('ed.js.in_this_period_b_the_earth_is_not_visible_b_from', 'In this period <b>the Earth is not visible</b> from this site.')}` : `${t('ed.js.the_earth_is_above_the_local_horizon_for_part_of', 'The Earth is above the local horizon for part of the period.')}`;
+    $('d2').innerHTML = `${earthLine}<div class="row">${stat('earth', t('ed.js.earth_visible', 'Earth visible'), met.earth_visible_pct, 1, '%')}${stat('bad', t('ed.js.longest_gap', 'Longest gap'), met.longest_comms_gap_h, 1, ' h')}</div>`;
     plot('c2', [
-      { x: [...Array(360).keys()], y: hor.el, name: 'Horizonte (terreno)', mode: 'lines', fill: 'tozeroy', fillgradient: grad('138,150,180', .1, .55), line: { color: C.terrainLine, width: 1.6, shape: 'spline' }, fillcolor: C.terrain, hoverinfo: 'skip' },
-      { x: eph.earth.az, y: eph.earth.el, name: 'Tierra (cada hora)', mode: 'markers', marker: { size: 7, color: eph.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#a9d8ff']], opacity: .9, line: { color: 'rgba(255,255,255,.5)', width: .6 } },
-        customdata: eph.t.map(t => t.slice(0, 16).replace('T', ' ')), hovertemplate: '%{customdata}<br>Az %{x:.0f}° · Elev %{y:.1f}°<extra data-i18n="ed.earth">Earth</extra>' },
-    ], { xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360], tickvals: [0, 90, 180, 270, 360], ticktext: ['N', 'E', 'S', 'O', 'N'] }, yaxis: { title: { text: 'Elevación (°)' } } });
+      { x: [...Array(360).keys()], y: hor.el, name: t('ed.js.horizon_terrain', 'Horizon (terrain)'), mode: 'lines', fill: 'tozeroy', fillgradient: grad('138,150,180', .1, .55), line: { color: C.terrainLine, width: 1.6, shape: 'spline' }, fillcolor: C.terrain, hoverinfo: 'skip' },
+      { x: eph.earth.az, y: eph.earth.el, name: t('ed.js.earth_each_hour', 'Earth (each hour)'), mode: 'markers', marker: { size: 7, color: eph.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#a9d8ff']], opacity: .9, line: { color: 'rgba(255,255,255,.5)', width: .6 } },
+        customdata: eph.t.map(t => t.slice(0, 16).replace('T', ' ')), hovertemplate: '%{customdata}<br>Az %{x:.0f}° · Elev %{y:.1f}°<extra>Earth</extra>' },
+    ], { xaxis: { title: { text: t('ed.js.azimuth', 'Azimuth (°)') }, range: [0, 360], tickvals: [0, 90, 180, 270, 360], ticktext: ['N', 'E', 'S', 'O', 'N'] }, yaxis: { title: { text: t('ed.js.elevation', 'Elevation (°)') } } });
 
     // 3. Terreno
-    $('d3').innerHTML = `El horizonte llega hasta <b>${r1(D.horMax)}°</b> de elevación.<div class="row" style="display:grid;grid-template-columns:1fr 1fr">${stat('sun', 'Sol · plano', sunFlat, 1, '%')}${stat('sun', 'Sol · terreno', sunTerr, 1, '%')}${stat('earth', 'Tierra · plano', earthFlat, 1, '%')}${stat('earth', 'Tierra · terreno', earthTerr, 1, '%')}</div>`;
+    $('d3').innerHTML = `${t('ed.js.the_horizon_reaches_b_h_b_elevation', 'The horizon reaches <b>{h}°</b> elevation.', {h: r1(D.horMax)})}<div class="row" style="display:grid;grid-template-columns:1fr 1fr">${stat('sun', t('ed.js.sun_flat', 'Sun · flat'), sunFlat, 1, '%')}${stat('sun', t('ed.js.sun_terrain', 'Sun · terrain'), sunTerr, 1, '%')}${stat('earth', t('ed.js.earth_flat', 'Earth · flat'), earthFlat, 1, '%')}${stat('earth', t('ed.js.earth_terrain', 'Earth · terrain'), earthTerr, 1, '%')}</div>`;
     plot('c3', [
-      { type: 'bar', x: ['Sol', 'Tierra'], y: [sunFlat, earthFlat], name: 'Horizonte plano', marker: { color: '#5b6788', cornerradius: 8 }, text: [sunFlat, earthFlat].map(v => r1(v) + '%'), textposition: 'outside', cliponaxis: false },
-      { type: 'bar', x: ['Sol', 'Tierra'], y: [sunTerr, earthTerr], name: 'Con terreno', marker: { color: [C.sun, C.earth], line: { color: '#fff', width: 1 }, cornerradius: 8 }, text: [sunTerr, earthTerr].map(v => r1(v) + '%'), textposition: 'outside', cliponaxis: false },
-    ], { barmode: 'group', bargap: .35, yaxis: { title: { text: '% del tiempo visible' }, range: [0, 112] } });
+      { type: 'bar', x: [t('ed.js.sun', 'Sun'), t('ed.js.earth', 'Earth')], y: [sunFlat, earthFlat], name: t('ed.js.flat_horizon', 'Flat horizon'), marker: { color: '#5b6788', cornerradius: 8 }, text: [sunFlat, earthFlat].map(v => r1(v) + '%'), textposition: 'outside', cliponaxis: false },
+      { type: 'bar', x: [t('ed.js.sun', 'Sun'), t('ed.js.earth', 'Earth')], y: [sunTerr, earthTerr], name: t('ed.js.with_terrain', 'With terrain'), marker: { color: [C.sun, C.earth], line: { color: '#fff', width: 1 }, cornerradius: 8 }, text: [sunTerr, earthTerr].map(v => r1(v) + '%'), textposition: 'outside', cliponaxis: false },
+    ], { barmode: 'group', bargap: .35, yaxis: { title: { text: t('ed.js.percent_of_time_visible', 'Percent of time visible') }, range: [0, 112] } });
 
     // 4. Día lunar
     const sunrises = D.rises.length, cycle = sunrises >= 2 ? (D.rises[sunrises - 1] - D.rises[0]) * D.stepH / 24 / (sunrises - 1) : null;
     const dayMax = Math.max(0, ...runsOf(D.lit, true)) * D.stepH, nightMax = Math.max(0, ...runsOf(D.lit, false)) * D.stepH;
-    $('d4').innerHTML = `Amaneceres detectados en el periodo: <b>${sunrises}</b>.${cycle == null ? `<div style="margin-top:6px">Con ${r1(n * D.stepH / 24)} días no se alcanzan a ver dos amaneceres: amplía las fechas a ≥ 30 días para medir el ciclo.</div>` : ''}` +
-      `<div class="row">${stat('ok', 'Día más largo', dayMax, 0, ' h')}${stat('bad', 'Noche más larga', nightMax, 0, ' h')}${cycle != null ? stat('sun', 'Ciclo medido', cycle, 1, ' d') : stat('sun', 'Ciclo teórico', 29.5, 1, ' d')}</div>`;
+    $('d4').innerHTML = `${t('ed.js.sunrises_detected_in_the_period_b_n_b', 'Sunrises detected in the period: <b>{n}</b>.', {n: sunrises})}${cycle == null ? `<div style="margin-top:6px">${t('ed.js.with_d_days_you_cannot_see_two_sunrises_extend_t', 'With {d} days you cannot see two sunrises: extend the dates to at least 30 days to measure the cycle.', {d: r1(n * D.stepH / 24)})}</div>` : ''}` +
+      `<div class="row">${stat('ok', t('ed.js.longest_day', 'Longest day'), dayMax, 0, ' h')}${stat('bad', t('ed.js.longest_night', 'Longest night'), nightMax, 0, ' h')}${cycle != null ? stat('sun', t('ed.js.measured_cycle', 'Measured cycle'), cycle, 1, ' d') : stat('sun', t('ed.js.theoretical_cycle', 'Theoretical cycle'), 29.5, 1, ' d')}</div>`;
     plot('c4', [
-      { type: 'bar', x: D.dayLab, y: D.daily, name: 'Horas de Sol por día', marker: { color: D.daily, colorscale: [[0, '#26315c'], [.5, '#c98a24'], [1, C.sun]], cornerradius: 3 }, yaxis: 'y', hovertemplate: '%{x}<br>%{y:.0f} h de Sol<extra></extra>' },
-      { type: 'heatmap', x: eph.t, y: ['Sol'], z: [D.lit.map(v => v ? 1 : 0)], showscale: false, colorscale: [[0, '#10162e'], [1, C.sun]], xaxis: 'x', yaxis: 'y2', hovertemplate: '%{x}<extra></extra>', xgap: 0 },
-    ], { yaxis: { domain: [.3, 1], title: { text: 'Horas de Sol / día' }, range: [0, 24] }, yaxis2: { domain: [0, .2], showticklabels: false, showgrid: false }, xaxis: { anchor: 'y2', title: { text: 'UTC' } }, showlegend: false, bargap: .2,
-         annotations: [{ xref: 'paper', yref: 'paper', x: 0, y: .22, text: 'Franja: dorado = Sol sobre el horizonte', showarrow: false, xanchor: 'left', font: { size: 11, color: '#9aa6c8' } }] });
+      { type: 'bar', x: D.dayLab, y: D.daily, name: t('ed.js.sun_hours_per_day', 'Sun hours per day'), marker: { color: D.daily, colorscale: [[0, '#26315c'], [.5, '#c98a24'], [1, C.sun]], cornerradius: 3 }, yaxis: 'y', hovertemplate: t('ed.js.x_br_y_0f_h_of_sun_extra_extra', '%{x}<br>%{y:.0f} h of Sun<extra></extra>') },
+      { type: 'heatmap', x: eph.t, y: [t('ed.js.sun', 'Sun')], z: [D.lit.map(v => v ? 1 : 0)], showscale: false, colorscale: [[0, '#10162e'], [1, C.sun]], xaxis: 'x', yaxis: 'y2', hovertemplate: '%{x}<extra></extra>', xgap: 0 },
+    ], { yaxis: { domain: [.3, 1], title: { text: t('ed.js.sun_hours_day', 'Sun hours / day') }, range: [0, 24] }, yaxis2: { domain: [0, .2], showticklabels: false, showgrid: false }, xaxis: { anchor: 'y2', title: { text: 'UTC' } }, showlegend: false, bargap: .2,
+         annotations: [{ xref: 'paper', yref: 'paper', x: 0, y: .22, text: t('ed.js.band_gold_sun_above_the_horizon', 'Band: gold = Sun above the horizon'), showarrow: false, xanchor: 'left', font: { size: 11, color: '#9aa6c8' } }] });
 
     // 5. Sombra
     const pl = pct(D.cat.map(v => v === 0)), ps = pct(D.cat.map(v => v === 1)), pn = pct(D.cat.map(v => v === 2));
-    const verdict = pl === 0 ? `En este periodo el punto <b>no recibe luz directa</b>: se comporta como un cráter en sombra permanente.` : ps > pn ? `El terreno tapa más Sol (<b>${r1(ps)}%</b>) del que oculta la noche.` : `La mayor parte del tiempo sin luz es noche (<b>${r1(pn)}%</b>), no sombra del relieve.`;
-    $('d5').innerHTML = `${verdict}<div class="row">${stat('sun', 'Sol visible', pl, 1, '%')}${stat('', 'Tapado por terreno', ps, 1, '%')}${stat('bad', 'Noche', pn, 1, '%')}</div>`;
-    plot('c5', [{ type: 'pie', hole: .64, sort: false, direction: 'clockwise', labels: ['Sol visible', 'Tapado por terreno', 'Noche (Sol bajo 0°)'], values: [pl, ps, pn], marker: { colors: [C.sun, '#7f8bab', '#2b3a73'], line: { color: '#0a0f20', width: 3 } }, textinfo: 'text', text: [pl, ps, pn].map(v => v > 3 ? r1(v) + '%' : ''), textfont: { color: '#fff' }, pull: [.04, 0, 0], hovertemplate: '%{label}: %{value:.1f}%<extra></extra>' }],
-      { showlegend: true, legend: { orientation: 'h', y: -.05 }, margin: { l: 10, r: 10, t: 10, b: 30 }, annotations: [{ text: `<b>${r1(pl)}%</b><br><span style="font-size:11px">con luz</span>`, showarrow: false, font: { size: 24, color: '#fff' } }] });
+    const verdict = pl === 0 ? `${t('ed.js.in_this_period_the_spot_b_gets_no_direct_light_b', 'In this period the spot <b>gets no direct light</b>: it behaves like a permanently shadowed crater.')}` : ps > pn ? `${t('ed.js.the_terrain_blocks_more_sun_b_p_b_than_the_night', 'The terrain blocks more Sun (<b>{p}%</b>) than the night hides.', {p: r1(ps)})}` : `${t('ed.js.most_of_the_time_without_light_is_night_b_p_b_no', 'Most of the time without light is night (<b>{p}%</b>), not terrain shadow.', {p: r1(pn)})}`;
+    $('d5').innerHTML = `${verdict}<div class="row">${stat('sun', t('ed.js.sun_visible', 'Sun visible'), pl, 1, '%')}${stat('', t('ed.js.blocked_by_terrain', 'Blocked by terrain'), ps, 1, '%')}${stat('bad', t('ed.js.night', 'Night'), pn, 1, '%')}</div>`;
+    plot('c5', [{ type: 'pie', hole: .64, sort: false, direction: 'clockwise', labels: [t('ed.js.sun_visible', 'Sun visible'), t('ed.js.blocked_by_terrain', 'Blocked by terrain'), t('ed.js.night_sun_below_0', 'Night (Sun below 0°)')], values: [pl, ps, pn], marker: { colors: [C.sun, '#7f8bab', '#2b3a73'], line: { color: '#0a0f20', width: 3 } }, textinfo: 'text', text: [pl, ps, pn].map(v => v > 3 ? r1(v) + '%' : ''), textfont: { color: '#fff' }, pull: [.04, 0, 0], hovertemplate: '%{label}: %{value:.1f}%<extra></extra>' }],
+      { showlegend: true, legend: { orientation: 'h', y: -.05 }, margin: { l: 10, r: 10, t: 10, b: 30 }, annotations: [{ text: `<b>${r1(pl)}%</b><br><span style="font-size:11px">${t('ed.js.lit', 'lit')}</span>`, showarrow: false, font: { size: 24, color: '#fff' } }] });
 
     countUps($('pane-q')); replotOpen();
   }
@@ -1009,8 +1008,8 @@
   function starsBg(ctx, w, h, seed) { const r = rng(seed); ctx.fillStyle = '#04060e'; ctx.fillRect(0, 0, w, h); for (let i = 0; i < 90; i++) { ctx.fillStyle = `rgba(255,255,255,${.15 + r() * .6})`; ctx.fillRect(r() * w, r() * h, r() > .85 ? 1.8 : 1, r() > .85 ? 1.8 : 1); } }
   const wrapPi = a => { a = (a + Math.PI) % TAU; if (a < 0) a += TAU; return a - Math.PI; };
   const phaseName = th => { const f = (1 - Math.cos(th)) / 2, x = ((th % TAU) + TAU) % TAU, w = x < Math.PI;
-    if (f < .06) return 'Luna nueva'; if (f > .94) return 'Luna llena'; if (Math.abs(f - .5) < .06) return w ? 'Cuarto creciente' : 'Cuarto menguante';
-    return f < .5 ? (w ? 'Creciente' : 'Menguante') : (w ? 'Gibosa creciente' : 'Gibosa menguante'); };
+    if (f < .06) return t('ed.js.new_moon', 'New Moon'); if (f > .94) return t('ed.js.full_moon', 'Full Moon'); if (Math.abs(f - .5) < .06) return w ? t('ed.js.first_quarter', 'First quarter') : t('ed.js.last_quarter', 'Last quarter');
+    return f < .5 ? (w ? t('ed.js.waxing_crescent', 'Waxing crescent') : t('ed.js.waning_crescent', 'Waning crescent')) : (w ? t('ed.js.waxing_gibbous', 'Waxing gibbous') : t('ed.js.waning_gibbous', 'Waning gibbous')); };
 
   /* Paso 1: órbita y fases */
   function slideOrbit() {
@@ -1023,7 +1022,7 @@
       ctx.drawImage(stars, 0, 0, w, h);
       ctx.strokeStyle = 'rgba(150,165,205,.28)'; ctx.setLineDash([4, 6]); ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
       for (let k = -2; k <= 2; k++) { ctx.strokeStyle = 'rgba(255,215,130,.6)'; ctx.lineWidth = 2; const y = cy + k * 34; ctx.beginPath(); ctx.moveTo(w - 70, y); ctx.lineTo(w - 22, y); ctx.lineTo(w - 32, y - 5); ctx.moveTo(w - 22, y); ctx.lineTo(w - 32, y + 5); ctx.stroke(); }
-      ctx.fillStyle = '#ffd98a'; ctx.font = '600 12px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('Luz del Sol', w - 46, cy - 98); ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffd98a'; ctx.font = '600 12px ' + FONT; ctx.textAlign = 'center'; ctx.fillText(t('ed.js.sunlight', 'Sunlight'), w - 46, cy - 98); ctx.textAlign = 'left';
       renderSphere(eCv, { tex: TEX.earth, tilt: 23.4, rot, atmo: true, light: [.9, .25, .45] }); ctx.drawImage(eCv, cx - 45, cy - 45, 90, 90);
       const mx = cx + R * Math.cos(th), my = cy - R * Math.sin(th), mr = 27, ms = sprite('m1', 60, { tex: TEX.moon, light: [0, 0, 1], tilt: 0, rot: 0, always: false });
       ctx.save(); ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.clip(); ctx.drawImage(ms, mx - mr, my - mr, mr * 2, mr * 2);
@@ -1031,11 +1030,11 @@
       ctx.strokeStyle = 'rgba(200,210,235,.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.stroke();
       const ux = (cx - mx) / R, uy = (cy - my) / R; ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(mx + ux * mr * .8, my + uy * mr * .8, 4.5, 0, TAU); ctx.fill();
       ctx.strokeStyle = 'rgba(255,107,107,.35)'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(mx + ux * mr * .8, my + uy * mr * .8); ctx.lineTo(cx - ux * 48, cy - uy * 48); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText('Tierra', cx - 16, cy + 62); ctx.fillText('Luna', mx - 12, my - mr - 7);
-      note.innerHTML = `<b>${phaseName(th)}</b> · ${Math.round((1 - Math.cos(th)) / 2 * 100)}% iluminada vista desde la Tierra. El punto rojo siempre mira a la Tierra.`;
+      ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText(t('ed.js.earth', 'Earth'), cx - 16, cy + 62); ctx.fillText(t('ed.js.moon', 'Moon'), mx - 12, my - mr - 7);
+      note.innerHTML = `<b>${phaseName(th)}</b> · ${Math.round((1 - Math.cos(th)) / 2 * 100)}% t('ed.js.lit_seen_from_the_earth_the_red_dot_always_faces', 'lit, seen from the Earth. The red dot always faces the Earth.')`;
     });
-    $('s1play').onclick = e => { auto = !auto; target = null; e.currentTarget.innerHTML = auto ? '<span class="ico s">⏸</span> Pausar' : '<span class="ico s">▶</span> Girar'; };
-    document.querySelectorAll('[data-ph]').forEach(b => b.onclick = () => { target = +b.dataset.ph; auto = false; $('s1play').innerHTML = '<span class="ico s">▶</span> Girar'; });
+    $('s1play').onclick = e => { auto = !auto; target = null; e.currentTarget.innerHTML = auto ? '<span class="ico s">⏸</span> ' + t('ed.js.pause', 'Pause') : '<span class="ico s">▶</span> ' + t('ed.js.rotate', 'Rotate'); };
+    document.querySelectorAll('[data-ph]').forEach(b => b.onclick = () => { target = +b.dataset.ph; auto = false; $('s1play').innerHTML = '<span class="ico s">▶</span> ' + t('ed.js.rotate', 'Rotate'); });
   }
 
   /* Paso 2: inclinación del eje */
@@ -1056,7 +1055,7 @@
       ctx.strokeStyle = '#ffd36a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, 50, 0, -a, true); ctx.stroke();
       ctx.fillStyle = '#ffd36a'; ctx.font = '600 13px ' + MONO; ctx.fillText(cur.toFixed(1) + '°', px + 56, py - 6);
       ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText('horizonte local', px + 70, py + ty * 90 + 12); ctx.fillText('eje', px + ax * 40 + 6, py + ay * 40);
-      note.innerHTML = `Eje inclinado <b>${cur.toFixed(1)}°</b> → en el polo el Sol sube como máximo <b>≈ ${cur.toFixed(1)}°</b> sobre el horizonte.`;
+      note.innerHTML = `${t('ed.js.axis_tilted_b_c_b_at_the_pole_the_sun_rises_at_m', 'Axis tilted <b>{c}°</b> → at the pole the Sun rises at most <b>≈ {c}°</b> above the horizon.', {c: cur.toFixed(1)})}`;
     });
     document.querySelectorAll('[data-tilt]').forEach(b => b.onclick = () => { target = +b.dataset.tilt; body = b.dataset.body; document.querySelectorAll('[data-tilt]').forEach(x => x.classList.toggle('on', x === b)); });
   }
@@ -1066,13 +1065,13 @@
     const { ctx, w, h } = setupCanvas(cv, 640, 330), L = 46, Rr = 14, Tp = 16, B = 34;
     let i = 0, playing = false, speed = 1, acc = 0, show = mode, lastKey = null; const stars = document.createElement('canvas'); stars.width = w; stars.height = h; starsBg(stars.getContext('2d'), w, h, mode === 'sun' ? 21 : 31);
     const api = {
-      toggle() { playing = !playing; if (playBtn) playBtn.innerHTML = playing ? '<span class="ico s">⏸</span> Pausar' : '<span class="ico s">▶</span> Reproducir'; },
-      speed(s) { speed = s; }, show(m) { show = m; }, set(k) { i = k; playing = false; if (playBtn) playBtn.innerHTML = '<span class="ico s">▶</span> Reproducir'; },
+      toggle() { playing = !playing; if (playBtn) playBtn.innerHTML = playing ? '<span class="ico s">⏸</span> ' + t('ed.js.pause', 'Pause') : '<span class="ico s">▶</span> ' + t('ed.js.play', 'Play'); },
+      speed(s) { speed = s; }, show(m) { show = m; }, set(k) { i = k; playing = false; if (playBtn) playBtn.innerHTML = '<span class="ico s">▶</span> ' + t('ed.js.play', 'Play'); },
       riseIndex() { return D && D.rises.length ? D.rises[0] : 0; }, get i() { return i; },
     };
     animate(cv, (t, dt) => {
       ctx.drawImage(stars, 0, 0, w, h);
-      if (!D) { ctx.fillStyle = '#9aa6c8'; ctx.font = '14px ' + FONT; ctx.fillText('Cargando datos del sitio…', 20, h / 2); return; }
+      if (!D) { ctx.fillStyle = '#9aa6c8'; ctx.font = '14px ' + FONT; ctx.fillText(t('ed.js.loading_the_site_s_data', 'Loading the site’s data…'), 20, h / 2); return; }
       if (lastKey !== D) { lastKey = D; rng_.max = D.n - 1; rng_.value = 0; i = 0; }
       if (playing) { acc += dt * 24 * speed; if (acc >= 1) { i = (i + Math.floor(acc)) % D.n; acc %= 1; } rng_.value = i; } else i = +rng_.value;
       const e = D.eph, top = Math.max(10, Math.ceil(Math.max(D.horMax, show !== 'earth' ? D.maxSun : 0, D.maxEarth) + 3)), bot = -6;
@@ -1090,10 +1089,10 @@
       const sunV = D.lit[i], eV = D.eVis[i];
       if (show !== 'earth') drawSunSprite(ctx, X(e.sun.az[i]), Y(e.sun.el[i]), 11, sunV ? 1 : .4);
       if (show !== 'sun') { const es = sprite('e3', 40, { tex: TEX.earth, atmo: true, light: [.6, .3, .7] }); ctx.save(); ctx.globalAlpha = eV ? 1 : .4; ctx.drawImage(es, X(e.earth.az[i]) - 14, Y(e.earth.el[i]) - 14, 28, 28); ctx.restore(); }
-      ctx.fillStyle = '#9aa6c8'; ctx.font = '12px ' + FONT; ctx.fillText('Azimut →', w / 2 - 26, h - 4);
+      ctx.fillStyle = '#9aa6c8'; ctx.font = '12px ' + FONT; ctx.fillText(t('ed.js.azimuth', 'Azimuth →'), w / 2 - 26, h - 4);
       const txt = [];
-      if (show !== 'earth') txt.push(`Sol ${e.sun.el[i].toFixed(1)}° <b>${sunV ? 'visible' : (e.sun.el[i] > 0 ? 'tapado por el terreno' : 'bajo el horizonte')}</b>`);
-      if (show !== 'sun') txt.push(`Tierra ${e.earth.el[i].toFixed(1)}° <b>${eV ? 'visible' : 'oculta'}</b>`);
+      if (show !== 'earth') txt.push(`${t('ed.js.sun', 'Sun')} ${e.sun.el[i].toFixed(1)}° <b>${sunV ? t('ed.js.visible', 'visible') : (e.sun.el[i] > 0 ? t('ed.js.blocked_by_the_terrain', 'blocked by the terrain') : t('ed.js.below_the_horizon', 'below the horizon'))}</b>`);
+      if (show !== 'sun') txt.push(`${t('ed.js.earth', 'Earth')} ${e.earth.el[i].toFixed(1)}° <b>${eV ? t('ed.js.visible', 'visible') : t('ed.js.hidden', 'hidden')}</b>`);
       note.innerHTML = `${e.t[i].slice(0, 16).replace('T', ' ')} UTC · ${txt.join(' · ')}`;
     });
     return api;
@@ -1118,8 +1117,8 @@
       if (hidden) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, gY - 120, mx - 120, 120); }
       ctx.fillStyle = '#dfe5f6'; ctx.fillRect(ex - 9, gY - 18, 18, 12); ctx.fillStyle = '#ffb43b'; ctx.fillRect(ex - 2, gY - 26, 4, 8); ctx.strokeStyle = '#dfe5f6'; ctx.beginPath(); ctx.moveTo(ex - 9, gY - 6); ctx.lineTo(ex - 15, gY); ctx.moveTo(ex + 9, gY - 6); ctx.lineTo(ex + 15, gY); ctx.stroke();
       ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(mx, peakY); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = '#fff'; ctx.font = '600 12px ' + MONO; ctx.fillText('cresta ' + cur.toFixed(1) + '°', mx - 40, peakY - 10); ctx.fillStyle = '#ffd36a'; ctx.fillText('Sol ' + sunE + '°', sx - 48, sy - 22); ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText('módulo', ex - 20, gY + 18); ctx.fillStyle = '#7f8cb0'; ctx.font = '11px ' + FONT; ctx.fillText('Ángulos dibujados ×3.2 para que se aprecien', 12, h - 10);
-      note.innerHTML = hidden ? `El Sol (<b>${sunE}°</b>) está más bajo que la cresta (<b>${cur.toFixed(1)}°</b>): <b>tapado</b>. Sin atmósfera no hay refracción que lo «levante».` : `El Sol (<b>${sunE}°</b>) supera la cresta (<b>${cur.toFixed(1)}°</b>): <b>hay luz</b> directa.`;
+      ctx.fillStyle = '#fff'; ctx.font = '600 12px ' + MONO; ctx.fillText(t('ed.js.ridge', 'ridge ') + cur.toFixed(1) + '°', mx - 40, peakY - 10); ctx.fillStyle = '#ffd36a'; ctx.fillText(t('ed.js.sun', 'Sun ') + sunE + '°', sx - 48, sy - 22); ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText(t('ed.js.module', 'module'), ex - 20, gY + 18); ctx.fillStyle = '#7f8cb0'; ctx.font = '11px ' + FONT; ctx.fillText(t('ed.js.angles_drawn_3_2_so_they_can_be_seen', 'Angles drawn ×3.2 so they can be seen'), 12, h - 10);
+      note.innerHTML = hidden ? `${t('ed.js.the_sun_b_s_b_is_lower_than_the_ridge_b_c_b_b_bl', 'The Sun (<b>{s}°</b>) is lower than the ridge (<b>{c}°</b>): <b>blocked</b>. With no atmosphere there is no refraction to “lift” it.', {s: sunE, c: cur.toFixed(1)})}` : `${t('ed.js.the_sun_b_s_b_is_above_the_ridge_b_c_b_b_direct_', 'The Sun (<b>{s}°</b>) is above the ridge (<b>{c}°</b>): <b>direct light</b>.', {s: sunE, c: cur.toFixed(1)})}`;
     });
     document.querySelectorAll('[data-mt]').forEach(b => b.onclick = () => { target = +b.dataset.mt; document.querySelectorAll('[data-mt]').forEach(x => x.classList.toggle('on', x === b)); });
     document.querySelectorAll('[data-se]').forEach(b => b.onclick = () => { sunE = +b.dataset.se; document.querySelectorAll('[data-se]').forEach(x => x.classList.toggle('on', x === b)); });
@@ -1128,13 +1127,13 @@
   /* Paso 6: resumen con barras y veredicto */
   function renderSummary() {
     const m = D.met, tot = D.n * D.stepH, rows = [
-      ['Sol (energía)', m.sun_lit_pct, '%', C.sun], ['Tierra (comunicación)', m.earth_visible_pct, '%', C.earth],
-      ['Noches cortas', 100 * (1 - m.longest_dark_h / tot), '', '#7a8cff'], ['Sin cortes largos', 100 * (1 - m.longest_comms_gap_h / tot), '', '#4fe0a4']].map(r => [r[0], clamp(r[1], 0, 100), r[2], r[3]]);
+      [t('ed.js.sun_energy', 'Sun (energy)'), m.sun_lit_pct, '%', C.sun], [t('ed.js.earth_communication', 'Earth (communication)'), m.earth_visible_pct, '%', C.earth],
+      [t('ed.js.short_nights', 'Short nights'), 100 * (1 - m.longest_dark_h / tot), '', '#7a8cff'], [t('ed.js.no_long_gaps', 'No long gaps'), 100 * (1 - m.longest_comms_gap_h / tot), '', '#4fe0a4']].map(r => [r[0], clamp(r[1], 0, 100), r[2], r[3]]);
     $('bars6').innerHTML = rows.map(([n, v, s, c]) => `<div class="bar"><span>${n}</span><i><u style="background:${c}" data-w="${v}"></u></i><b>${Math.round(v)}${s}</b></div>`).join('');
     requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll('#bars6 u').forEach(u => { u.style.width = u.dataset.w + '%'; })));
-    const score = (rows[0][1] + rows[1][1]) / 2, [t, col] = score >= 60 ? ['Buen candidato', C.ok] : score >= 30 ? ['Candidato con condiciones', C.sun] : ['Difícil en este periodo', C.bad];
-    const tip = score >= 60 ? 'Mucha luz y buen enlace con la Tierra. Revisa igualmente las noches más largas.' : score >= 30 ? 'Planea batería extra, calefacción y relevo de comunicaciones para los tramos sin Sol o sin Tierra.' : 'Prueba otra fecha o sitio: usa el heatmap para ver cuándo mejora.';
-    $('verdict6').innerHTML = `<strong style="color:${col}">${t}</strong><div style="color:#c3cce2;margin-top:4px">${tip}</div>`;
+    const score = (rows[0][1] + rows[1][1]) / 2, [tl, col] = score >= 60 ? [t('ed.js.good_candidate', 'Good candidate'), C.ok] : score >= 30 ? [t('ed.js.candidate_with_conditions', 'Candidate with conditions'), C.sun] : [t('ed.js.difficult_in_this_period', 'Difficult in this period'), C.bad];
+    const tip = score >= 60 ? t('ed.js.plenty_of_light_and_a_good_link_to_the_earth_sti', 'Plenty of light and a good link to the Earth. Still check the longest nights.') : score >= 30 ? t('ed.js.plan_extra_battery_heating_and_a_communications_', 'Plan extra battery, heating and a communications relay for stretches without Sun or Earth.') : t('ed.js.try_another_date_or_site_use_the_heatmap_to_see_', 'Try another date or site: use the heatmap to see when it improves.');
+    $('verdict6').innerHTML = `<strong style="color:${col}">${tl}</strong><div style="color:#c3cce2;margin-top:4px">${tip}</div>`;
     $('n6').innerHTML = `<b>${D.s.name}</b> · ${D.eph.t[0].slice(0, 10)} → ${D.eph.t[D.n - 1].slice(0, 10)}`;
   }
 
@@ -1147,7 +1146,7 @@
     function go(k) {
       idx = clamp(k, 0, slides.length - 1); track.style.transform = `translateX(${-idx * 100}%)`;
       slides.forEach((s, j) => s.classList.toggle('act', j === idx)); [...dots.children].forEach((d, j) => d.classList.toggle('on', j === idx));
-      $('prev').disabled = idx === 0; const nx = $('next'); nx.innerHTML = idx === slides.length - 1 ? 'Volver al inicio <span class="ico l">↺</span>' : 'Siguiente <span class="ico r">→</span>';
+      $('prev').disabled = idx === 0; const nx = $('next'); nx.innerHTML = idx === slides.length - 1 ? t('ed.js.back_to_start', 'Back to start') + ' <span class="ico l">↺</span>' : t('ed.js.next', 'Next') + ' <span class="ico r">→</span>';
       requestAnimationFrame(() => { const d = slides[idx].querySelector('details[open]'); if (d) runJob(d.dataset.plot); });
     }
     $('prev').onclick = () => go(idx - 1); $('next').onclick = () => go(idx === slides.length - 1 ? 0 : idx + 1);
@@ -1205,7 +1204,7 @@
     }
     if (detail) {
       const d = document.createElement('small');
-      d.className = 'errdetail'; d.textContent = 'Detalle técnico: ' + detail;
+      d.className = 'errdetail'; d.textContent = t('ed.js.technical_detail', 'Technical detail: ') + detail;
       box.append(d);
     }
   }
@@ -1228,14 +1227,15 @@
       sites = await getJson('/api/sites');
     } catch (e) {
       $('load').disabled = true;
-      showError('No se pudo cargar la lista de sitios. Comprueba la conexión con el servidor y vuelve a intentarlo.', loadSites, e.message);
+      showError(t('ed.js.could_not_load_the_site_list_check_the_connectio', 'Could not load the site list. Check the connection to the server and try again.'), loadSites, e.message);
       return;
     }
-    $('site').innerHTML = sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    $('site').innerHTML = sites.map(s => `<option value="${s.id}">${I18N.siteName(s)}</option>`).join('');
     $('site').value = sites.some(s => s.id === 'shackleton') ? 'shackleton' : sites[0].id;
     $('load').disabled = false;
     $('load').onclick = load; load();
   }
+  let LAST = null;   // última respuesta (para recalcular el nombre al cambiar de idioma)
   async function load() {
     showError('');
     const s = sites.find(x => x.id === $('site').value);
@@ -1245,16 +1245,25 @@
     try {
       const [eph, hor, met] = await Promise.all(['ephemeris', 'horizon', 'metrics'].map(p => getJson(`/api/${p}?${q}`)));
       $('banner').hidden = ![eph.source, hor.source, met.source?.ephemeris, met.source?.horizon].includes('mock');
-      D = derive(s, eph, hor, met);
+      LAST = { s, eph, hor, met };
+      D = derive({ ...s, name: I18N.siteName(s) }, eph, hor, met);
       renderLessons(); renderSummary();
     } catch (e) {
-      showError('No se pudieron cargar los datos de este sitio. Vuelve a intentarlo; si sigue fallando, prueba con un periodo más corto.', load, e.message);
+      showError(t('ed.js.could_not_load_this_site_s_data_try_again_if_it_', 'Could not load this site’s data. Try again; if it keeps failing, use a shorter period.'), load, e.message);
     } finally {
       $('load').disabled = false;
       $('loading').hidden = true;
     }
   }
-  init().catch(e => showError('La página no terminó de prepararse. Recárgala para volver a intentarlo.', () => location.reload(), e.message));
+  // Al cambiar de idioma se repintan las lecciones y el resumen con los datos ya cargados.
+  I18N.onChange(() => {
+    const cur = $('site').value;
+    $('site').innerHTML = sites.map(s => `<option value="${s.id}">${I18N.siteName(s)}</option>`).join('');
+    $('site').value = cur;
+    if (LAST) D = derive({ ...LAST.s, name: I18N.siteName(LAST.s) }, LAST.eph, LAST.hor, LAST.met);
+    if (D) { renderLessons(); renderSummary(); replotOpen(); }
+  });
+  init().catch(e => showError(t('ed.js.the_page_did_not_finish_loading_reload_it_to_try', 'The page did not finish loading. Reload it to try again.'), () => location.reload(), e.message));
   </script>
 </body>
 </html>
