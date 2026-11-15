@@ -78,26 +78,21 @@
     details.dd { border: 1px solid rgba(76,201,240,.5); border-left: 4px solid var(--accent); border-radius: 12px; overflow: hidden;
                  background: linear-gradient(90deg, rgba(76,201,240,.17), rgba(143,123,255,.09) 55%, rgba(8,12,26,.6));
                  transition: border-color .25s, box-shadow .25s; }
-    details.dd:not([open]) { animation: ddGlow 3.2s ease-in-out infinite; }
     @keyframes ddGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(76,201,240,0); } 50% { box-shadow: 0 0 0 4px rgba(76,201,240,.16), 0 8px 24px -10px rgba(76,201,240,.55); } }
     details.dd:hover { border-color: var(--accent); }
     details.dd[open] { box-shadow: 0 14px 34px -18px rgba(76,201,240,.7); }
     details.dd > summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 650; color: #fff; user-select: none; }
     details.dd > summary::-webkit-details-marker { display: none; }
-    details.dd > summary::before { content: "DESPLEGABLE"; font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .14em; padding: 4px 9px; border-radius: 7px;
-                                   background: rgba(76,201,240,.22); color: var(--accent); border: 1px solid rgba(76,201,240,.5); flex: none; }
     details.dd > summary > span { flex: 1; min-width: 0; }
     details.dd .chev { flex: none; width: auto; height: auto; margin: 0; transform: none; font-style: normal; font-family: var(--mono); font-size: 12.5px; font-weight: 500; padding: 6px 14px; border-radius: 999px;
                        background: var(--accent); color: #04222d; border: 0; box-shadow: 0 4px 14px rgba(76,201,240,.35); transition: transform .2s, background .2s; }
     details.dd .chev::before { content: "Abrir ▾"; }
-    details.dd:not([open]) .chev { animation: ddNudge 2.4s ease-in-out infinite; }
     @keyframes ddNudge { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(3px); } 90% { transform: translateY(-2px); } }
     details.dd:hover .chev { transform: translateY(-1px) scale(1.05); }
     details.dd[open] .chev { background: rgba(255,255,255,.14); color: #fff; box-shadow: none; }
     details.dd[open] .chev::before { content: "Cerrar ▴"; }
     details.dd .dd-body { padding: 4px 14px 14px; animation: ddOpen .4s ease both; }
     @keyframes ddOpen { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-    @media (max-width: 640px) { details.dd > summary::before { display: none; } }
 
     /* ---------- Botones con movimiento ---------- */
     .mbtn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text);
@@ -248,7 +243,7 @@
             <div id="c1" class="plot"></div>
           </div>
         </div>
-        <details class="dd" data-plot="c1b"><summary><span>📊 Elevación máxima del Sol, día por día</span><i class="chev"></i></summary><div class="dd-body"><div id="c1b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c1b"><summary><span>Elevación máxima del Sol, día por día</span><i class="chev"></i></summary><div class="dd-body"><div id="c1b" class="plot sm"></div></div></details>
       </article>
 
       <article class="card lesson reveal">
@@ -260,7 +255,7 @@
           </div>
           <div id="c2" class="plot"></div>
         </div>
-        <details class="dd" data-plot="c2b"><summary><span>🧭 Vista de cielo (círculo): dónde cae la Tierra</span><i class="chev"></i></summary><div class="dd-body"><div id="c2b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c2b"><summary><span>Vista de cielo (círculo): dónde cae la Tierra</span><i class="chev"></i></summary><div class="dd-body"><div id="c2b" class="plot sm"></div></div></details>
       </article>
 
       <article class="card lesson reveal">
@@ -272,7 +267,7 @@
           </div>
           <div id="c3" class="plot"></div>
         </div>
-        <details class="dd" data-plot="c3b"><summary><span>⛰ El relieve visto desde arriba (perfil circular)</span><i class="chev"></i></summary><div class="dd-body"><div id="c3b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c3b"><summary><span>El relieve visto desde arriba (perfil circular)</span><i class="chev"></i></summary><div class="dd-body"><div id="c3b" class="plot sm"></div></div></details>
       </article>
 
       <article class="card lesson reveal">
@@ -295,7 +290,7 @@
           </div>
           <div id="c5" class="plot"></div>
         </div>
-        <details class="dd" data-plot="c5b"><summary><span>☀ El recorrido del Sol contra el horizonte</span><i class="chev"></i></summary><div class="dd-body"><div id="c5b" class="plot sm"></div></div></details>
+        <details class="dd" data-plot="c5b"><summary><span>El recorrido del Sol contra el horizonte</span><i class="chev"></i></summary><div class="dd-body"><div id="c5b" class="plot sm"></div></div></details>
       </article>
     </section>
 
@@ -336,7 +331,7 @@
                 </div>
                 <div class="slide-vis"><canvas id="cv1"></canvas></div>
               </div>
-              <details class="dd" data-plot="p1"><summary><span>📈 Cuánta Luna ilumina el Sol, mes a mes</span><i class="chev"></i></summary><div class="dd-body"><div id="p1" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p1"><summary><span>Cuánta Luna ilumina el Sol, mes a mes</span><i class="chev"></i></summary><div class="dd-body"><div id="p1" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 2 -->
@@ -347,15 +342,15 @@
                   <h3>Un eje casi vertical: el Sol se queda bajo</h3>
                   <p>Desde el polo, la altura máxima del Sol es igual a la inclinación del eje. En la Tierra son 23.4°; en la Luna, solo 1.5°. Cambia la inclinación y mira el ángulo entre el rayo de luz y el horizonte local (la línea blanca).</p>
                   <div class="ctrls">
-                    <button class="mbtn on" data-tilt="23.4" data-body="earth"><span class="ico s">🌍</span> Tierra 23.4°</button>
-                    <button class="mbtn" data-tilt="1.5" data-body="moon"><span class="ico s">🌙</span> Luna 1.5°</button>
+                    <button class="mbtn on" data-tilt="23.4" data-body="earth">Tierra 23.4°</button>
+                    <button class="mbtn" data-tilt="1.5" data-body="moon">Luna 1.5°</button>
                     <button class="mbtn" data-tilt="0" data-body="moon"><span class="ico s">⊘</span> Sin inclinación</button>
                   </div>
                   <div class="slide-note" id="n2"></div>
                 </div>
                 <div class="slide-vis"><canvas id="cv2"></canvas></div>
               </div>
-              <details class="dd" data-plot="p2"><summary><span>📈 Altura máxima del Sol según la latitud</span><i class="chev"></i></summary><div class="dd-body"><div id="p2" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p2"><summary><span>Altura máxima del Sol según la latitud</span><i class="chev"></i></summary><div class="dd-body"><div id="p2" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 3 -->
@@ -368,14 +363,14 @@
                   <div class="ctrls">
                     <button class="mbtn primary" id="s3play"><span class="ico s">▶</span> Reproducir</button>
                     <button class="mbtn on" data-sp="1">1×</button><button class="mbtn" data-sp="3">3×</button><button class="mbtn" data-sp="10">10×</button>
-                    <button class="mbtn" id="s3rise"><span class="ico s">🌅</span> Ir al amanecer</button>
+                    <button class="mbtn" id="s3rise">Ir al amanecer</button>
                     <input type="range" id="s3rng" min="0" max="0" value="0" aria-label="Momento">
                   </div>
                   <div class="slide-note" id="n3"></div>
                 </div>
                 <div class="slide-vis"><canvas id="cv3"></canvas></div>
               </div>
-              <details class="dd" data-plot="p3"><summary><span>📈 Los primeros 5 días: Sol contra el terreno</span><i class="chev"></i></summary><div class="dd-body"><div id="p3" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p3"><summary><span>Los primeros 5 días: Sol contra el terreno</span><i class="chev"></i></summary><div class="dd-body"><div id="p3" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 4 -->
@@ -391,15 +386,15 @@
                     <button class="mbtn" data-mt="8">Montaña 8°</button>
                   </div>
                   <div class="ctrls" style="margin-top:0">
-                    <button class="mbtn" data-se="1"><span class="ico s">☀</span> Sol 1°</button>
-                    <button class="mbtn on" data-se="2"><span class="ico s">☀</span> Sol 2°</button>
-                    <button class="mbtn" data-se="6"><span class="ico s">☀</span> Sol 6°</button>
+                    <button class="mbtn" data-se="1">Sol 1°</button>
+                    <button class="mbtn on" data-se="2">Sol 2°</button>
+                    <button class="mbtn" data-se="6">Sol 6°</button>
                   </div>
                   <div class="slide-note" id="n4"></div>
                 </div>
                 <div class="slide-vis"><canvas id="cv4"></canvas></div>
               </div>
-              <details class="dd" data-plot="p4"><summary><span>⛰ El horizonte real de tu sitio</span><i class="chev"></i></summary><div class="dd-body"><div id="p4" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p4"><summary><span>El horizonte real de tu sitio</span><i class="chev"></i></summary><div class="dd-body"><div id="p4" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 5 -->
@@ -419,7 +414,7 @@
                 </div>
                 <div class="slide-vis"><canvas id="cv5"></canvas></div>
               </div>
-              <details class="dd" data-plot="p5"><summary><span>📈 Cuánto se mueve la Tierra en el cielo</span><i class="chev"></i></summary><div class="dd-body"><div id="p5" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p5"><summary><span>Cuánto se mueve la Tierra en el cielo</span><i class="chev"></i></summary><div class="dd-body"><div id="p5" class="plot sm"></div></div></details>
             </div>
 
             <!-- Paso 6 -->
@@ -430,8 +425,8 @@
                   <h3>Juntando todo: ¿es buen sitio y buena fecha?</h3>
                   <p>Un buen candidato tiene mucho Sol (energía), buena línea de vista a la Tierra (comunicación) y noches o cortes cortos. Cambia el sitio o las fechas arriba y compara.</p>
                   <div class="ctrls">
-                    <a class="mbtn primary pulse" href="/"><span class="ico s">🚀</span> Abrir el navegador</a>
-                    <a class="mbtn" href="/heatmap.html"><span class="ico s">🗓</span> Heatmap sitio × fecha</a>
+                    <a class="mbtn primary" href="/">Abrir el navegador</a>
+                    <a class="mbtn" href="/heatmap.html">Heatmap sitio × fecha</a>
                   </div>
                   <div class="slide-note" id="n6"></div>
                 </div>
@@ -440,7 +435,7 @@
                   <div class="verdict" id="verdict6"></div>
                 </div>
               </div>
-              <details class="dd" data-plot="p6"><summary><span>🕸 Perfil del sitio (radar)</span><i class="chev"></i></summary><div class="dd-body"><div id="p6" class="plot sm"></div></div></details>
+              <details class="dd" data-plot="p6"><summary><span>Perfil del sitio (radar)</span><i class="chev"></i></summary><div class="dd-body"><div id="p6" class="plot sm"></div></div></details>
             </div>
 
           </div>
@@ -448,7 +443,7 @@
         <div class="car-ctrl">
           <button class="mbtn" id="prev"><span class="ico l">←</span> Anterior</button>
           <div class="dots" id="dots"></div>
-          <button class="mbtn primary pulse" id="next">Siguiente <span class="ico r">→</span></button>
+          <button class="mbtn primary" id="next">Siguiente <span class="ico r">→</span></button>
         </div>
       </div>
     </section>
