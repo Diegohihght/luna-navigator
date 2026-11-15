@@ -210,13 +210,13 @@
     </section>
 
     <div class="tabs" role="tablist">
-      <button id="tab-q" class="on" role="tab" data-tab="q">Tu sitio</button>
-      <button id="tab-s" role="tab" data-tab="s">Paso a paso</button>
-      <button id="tab-m" role="tab" data-tab="m">Mitos y datos</button>
+      <button id="tab-q" class="on" role="tab" data-tab="q" aria-selected="true" aria-controls="pane-q">Tu sitio</button>
+      <button id="tab-s" role="tab" data-tab="s" aria-selected="false" aria-controls="pane-s">Paso a paso</button>
+      <button id="tab-m" role="tab" data-tab="m" aria-selected="false" aria-controls="pane-m">Mitos y datos</button>
     </div>
 
     <!-- ======================= TU SITIO: 5 lecciones ======================= -->
-    <section id="pane-q" class="pane on">
+    <section id="pane-q" class="pane on" role="tabpanel" aria-labelledby="tab-q">
       <article class="card lesson reveal">
         <div class="lesson-head"><span class="num sun">01</span><h2>¿Por qué el Sol casi no sube en el polo sur?</h2></div>
         <div class="split">
@@ -224,14 +224,14 @@
             <p class="why">El eje de la Luna está inclinado solo ~1.5° respecto a su órbita (el de la Tierra, 23.4°). Por eso no hay estaciones marcadas, y cerca de los polos el Sol da vueltas casi pegado al horizonte. Las sombras son larguísimas.</p>
             <div class="readout" id="d1"></div>
             <div class="tiltpair">
-              <figure class="sph earthg"><canvas id="cvE" width="220" height="220"></canvas>
+              <figure class="sph earthg"><canvas id="cvE" width="220" height="220" role="img" aria-label="La Tierra con su eje inclinado 23.4°"></canvas>
                 <svg viewBox="0 0 200 200" aria-label="Eje de la Tierra inclinado 23.4 grados">
                   <line x1="100" y1="6" x2="100" y2="194" stroke="rgba(142,155,186,.5)" stroke-dasharray="4 4"/>
                   <g transform="rotate(23.4 100 100)"><line x1="100" y1="2" x2="100" y2="198" stroke="#ffb43b" stroke-width="2.6" stroke-linecap="round"/></g>
                   <path d="M100 16 A84 84 0 0 1 133.2 22.9" fill="none" stroke="#ffb43b" stroke-width="1.6"/>
                   <text x="128" y="14" fill="#ffb43b" font-size="12" font-family="DM Mono, ui-monospace, Menlo, monospace">23.4°</text>
                 </svg><figcaption>Tierra</figcaption></figure>
-              <figure class="sph moong"><canvas id="cvM" width="220" height="220"></canvas>
+              <figure class="sph moong"><canvas id="cvM" width="220" height="220" role="img" aria-label="La Luna con su eje inclinado 1.5°"></canvas>
                 <svg viewBox="0 0 200 200" aria-label="Eje de la Luna inclinado 1.5 grados">
                   <line x1="100" y1="6" x2="100" y2="194" stroke="rgba(142,155,186,.5)" stroke-dasharray="4 4"/>
                   <g transform="rotate(1.5 100 100)"><line x1="100" y1="2" x2="100" y2="198" stroke="#4cc9f0" stroke-width="2.6" stroke-linecap="round"/></g>
@@ -295,7 +295,7 @@
     </section>
 
     <!-- ======================= PASO A PASO ======================= -->
-    <section id="pane-s" class="pane">
+    <section id="pane-s" class="pane" role="tabpanel" aria-labelledby="tab-s">
       <div class="cast reveal">
         <div class="cast-head"><h3>Los protagonistas</h3>
           <div style="display:flex;gap:8px">
@@ -303,10 +303,10 @@
             <button class="mbtn" id="castR" aria-label="Siguiente"><span class="ico r">→</span></button>
           </div></div>
         <div class="cast-row" id="castRow">
-          <div class="cast-card"><canvas id="cs0" width="240" height="240"></canvas><h4>El Sol</h4><ul><li>Diámetro: <b>1.39 millones km</b></li><li>Distancia: <b>≈ 150 millones km</b></li><li>Su luz tarda <b>≈ 8 min 20 s</b> en llegar</li></ul></div>
-          <div class="cast-card"><canvas id="cs1" width="240" height="240"></canvas><h4>La Tierra</h4><ul><li>Diámetro: <b>12,742 km</b></li><li>Inclinación del eje: <b>23.4°</b></li><li>Desde la Luna se ve <b>≈ 3.7×</b> más ancha que la Luna desde aquí</li></ul></div>
-          <div class="cast-card"><canvas id="cs2" width="240" height="240"></canvas><h4>La Luna</h4><ul><li>Diámetro: <b>3,474 km</b></li><li>Inclinación del eje: <b>1.5°</b></li><li>Gira en <b>27.3 d</b>; su día solar dura <b>29.5 d</b></li></ul></div>
-          <div class="cast-card"><canvas id="cs3" width="240" height="240"></canvas><h4>El polo sur</h4><ul><li>El Sol apenas sube <b>unos pocos grados</b></li><li>Cráteres en <b>sombra permanente</b></li><li>Picos con <b>luz casi continua</b></li></ul></div>
+          <div class="cast-card"><canvas id="cs0" width="240" height="240" aria-hidden="true"></canvas><h4>El Sol</h4><ul><li>Diámetro: <b>1.39 millones km</b></li><li>Distancia: <b>≈ 150 millones km</b></li><li>Su luz tarda <b>≈ 8 min 20 s</b> en llegar</li></ul></div>
+          <div class="cast-card"><canvas id="cs1" width="240" height="240" aria-hidden="true"></canvas><h4>La Tierra</h4><ul><li>Diámetro: <b>12,742 km</b></li><li>Inclinación del eje: <b>23.4°</b></li><li>Desde la Luna se ve <b>≈ 3.7×</b> más ancha que la Luna desde aquí</li></ul></div>
+          <div class="cast-card"><canvas id="cs2" width="240" height="240" aria-hidden="true"></canvas><h4>La Luna</h4><ul><li>Diámetro: <b>3,474 km</b></li><li>Inclinación del eje: <b>1.5°</b></li><li>Gira en <b>27.3 d</b>; su día solar dura <b>29.5 d</b></li></ul></div>
+          <div class="cast-card"><canvas id="cs3" width="240" height="240" aria-hidden="true"></canvas><h4>El polo sur</h4><ul><li>El Sol apenas sube <b>unos pocos grados</b></li><li>Cráteres en <b>sombra permanente</b></li><li>Picos con <b>luz casi continua</b></li></ul></div>
         </div>
       </div>
 
@@ -329,7 +329,7 @@
                   </div>
                   <div class="slide-note" id="n1"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv1"></canvas></div>
+                <div class="slide-vis"><canvas id="cv1" role="img" aria-label="Animación: la Luna siempre muestra la misma cara a la Tierra"></canvas></div>
               </div>
               <details class="dd" data-plot="p1"><summary><span>Cuánta Luna ilumina el Sol, mes a mes</span><i class="chev"></i></summary><div class="dd-body"><div id="p1" class="plot sm"></div></div></details>
             </div>
@@ -348,7 +348,7 @@
                   </div>
                   <div class="slide-note" id="n2"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv2"></canvas></div>
+                <div class="slide-vis"><canvas id="cv2" role="img" aria-label="Animación: con un eje casi vertical, el Sol se queda bajo en el polo"></canvas></div>
               </div>
               <details class="dd" data-plot="p2"><summary><span>Altura máxima del Sol según la latitud</span><i class="chev"></i></summary><div class="dd-body"><div id="p2" class="plot sm"></div></div></details>
             </div>
@@ -368,7 +368,7 @@
                   </div>
                   <div class="slide-note" id="n3"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv3"></canvas></div>
+                <div class="slide-vis"><canvas id="cv3" role="img" aria-label="Animación: el recorrido del Sol visto desde tu sitio"></canvas></div>
               </div>
               <details class="dd" data-plot="p3"><summary><span>Los primeros 5 días: Sol contra el terreno</span><i class="chev"></i></summary><div class="dd-body"><div id="p3" class="plot sm"></div></div></details>
             </div>
@@ -392,7 +392,7 @@
                   </div>
                   <div class="slide-note" id="n4"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv4"></canvas></div>
+                <div class="slide-vis"><canvas id="cv4" role="img" aria-label="Animación: el relieve tapa el Sol cuando está bajo"></canvas></div>
               </div>
               <details class="dd" data-plot="p4"><summary><span>El horizonte real de tu sitio</span><i class="chev"></i></summary><div class="dd-body"><div id="p4" class="plot sm"></div></div></details>
             </div>
@@ -412,7 +412,7 @@
                   </div>
                   <div class="slide-note" id="n5"></div>
                 </div>
-                <div class="slide-vis"><canvas id="cv5"></canvas></div>
+                <div class="slide-vis"><canvas id="cv5" role="img" aria-label="Animación: la Tierra casi quieta en el cielo, a veces tapada por el relieve"></canvas></div>
               </div>
               <details class="dd" data-plot="p5"><summary><span>Cuánto se mueve la Tierra en el cielo</span><i class="chev"></i></summary><div class="dd-body"><div id="p5" class="plot sm"></div></div></details>
             </div>
@@ -449,7 +449,7 @@
     </section>
 
     <!-- ======================= MITOS ======================= -->
-    <section id="pane-m" class="pane myths">
+    <section id="pane-m" class="pane myths" role="tabpanel" aria-labelledby="tab-m">
       <div class="myth"><button class="q"><span class="lab">Mito</span><span>"En la Luna hay un lado oscuro donde nunca llega el Sol."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Todos los puntos reciben Sol; el día lunar dura ≈ 29.5 días terrestres. Lo que cambia es el lado que mira a la Tierra: el lado oculto nunca la ve, pero sí tiene días y noches.</div></div></div></div>
       <div class="myth"><button class="q"><span class="lab">Mito</span><span>"El cielo lunar se ve azul de día."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Sin atmósfera no hay dispersión de luz ni refracción: el cielo es negro incluso con el Sol sobre el horizonte.</div></div></div></div>
       <div class="myth"><button class="q"><span class="lab">Mito</span><span>"El Sol sube alto en todas partes."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>En el ecuador sube hasta el cenit, pero en el polo sur apenas unos pocos grados por la inclinación axial de ~1.5°. Por eso interesa el polo sur: hay cráteres en sombra permanente y picos con luz casi continua.</div></div></div></div>
@@ -991,7 +991,7 @@
   /* ================= Mitos, pestañas y botones ================= */
   function initMyths() { document.querySelectorAll('.myth .q').forEach(b => b.onclick = () => { const m = b.parentElement, open = m.classList.toggle('open'); b.querySelector('.tog').textContent = open ? '▲ ocultar' : '▼ ver dato'; }); }
   function showTab(name) {
-    ['q', 's', 'm'].forEach(k => { $('pane-' + k).classList.toggle('on', k === name); $('tab-' + k).classList.toggle('on', k === name); });
+    ['q', 's', 'm'].forEach(k => { $('pane-' + k).classList.toggle('on', k === name); $('tab-' + k).classList.toggle('on', k === name); $('tab-' + k).setAttribute('aria-selected', String(k === name)); });
     if (history.replaceState) history.replaceState(null, '', name === 's' ? '#paso' : name === 'm' ? '#mitos' : location.pathname + location.search);
     requestAnimationFrame(() => { document.querySelectorAll('#pane-' + name + ' .js-plotly-plot').forEach(p => window.Plotly && Plotly.Plots.resize(p)); });
   }
