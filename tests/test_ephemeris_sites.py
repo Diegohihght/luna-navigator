@@ -1,8 +1,8 @@
-"""Compara ephemeris.py con los valores de JPL Horizons guardados (rol A).
+"""Compare ephemeris.py with the stored JPL Horizons values (role A).
 
-Usa tests/horizons_validation/jpl_reference.json, generado con
-tests/horizons_validation/compare_horizons.py, así que no necesita internet.
-Si el archivo no existe, las pruebas se omiten.
+Uses tests/horizons_validation/jpl_reference.json, generated with
+tests/horizons_validation/compare_horizons.py, so no internet is needed.
+If the file does not exist, the tests are skipped.
 """
 import json
 import math
@@ -19,7 +19,7 @@ _REF = json.loads(REF_PATH.read_text(encoding="utf-8")) if REF_PATH.exists() els
 
 
 def _sep_deg(az1: float, el1: float, az2: float, el2: float) -> float:
-    """Separación angular (grados) entre dos direcciones az/el."""
+    """Angular separation (degrees) between two az/el directions."""
 
     def unit(az, el):
         a, e = math.radians(az), math.radians(el)

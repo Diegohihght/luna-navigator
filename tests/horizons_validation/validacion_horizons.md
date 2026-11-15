@@ -1,8 +1,8 @@
-# Validación de efemérides contra JPL Horizons
+# Ephemeris validation against JPL Horizons
 
-Fechas: 2027-01-01, 2027-01-10, 2027-01-20 (00:00, 06:00, 12:00 y 18:00 UTC). Métrica: separación angular máxima entre ephemeris.py y Horizons. Tolerancia: 0.02°.
+Dates: 2027-01-01, 2027-01-10, 2027-01-20 (00:00, 06:00, 12:00 and 18:00 UTC). Metric: maximum angular separation between ephemeris.py and Horizons. Tolerance: 0.02°.
 
-| Sitio | Cuerpo | Separación máx. (°) | Resultado |
+| Site | Body | Max. separation (°) | Result |
 |---|---|---|---|
 | apollo11 | earth | 0.0055 | OK |
 | apollo11 | sun | 0.0062 | OK |

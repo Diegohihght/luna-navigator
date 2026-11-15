@@ -1,9 +1,9 @@
-"""API principal (integración: Diego).
+"""Main API (integration: Diego).
 
-Ejecutar desde la raíz del repo:
+Run from the repository root:
     uvicorn backend.main:app --reload
-Abrir: http://127.0.0.1:8000        (frontend)
-       http://127.0.0.1:8000/docs   (documentación interactiva de la API)
+Open: http://127.0.0.1:8000        (frontend)
+      http://127.0.0.1:8000/docs   (interactive API documentation)
 """
 from __future__ import annotations
 
@@ -31,17 +31,17 @@ def _parse_dt(value: str) -> datetime:
     try:
         dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
-        raise HTTPException(400, f"Fecha inválida: {value!r}. Usa ISO 8601, ej. 2027-01-01T00:00:00Z")
+        raise HTTPException(400, f"Invalid date: {value!r}. Use ISO 8601, e.g. 2027-01-01T00:00:00Z")
     return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
 def _eph(lat: float, lon: float, start: str, end: str, step_min: int) -> dict:
     s, e = _parse_dt(start), _parse_dt(end)
     if e <= s:
-        raise HTTPException(400, "end debe ser posterior a start")
+        raise HTTPException(400, "end must be later than start")
     n = int((e - s).total_seconds() / 60 / step_min) + 1
     if n > MAX_SAMPLES:
-        raise HTTPException(400, f"Demasiadas muestras ({n}). Aumenta step_min o reduce el rango.")
+        raise HTTPException(400, f"Too many samples ({n}). Increase step_min or reduce the range.")
     return ephemeris.get_ephemeris(lat, lon, s, e, step_min)
 
 
@@ -73,7 +73,7 @@ def api_metrics(lat: float = LAT, lon: float = LON, start: str = Query(...), end
 
 
 @app.get("/api/compare")
-def api_compare(sites: str = Query(..., description="ids separados por coma"), start: str = Query(...), end: str = Query(...), step_min: int = STEP):
+def api_compare(sites: str = Query(..., description="comma-separated ids"), start: str = Query(...), end: str = Query(...), step_min: int = STEP):
     by_id = {s["id"]: s for s in _sites()}
     out = []
     for sid in [x.strip() for x in sites.split(",") if x.strip()]:
@@ -86,5 +86,5 @@ def api_compare(sites: str = Query(..., description="ids separados por coma"), s
     return out
 
 
-# El frontend se sirve desde la misma app (sin Node ni build). Va al final.
+# The frontend is served by this same app (no Node or build step). Keep this mount last.
 app.mount("/", StaticFiles(directory=ROOT / "frontend", html=True), name="frontend")

@@ -1,11 +1,11 @@
-"""Validación de ephemeris.py contra JPL Horizons (rol A).
+"""Validation of ephemeris.py against JPL Horizons (role A).
 
-Referencia: Horizons, Observer Table, centro Luna (301) con sitio definido,
-marco MEAN_ME, DE441, sin refracción, Apparent AZ & EL.
-Fechas: 2027-01-01 00:00, 06:00, 12:00 y 18:00 UTC.
+Reference: Horizons, Observer Table, Moon centre (301) with the site defined,
+MEAN_ME frame, DE441, no refraction, Apparent AZ & EL.
+Dates: 2027-01-01 00:00, 06:00, 12:00 and 18:00 UTC.
 
-Tolerancia 0.02 grados: Horizons incluye aberración estelar y este cálculo
-no, lo que da diferencias de hasta ~0.008 grados.
+Tolerance 0.02 degrees: Horizons includes stellar aberration and this
+computation does not, which gives differences of up to ~0.008 degrees.
 """
 from datetime import datetime, timezone
 
@@ -43,7 +43,7 @@ CASES = {
 
 
 def _ang_diff(a: float, b: float) -> float:
-    """Diferencia angular mínima en grados (maneja el cruce 0/360)."""
+    """Minimum angular difference in degrees (handles the 0/360 wrap)."""
     return abs((a - b + 180.0) % 360.0 - 180.0)
 
 

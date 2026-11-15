@@ -1,4 +1,4 @@
-"""Pruebas de efemérides (rol A). La primera corrida descarga kernels (internet)."""
+"""Ephemeris tests (role A). The first run downloads the kernels (requires internet)."""
 from datetime import datetime, timezone
 
 from backend.ephemeris import get_ephemeris
@@ -10,7 +10,7 @@ def test_contract_format():
     start = datetime(2027, 1, 1, tzinfo=UTC)
     end = datetime(2027, 1, 2, tzinfo=UTC)
     r = get_ephemeris(-89.5, 0.0, start, end, 60)
-    n = 25  # 24 h con paso de 60 min, ambos extremos incluidos
+    n = 25  # 24 h at 60-min steps, both endpoints included
     assert len(r["t"]) == n
     for body in ("sun", "earth"):
         assert len(r[body]["az"]) == n and len(r[body]["el"]) == n
@@ -21,7 +21,7 @@ def test_contract_format():
 
 
 def test_south_pole_sun_stays_low():
-    """En el polo sur el Sol sube solo unos pocos grados durante todo el año."""
+    """At the south pole the Sun rises only a few degrees all year."""
     start = datetime(2027, 1, 1, tzinfo=UTC)
     end = datetime(2027, 12, 31, tzinfo=UTC)
     r = get_ephemeris(-89.5, 0.0, start, end, 360)
@@ -29,7 +29,7 @@ def test_south_pole_sun_stays_low():
 
 
 def test_far_side_never_sees_earth():
-    """Un sitio de la cara oculta nunca ve la Tierra."""
+    """A far-side site never sees the Earth."""
     start = datetime(2027, 1, 1, tzinfo=UTC)
     end = datetime(2027, 1, 31, tzinfo=UTC)
     r = get_ephemeris(0.0, 180.0, start, end, 180)
@@ -37,7 +37,7 @@ def test_far_side_never_sees_earth():
 
 
 def test_sub_earth_point_sees_earth_high():
-    """Cerca del centro de la cara visible la Tierra está casi en el cenit."""
+    """Near the centre of the near side the Earth is almost at the zenith."""
     start = datetime(2027, 1, 1, tzinfo=UTC)
     end = datetime(2027, 1, 31, tzinfo=UTC)
     r = get_ephemeris(0.0, 0.0, start, end, 180)
