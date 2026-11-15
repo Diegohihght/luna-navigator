@@ -40,6 +40,7 @@ Debe servir a planificadores, educadores y público general.
 - Efemérides: Skyfield con kernels JPL y marco lunar (alternativa: SpiceyPy). Confirmar API en la documentación.
 - Terreno: LOLA (NASA LRO, los mismos datos que muestra Moon Trek). Polo sur: `LDEM_80S_80MPP_ADJ` (80 m/px, descarga local en `data/dem/`). Resto de la Luna: LOLA Global LDEM 118 m/px (USGS Astrogeology), leído en remoto por HTTP solo la ventana del sitio. Ray-marching con curvatura lunar (R ≈ 1737.4 km).
 - **Horizontes precalculados de los sitios curados en `data/horizons/` (sí van en Git, ~10 KB por sitio)**, para que la app corra sin descargar DEMs (evaluadores). Se regeneran con `python scripts/build_horizons.py`. Las coordenadas personalizadas se calculan bajo demanda (requiere internet o el DEM local) y se cachean en `data/cache/` (no va en Git).
+- **Relieve de las vistas 3D en `frontend/data/relief/` (sí va en Git, 2.8 MB)**: globo 1024×512 con alturas LOLA 118 m y albedo Clementine UVVIS 750 nm Global Mosaic 118 m v2 (USGS Astrogeology; por encima de 60° de latitud el albedo se funde a gris porque el mosaico es poco fiable), y suelo de ±8 km (256×256) por sitio curado. Formato en `manifest.json`. Se regenera con `python scripts/build_relief.py`. Las coordenadas personalizadas usan relieve ilustrativo y la vista lo indica.
 
 ## 5. Convenciones y contratos
 **Globales**
@@ -130,5 +131,5 @@ Si algo se atrasa, se recorta alcance, no calidad del núcleo: terreno plano + e
 | Repo + mocks | listo | subido a GitHub (`Diegohihght/luna-navigator`) |
 | A. Efemérides | real en `main` (`source: "skyfield-de421"`) | PR #1 (cálculo con Skyfield) y PR #3 (validación contra JPL Horizons). Pendiente: revisar rendimiento con rangos largos |
 | B. Terreno | real para los 10 sitios curados (LOLA) | PR #5 (Sennie): DEM polar. Rama `diego/siguiente`: DEM global remoto y horizontes precalculados en `data/horizons/`. Ya no queda ningún sitio curado en mock |
-| C. Frontend | rediseño y tema compartido en `main` (PR #4 y #6) | `index.html` con selector, horizonte SVG, línea de tiempo y comparación; `theme.css` común a las tres páginas |
+| C. Frontend | rediseño y tema compartido en `main` (PR #4 y #6) | `index.html` con selector, horizonte SVG, línea de tiempo y comparación; `theme.css` común a las tres páginas. Vistas 3D (`vista3d.js`, Luis) con relieve real en la rama `diego/relieve-3d` |
 | D. Métricas e integración | en `main` con tests | métricas (PR #2 heatmap sitio × fecha y modo educativo). Pendiente: README y guion del pitch |
