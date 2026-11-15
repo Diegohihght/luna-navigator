@@ -1,21 +1,21 @@
-"""Validación de efemérides contra JPL Horizons para los sitios curados (rol A).
+"""Validation of ephemerides against JPL Horizons for the curated sites (role A).
 
-Para cada sitio de data/sites.json y cada fecha, consulta la API de Horizons
-(Sol y Tierra, AZ/EL aparentes, sin refracción, centro Luna con sitio
-geodésico), compara con backend/ephemeris.py y guarda:
-  - jpl_reference.json       valores de Horizons (los usa
-                             tests/test_ephemeris_sites.py sin necesitar internet)
-  - validacion_horizons.csv  detalle de cada comparación
-  - validacion_horizons.md   resumen por sitio y cuerpo
+For each site in data/sites.json and each date, it queries the Horizons API
+(Sun and Earth, apparent AZ/EL, no refraction, Moon centre with a geodetic
+site), compares the result with backend/ephemeris.py, and saves:
+  - jpl_reference.json       Horizons values (used by
+                             tests/test_ephemeris_sites.py without internet)
+  - validacion_horizons.csv  detail of each comparison
+  - validacion_horizons.md   summary per site and body
 
-Uso (desde la raíz del proyecto, con internet y el entorno activo):
+Usage (from the project root, with internet and the environment active):
     python tests/horizons_validation/compare_horizons.py --limit 1 --debug
     python tests/horizons_validation/compare_horizons.py
 
-La métrica es la separación angular entre las dos direcciones, no az y el por
-separado: cerca del cenit el azimut es muy sensible y exagera la diferencia.
-Los valores ya consultados se guardan en jpl_reference.json y no se vuelven a
-pedir (salvo que cambie la lat/lon del sitio).
+The metric is the angular separation between the two directions, not az and el
+separately: near the zenith the azimuth is very sensitive and exaggerates the
+difference. Values already queried are stored in jpl_reference.json and are not
+requested again (unless the site's lat/lon changes).
 """
 import argparse
 import csv
@@ -50,13 +50,13 @@ _NUM = re.compile(r"^-?\d+(\.\d+)?$")
 
 
 def _unit(az: float, el: float):
-    """Vector unitario (este, norte, arriba) de una dirección az/el en grados."""
+    """Unit vector (east, north, up) of an az/el direction, in degrees."""
     a, e = math.radians(az), math.radians(el)
     return (math.cos(e) * math.sin(a), math.cos(e) * math.cos(a), math.sin(e))
 
 
 def _sep_deg(az1: float, el1: float, az2: float, el2: float) -> float:
-    """Separación angular (grados) entre dos direcciones az/el."""
+    """Angular separation (degrees) between two az/el directions."""
     u, v = _unit(az1, el1), _unit(az2, el2)
     dot = sum(x * y for x, y in zip(u, v))
     cross = (
@@ -68,9 +68,9 @@ def _sep_deg(az1: float, el1: float, az2: float, el2: float) -> float:
 
 
 def _parse(text: str):
-    """Extrae [(az, el), ...] de la tabla CSV de Horizons ($$SOE ... $$EOE)."""
+    """Extract [(az, el), ...] from the Horizons CSV table ($$SOE ... $$EOE)."""
     if "$$SOE" not in text:
-        raise RuntimeError("Respuesta sin tabla de efemérides:\n" + text[:800])
+        raise RuntimeError("Response has no ephemeris table:\n" + text[:800])
     block = text.split("$$SOE")[1].split("$$EOE")[0]
     rows = []
     for line in block.strip().splitlines():
@@ -85,7 +85,7 @@ def _parse(text: str):
 
 
 def _query(body_id: str, lat: float, lon: float, start: datetime, end: datetime, debug: bool = False):
-    """Pide a Horizons az/el aparentes (sin refracción) desde un sitio lunar."""
+    """Request apparent az/el (no refraction) from Horizons for a lunar site."""
     params = {
         "format": "text",
         "COMMAND": f"'{body_id}'",
@@ -110,7 +110,7 @@ def _query(body_id: str, lat: float, lon: float, start: datetime, end: datetime,
             with urllib.request.urlopen(url, timeout=60) as resp:
                 text = resp.read().decode("utf-8", errors="replace")
             if debug:
-                print("---- respuesta cruda de Horizons (primeros 3000 caracteres) ----")
+                print("---- raw Horizons response (first 3000 characters) ----")
                 print(text[:3000])
                 print("------------------------------------------------------------")
             return _parse(text)
@@ -132,8 +132,8 @@ def _load_sites():
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Valida ephemeris.py contra JPL Horizons.")
-    ap.add_argument("--limit", type=int, default=0, help="solo los primeros N sitios (para probar)")
-    ap.add_argument("--debug", action="store_true", help="muestra la respuesta cruda de la primera consulta")
+    ap.add_argument("--limit", type=int, default=0, help="only the first N sites (for testing)")
+    ap.add_argument("--debug", action="store_true", help="show the raw response of the first query")
     ap.add_argument("--dates", nargs="*", default=DATES, help="fechas AAAA-MM-DD (00:00 a 18:00 UTC)")
     args = ap.parse_args()
 
@@ -193,19 +193,19 @@ def main() -> int:
         k = (r["site"], r["body"])
         worst[k] = max(worst.get(k, 0.0), r["sep_deg"])
     lines = [
-        "# Validación de efemérides contra JPL Horizons",
+        "# Ephemeris validation against JPL Horizons",
         "",
-        f"Fechas: {', '.join(args.dates)} (00:00, 06:00, 12:00 y 18:00 UTC). "
-        f"Métrica: separación angular máxima entre ephemeris.py y Horizons. Tolerancia: {TOL_DEG}°.",
+        f"Dates: {', '.join(args.dates)} (00:00, 06:00, 12:00 and 18:00 UTC). "
+        f"Metric: maximum angular separation between ephemeris.py and Horizons. Tolerance: {TOL_DEG}°.",
         "",
-        "| Sitio | Cuerpo | Separación máx. (°) | Resultado |",
+        "| Site | Body | Max. separation (°) | Result |",
         "|---|---|---|---|",
     ]
     any_fail = False
     for (site_id, body), sep in sorted(worst.items()):
         ok = sep < TOL_DEG
         any_fail = any_fail or not ok
-        lines.append(f"| {site_id} | {body} | {sep:.4f} | {'OK' if ok else 'REVISAR'} |")
+        lines.append(f"| {site_id} | {body} | {sep:.4f} | {'OK' if ok else 'REVIEW'} |")
     MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     print("\n".join(lines))

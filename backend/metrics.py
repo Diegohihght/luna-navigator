@@ -1,9 +1,9 @@
-"""Métricas de energía y comunicación a partir de efemérides + horizonte.
+"""Energy and communication metrics from ephemerides and the horizon.
 
-RESPONSABLE: Diego (rol D)
+OWNER: Diego (role D)
 
-Regla: el Sol (o la Tierra) es visible en un instante si su elevación es mayor
-que la elevación del horizonte en su azimut.
+Rule: the Sun (or the Earth) is visible at a given instant if its elevation is
+greater than the horizon elevation at its azimuth.
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def _parse(ts: str) -> datetime:
 
 
 def _horizon_at(hor: dict, az) -> np.ndarray:
-    """Elevación del horizonte interpolada (periódica) en los azimuts dados."""
+    """Periodic, interpolated horizon elevation at the given azimuths."""
     step = hor.get("az_step_deg", 1)
     grid = np.arange(len(hor["el"])) * step
     return np.interp(np.asarray(az, dtype=float) % 360.0, grid, hor["el"], period=360.0)
@@ -49,7 +49,7 @@ def _longest_run(mask: np.ndarray, value: bool) -> int:
 
 
 def _hours_to_change(mask: np.ndarray, idx: int, step_h: float) -> float | None:
-    """Horas desde idx hasta que el estado de visibilidad cambia (None si no cambia)."""
+    """Hours from idx until the visibility state changes (None if it never changes)."""
     for j in range(idx + 1, len(mask)):
         if mask[j] != mask[idx]:
             return round((j - idx) * step_h, 3)

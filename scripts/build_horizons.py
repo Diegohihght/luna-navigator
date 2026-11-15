@@ -1,18 +1,18 @@
-"""Precalcula el horizonte de los sitios curados y lo guarda en data/horizons/.
+"""Precompute the horizon of the curated sites and save it to data/horizons/.
 
-RESPONSABLE: Diego (rol D, integración). Usa el cálculo de backend/horizon.py (rol B).
+OWNER: Diego (role D, integration). Uses the horizon computation in backend/horizon.py (role B).
 
-Estos perfiles (360 números por sitio) SÍ se suben a Git: así la app corre sin
-descargar ningún DEM (por ejemplo, los evaluadores del Space Apps).
+These profiles (360 numbers per site) ARE committed to git, so the app runs
+without downloading any DEM (for example, for the Space Apps evaluators).
 
-Uso, desde la raíz del repo:
-    python scripts/build_horizons.py            # todos los sitios de data/sites.json
-    python scripts/build_horizons.py apollo15   # solo algunos ids
+Usage, from the repository root:
+    python scripts/build_horizons.py            # all sites in data/sites.json
+    python scripts/build_horizons.py apollo15   # only the given ids
 
-Fuentes (NASA LRO LOLA):
-  - Polo sur (80°S-90°S): data/dem/LDEM_80S_80MPP_ADJ.TIF, 80 m/px (descarga local,
-    ver data/dem/README.txt).
-  - Resto de la Luna: DEM global de LOLA 118 m/px, leído en remoto (requiere internet).
+Sources (NASA LRO LOLA):
+  - South pole (80°S-90°S): data/dem/LDEM_80S_80MPP_ADJ.TIF, 80 m/px (local
+    download, see data/dem/README.txt).
+  - Rest of the Moon: LOLA global DEM, 118 m/px, read remotely (requires internet).
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ RADIUS_KM = 50.0
 
 
 def main(ids: list[str]) -> int:
-    """Calcula y guarda los perfiles; devuelve 1 si algún sitio no tuvo datos reales."""
+    """Compute and save the profiles; returns 1 if any site had no real data."""
     sites = json.loads((ROOT / "data" / "sites.json").read_text(encoding="utf-8"))
     if ids:
         sites = [s for s in sites if s["id"] in ids]
@@ -41,14 +41,14 @@ def main(ids: list[str]) -> int:
         try:
             result = horizon._compute_from_dem(s["lat"], s["lon"], RADIUS_KM)
         except horizon._NoTerrainData as exc:
-            print(f"[SIN DATOS] {s['id']}: {exc}")
+            print(f"[NO DATA] {s['id']}: {exc}")
             failed += 1
             continue
         out = horizon.PRECOMPUTED_DIR / horizon.horizon_filename(s["lat"], s["lon"], RADIUS_KM)
         out.write_text(json.dumps(result) + "\n", encoding="utf-8")
         el = result["el"]
-        print(f"[OK] {s['id']:<13} {result['source']:<48} máx {max(el):6.2f}° "
-              f"(az {el.index(max(el))}°)  mín {min(el):6.2f}°  {time.time() - t0:5.1f} s")
+        print(f"[OK] {s['id']:<13} {result['source']:<48} max {max(el):6.2f}° "
+              f"(az {el.index(max(el))}°)  min {min(el):6.2f}°  {time.time() - t0:5.1f} s")
     return 1 if failed else 0
 
 
