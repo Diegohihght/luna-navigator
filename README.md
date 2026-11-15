@@ -144,7 +144,7 @@ This project was built with the help of AI tools, as declared here in line with 
 
 - **Tool used:** Anthropic's Claude models, through Claude Code (command-line agent in the repository) and the claude.ai chat.
 - **What the AI helped with:** drafting and refactoring Python and JavaScript code, writing tests, debugging, drafting documentation (including this README), and suggesting visualization designs.
-- **What the team did:** defined the scientific scope, chose data sources, set the validation criteria, reviewed and ran every change, and decided what was kept. Astronomical values are checked against JPL Horizons, and terrain values come directly from the published LOLA products. The validation table is kept in `tests/horizons_validation/`.
+- **What the team did:** defined the scientific scope, chose data sources, set the validation criteria, reviewed and ran every change, and decided what was kept. Astronomical values are checked against JPL Horizons, terrain values come directly from the published LOLA products, and the coordinates of the landing sites were looked up in LROC QuickMap (see [Data Sources](#data-sources)). The validation table is kept in `tests/horizons_validation/`.
 - **Limits we are aware of:** AI-generated code can contain errors, so every change was tested before merging, and open issues are listed in [CONTEXTO.md](CONTEXTO.md).
 
 ## References
@@ -156,5 +156,20 @@ This project was built with the help of AI tools, as declared here in line with 
 - NASA Lunar Reconnaissance Orbiter (LRO) mission: https://lunar.gsfc.nasa.gov/
 - NASA Moon Trek: https://trek.nasa.gov/moon/
 - NASA JPL Horizons: https://ssd.jpl.nasa.gov/horizons/
-- LROC Quickmap: https://quickmap.lroc.asu.edu/
+- LROC QuickMap. NASA / Arizona State University: https://quickmap.lroc.im-ldi.com/
 - Canadian Space Agency, Moon exploration: https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/
+
+## Data Sources
+
+The coordinates of the landing sites and reference points (`lat`, `lon`, planetocentric, in degrees) were looked up in **QuickMap**, the web map viewer of the LROC (*Lunar Reconnaissance Orbiter Camera*) team of the NASA LRO mission / Arizona State University:
+
+- LROC QuickMap. NASA / Arizona State University. https://quickmap.lroc.im-ldi.com/ (accessed November 15, 2026).
+
+Sites included: Apollo 11, 12, 14, 15, 16 and 17, Chandrayaan-3 (Shiv Shakti), the rim of Shackleton crater, and the lunar south pole.
+
+### Notes and Limitations
+
+- The `verified: true` field means the coordinate was checked against QuickMap.
+- **IM-2** (`verified: false`) is an **approximate position of the target area**, not a confirmed landing coordinate. It should be reviewed before being used as definitive data.
+- The **Shackleton** point is the (approximate) crater rim, not a point location of a specific mission.
+- Coordinates may differ by tenths of a degree depending on the reference system and the viewer's precision.
