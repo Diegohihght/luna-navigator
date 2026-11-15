@@ -38,8 +38,8 @@ Debe servir a planificadores, educadores y público general.
 - Backend: Python 3.11+, FastAPI. Sirve también el frontend.
 - Frontend: HTML + JS sin build, Plotly.js (Leaflet si hacemos mapa polar).
 - Efemérides: Skyfield con kernels JPL y marco lunar (alternativa: SpiceyPy). Confirmar API en la documentación.
-- Terreno: LOLA (vía Moon Trek / PDS), recortes polares. Ray-marching con curvatura lunar (R ≈ 1737.4 km).
-- Cachear horizonte y efemérides de los sitios curados; calcular bajo demanda para coordenadas personalizadas.
+- Terreno: LOLA (NASA LRO, los mismos datos que muestra Moon Trek). Polo sur: `LDEM_80S_80MPP_ADJ` (80 m/px, descarga local en `data/dem/`). Resto de la Luna: LOLA Global LDEM 118 m/px (USGS Astrogeology), leído en remoto por HTTP solo la ventana del sitio. Ray-marching con curvatura lunar (R ≈ 1737.4 km).
+- **Horizontes precalculados de los sitios curados en `data/horizons/` (sí van en Git, ~10 KB por sitio)**, para que la app corra sin descargar DEMs (evaluadores). Se regeneran con `python scripts/build_horizons.py`. Las coordenadas personalizadas se calculan bajo demanda (requiere internet o el DEM local) y se cachean en `data/cache/` (no va en Git).
 
 ## 5. Convenciones y contratos
 **Globales**
@@ -121,7 +121,7 @@ Si algo se atrasa, se recorta alcance, no calidad del núcleo: terreno plano + e
 ## 11. Pendientes
 - [ ] Revisar la pestaña Recursos del reto y pegar enlaces de datos.
 - [ ] Confirmar requisitos de entrega (formato, video, repositorio público, etc.).
-- [ ] Verificar coordenadas de `data/sites.json` con Quickmap.
+- [ ] Verificar coordenadas de `data/sites.json` con Quickmap. **Urgente para Shackleton**: con `-89.9, 129.8` el horizonte llega a 33° y da 0 % de Sol, lo que sugiere un punto dentro del cráter y no en el borde. Si cambia una coordenada, regenerar su perfil con `scripts/build_horizons.py <id>`.
 - [ ] Decidir sitios finales de la lista curada.
 
 ## Estado
@@ -129,6 +129,6 @@ Si algo se atrasa, se recorta alcance, no calidad del núcleo: terreno plano + e
 |---|---|---|
 | Repo + mocks | listo | subido a GitHub (`Diegohihght/luna-navigator`) |
 | A. Efemérides | real en `main` (`source: "skyfield-de421"`) | PR #1 (cálculo con Skyfield) y PR #3 (validación contra JPL Horizons). Pendiente: revisar rendimiento con rangos largos |
-| B. Terreno | código real en `main` (PR #5), requiere el DEM local | `horizon.py` lee `data/dem/LDEM_80S_80MPP_ADJ.TIF` (no va en Git) y necesita `rasterio`. Sin el archivo devuelve horizonte plano con `source: "mock"`, así que las páginas siguen mostrando el aviso |
-| C. Frontend | rediseño en `main` (PR #4) | `index.html` con selector, horizonte SVG, línea de tiempo y comparación. Tema compartido `theme.css` en rama `diego/ui-refresh`, pendiente de PR |
+| B. Terreno | real para los 10 sitios curados (LOLA) | PR #5 (Sennie): DEM polar. Rama `diego/siguiente`: DEM global remoto y horizontes precalculados en `data/horizons/`. Ya no queda ningún sitio curado en mock |
+| C. Frontend | rediseño y tema compartido en `main` (PR #4 y #6) | `index.html` con selector, horizonte SVG, línea de tiempo y comparación; `theme.css` común a las tres páginas |
 | D. Métricas e integración | en `main` con tests | métricas (PR #2 heatmap sitio × fecha y modo educativo). Pendiente: README y guion del pitch |
