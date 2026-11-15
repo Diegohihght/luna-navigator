@@ -1,6 +1,10 @@
 /* vista3d.js — Vista 3D realista del horizonte (sin librerías externas, Canvas 2D).
  * Pestañas: Panorámica 2D · 3D desde fuera (Luna con relieve) · 3D desde el sitio (suelo con cráteres).
  * La Luna, el suelo y la Tierra se iluminan con la posición REAL del Sol (relieve por normales).
+ * Relieve real (frontend/data/relief/, generado con scripts/build_relief.py):
+ *   - Globo: alturas NASA LRO LOLA (118 m, promediadas a 1024x512) y albedo Clementine 750 nm.
+ *   - Suelo desde el sitio: alturas LOLA en ±8 km alrededor de cada sitio curado.
+ *   Si un punto no tiene datos (coordenadas personalizadas) se usa relieve ilustrativo y se indica.
  * Se engancha a updateNow() y drawChart() de index.html sin modificarlas.
  * Convención 3D: x = este, y = arriba, z = norte. Azimut 0° = norte, sentido horario.
  */
@@ -11,7 +15,7 @@
 
   const D2R = Math.PI / 180, TAU = Math.PI * 2;
   const st = {
-    mode: "2d", exag: 3, cache: null, follow: true,
+    mode: "2d", exag: 1, cache: null, follow: true,
     orbit: { yaw: Math.PI + 0.55, pitch: 0.5, dist: 4.6 },
     first: { yaw: 0, off: 0, pitch: 0.08, fov: 85 }
   };
@@ -38,12 +42,12 @@
     '<button class="vtab" data-mode="orbit">3D desde fuera</button>' +
     '<button class="vtab" data-mode="first">3D desde el sitio</button>' +
     '<label class="vexag vfollow"><input type="checkbox" id="vfollow" checked> La cámara sigue al Sol</label>' +
-    '<label class="vexag">Exagerar alturas <select id="vexag"><option value="1">×1 (real)</option><option value="3" selected>×3</option><option value="6">×6</option><option value="10">×10</option></select></label>';
+    '<label class="vexag">Exagerar alturas <select id="vexag"><option value="1" selected>×1 (real)</option><option value="3">×3</option><option value="6">×6</option><option value="10">×10</option></select></label>';
   canvas = document.createElement("canvas");
   canvas.id = "view3d";
   const hint = document.createElement("p");
   hint.className = "vhint";
-  hint.textContent = "Arrastra para girar · rueda del ratón para acercar o alejar · doble clic para reiniciar. El relieve se ilumina con la posición real del Sol; las alturas se pueden exagerar y los astros se dibujan más grandes que en la realidad para que se vean.";
+  hint.textContent = "Arrastra para girar · rueda del ratón para acercar o alejar · doble clic para reiniciar. Relieve: altímetro LOLA de la sonda LRO (NASA); tono de la Luna: mosaico Clementine 750 nm. Se ilumina con la posición real del Sol; las alturas se pueden exagerar y los astros se dibujan más grandes que en la realidad para que se vean.";
   chart.parentNode.insertBefore(bar, chart);
   chart.parentNode.insertBefore(canvas, chart.nextSibling);
   canvas.parentNode.insertBefore(hint, canvas.nextSibling);
@@ -102,8 +106,57 @@
 
   /* ---------- Texturas procedurales (se generan una vez) ---------- */
   const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-  const tex = { moon: null, ground: null, earth: null };
+  const tex = { moon: null, ground: null, earth: null, groundSite: null };
   let loading = false;
+
+  /* ---------- Relieve real (LOLA + Clementine), con respaldo ilustrativo ---------- */
+  const RELIEF = "/data/relief/", MOON_R = 1737400, M_PER_UNIT = 4500; // 1 unidad de escena = 4.5 km en el suelo
+  const real = { state: "idle", manifest: null, ground: {} };
+  const siteKey = s => (+s.lat).toFixed(4) + "_" + (+s.lon).toFixed(4);
+  async function getBin(path, Type) {
+    const r = await fetch(RELIEF + path);
+    if (!r.ok) throw new Error(path + ": " + r.status);
+    return new Type(await r.arrayBuffer());
+  }
+  async function loadReal() {
+    real.state = "loading";
+    try {
+      const r = await fetch(RELIEF + "manifest.json");
+      if (!r.ok) throw new Error("manifest " + r.status);
+      const m = real.manifest = await r.json(), g = m.globe;
+      const [h16, a8] = await Promise.all([getBin(g.heights, Int16Array), getBin(g.albedo, Uint8Array)]);
+      const n = g.w * g.h, hm = new Float32Array(n), al = new Float32Array(n), texel = TAU * MOON_R / g.w;
+      for (let k = 0; k < n; k++) { hm[k] = h16[k] / texel; al[k] = 0.2 + 0.72 * a8[k] / 255; }
+      tex.moon = { hm, al, Wt: g.w, Ht: g.h, real: true };
+      real.state = "ready";
+    } catch (err) {
+      console.warn("Relieve LOLA no disponible; uso relieve ilustrativo.", err);
+      real.state = "failed";
+    }
+    draw3D();
+  }
+  /** Suelo real del sitio: objeto listo, "loading" mientras se descarga, o null (sin datos). */
+  function groundFor(site) {
+    if (real.state !== "ready") return null;
+    const key = siteKey(site), info = real.manifest.ground && real.manifest.ground.sites[key];
+    if (!info) return null;
+    const cur = real.ground[key];
+    if (cur === undefined) {
+      real.ground[key] = "loading";
+      getBin(info.file, Int16Array).then(h16 => {
+        const G = real.manifest.ground, M = tex.moon;
+        let albedo = 0.55;
+        if (M && M.real) {
+          const iu = Math.min(M.Wt - 1, Math.floor((+site.lon / 360 + 0.5) * M.Wt)), iv = Math.min(M.Ht - 1, Math.floor((0.5 - site.lat / 180) * M.Ht));
+          albedo = M.al[iv * M.Wt + iu];
+        }
+        real.ground[key] = { hm: Float32Array.from(h16), n: G.n, extent: G.extent_m, albedo, source: info.source };
+        draw3D();
+      }).catch(err => { console.warn("Sin suelo LOLA para", key, err); real.ground[key] = "failed"; draw3D(); });
+      return "loading";
+    }
+    return cur === "loading" ? "loading" : cur === "failed" ? null : cur;
+  }
 
   /* Ruido fractal: suma de octavas bilineales; amplitud proporcional a la longitud de onda (pendiente constante). */
   function fbm(Wt, Ht, seed, octs, kS, base, wy) {
@@ -231,6 +284,8 @@
     const f = site.lat * D2R, cf = Math.cos(f), sf = Math.sin(f), lon0 = site.lon * D2R;
     const O = [cam.P[0] - GC[0], cam.P[1] - GC[1], cam.P[2] - GC[2]], cc = O[0] * O[0] + O[1] * O[1] + O[2] * O[2] - GR * GR;
     const ps = Math.sqrt(cq.d) / cam.focal, Wt = T.Wt, Ht = T.Ht, hm = T.hm, al = T.al;
+    // Con alturas reales la pendiente ya es física (m/m): se usa tal cual, por la exageración elegida.
+    const kN = T.real ? st.exag : 1.5;
     for (let py = 0; py < bh; py++) {
       const b = -((y0 + py + 0.5) - H / 2) / cam.focal;
       for (let px = 0; px < bw; px++) {
@@ -252,7 +307,7 @@
         const eX = -sl, eY = cl, nX = -sp * cl, nY = -sp * sl, nZ = cp;
         const ex_ = eY, ey_ = eX * cf, ez_ = -eX * sf;
         const nx_ = nY, ny_ = nX * cf + nZ * sf, nz_ = -nX * sf + nZ * cf;
-        let mx = nx - 1.5 * (sE * ex_ + sN * nx_), my = ny - 1.5 * (sE * ey_ + sN * ny_), mz = nzz - 1.5 * (sE * ez_ + sN * nz_);
+        let mx = nx - kN * (sE * ex_ + sN * nx_), my = ny - kN * (sE * ey_ + sN * ny_), mz = nzz - kN * (sE * ez_ + sN * nz_);
         const ml = 1 / Math.hypot(mx, my, mz); mx *= ml; my *= ml; mz *= ml;
         const day = clamp((nx * L[0] + ny * L[1] + nzz * L[2] + 0.04) / 0.14, 0, 1);
         const lamb = Math.max(0, mx * L[0] + my * L[1] + mz * L[2]) * day;
@@ -278,7 +333,39 @@
     ctx.fillStyle = "#c5cbe0"; ctx.font = "600 13px system-ui, sans-serif"; ctx.fillText("LUNA", cq.x - 20, Math.min(H - 6, cq.y + sr + 18));
   }
 
+  /* Suelo real: plano iluminado con las pendientes del DEM de LOLA alrededor del sitio. */
+  function drawGroundReal(cam, L, G) {
+    const gw = Math.ceil(W / 2), gh = Math.ceil(H / 2), B = buffer("ground", gw, gh), data = B.img.data;
+    const hgt = 0.97 * Math.sin(4 * D2R), gain = 1 + 1.6 * (1 - clamp(L[1] * 6, 0, 1));
+    const N = G.n, E = G.extent, pxm = 2 * E / N, h = G.hm, k = st.exag / (2 * pxm), A0 = G.albedo;
+    for (let py = 0; py < gh; py++) {
+      const b = -((py * 2 + 1) - H / 2) / cam.focal;
+      for (let px = 0; px < gw; px++) {
+        const a = ((px * 2 + 1) - W / 2) / cam.focal;
+        const dx = cam.f[0] + cam.r[0] * a + cam.u[0] * b, dy = cam.f[1] + cam.r[1] * a + cam.u[1] * b, dz = cam.f[2] + cam.r[2] * a + cam.u[2] * b;
+        if (dy > -1e-4) continue;
+        const s = -hgt / dy, dist = s * Math.hypot(dx, dy, dz);
+        const fi = (s * dx * M_PER_UNIT + E) / pxm - 0.5, fj = (E - s * dz * M_PER_UNIT) / pxm - 0.5;
+        let sx = 0, sz = 0;
+        if (fi >= 1 && fi < N - 1 && fj >= 1 && fj < N - 1) {
+          const r = (fj | 0) * N + (fi | 0);
+          sx = (h[r + 1] - h[r - 1]) * k;      // dh/dx hacia el este
+          sz = (h[r - N] - h[r + N]) * k;      // dh/dz hacia el norte (fila 0 = norte)
+        }
+        const fade = clamp(1.25 - dist / 1.4, 0, 1);
+        sx *= fade; sz *= fade;
+        const il = 1 / Math.hypot(sx, 1, sz), lamb = Math.max(0, (-sx * L[0] + L[1] - sz * L[2]) * il);
+        const v = A0 * (0.04 + 0.95 * gain * lamb), o = (py * gw + px) * 4;
+        data[o] = clamp(v * 255 + 3, 0, 255); data[o + 1] = clamp(v * 250 + 4, 0, 255); data[o + 2] = clamp(v * 240 + 8, 0, 255); data[o + 3] = 255;
+      }
+    }
+    B.x.putImageData(B.img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(B.c, 0, 0, W, H);
+  }
+
   function drawGround(cam, L) {
+    if (tex.groundSite) return drawGroundReal(cam, L, tex.groundSite);
     const T = tex.ground, P = T.P, gw = Math.ceil(W / 2), gh = Math.ceil(H / 2);
     const B = buffer("ground", gw, gh), data = B.img.data, hm = T.hm, al = T.al;
     const hgt = 0.97 * Math.sin(4 * D2R), gain = 1 + 1.6 * (1 - clamp(L[1] * 6, 0, 1));
@@ -373,7 +460,14 @@
   function draw3D() {
     if (st.mode === "2d" || !ctx || !S.eph || !S.hor) return;
     const orbit = st.mode === "orbit";
-    if (!tex.earth || (orbit && !tex.moon) || (!orbit && !tex.ground)) {
+    if (real.state === "idle") loadReal();
+    if (real.state === "loading") { message("Cargando relieve LOLA (NASA)…"); return; }
+    if (!orbit) {
+      const g = groundFor(siteNow());
+      if (g === "loading") { message("Cargando el terreno LOLA del sitio…"); return; }
+      tex.groundSite = g;
+    }
+    if (!tex.earth || (orbit && !tex.moon) || (!orbit && !tex.groundSite && !tex.ground)) {
       message("Generando relieve de la Luna…");
       if (!loading) { loading = true; setTimeout(() => { if (!tex.earth) tex.earth = genEarth(); if (st.mode === "orbit" && !tex.moon) tex.moon = genMoon(); if (st.mode === "first" && !tex.ground) tex.ground = genGround(); loading = false; draw3D(); }, 30); }
       return;
@@ -445,6 +539,11 @@
     }
     ctx.fillStyle = "#9aa3bd"; ctx.font = "12px system-ui, sans-serif";
     ctx.fillText((st.exag === 1 ? "Alturas reales" : "Alturas exageradas ×" + st.exag) + " · " + site.name + " (" + (+site.lat).toFixed(2) + "°, " + (+site.lon).toFixed(2) + "°)", 12, 20);
+    const relief = orbit
+      ? (tex.moon && tex.moon.real ? "Relieve: LOLA (NASA LRO) · tono: Clementine 750 nm" : "Relieve del globo ilustrativo (datos LOLA no cargados)")
+      : (tex.groundSite ? "Suelo: " + tex.groundSite.source + " · ±8 km · vista desde ~300 m" : "Suelo ilustrativo: no hay datos LOLA locales para este punto");
+    ctx.fillStyle = tex.groundSite || (orbit && tex.moon && tex.moon.real) ? "#7fd8b0" : "#f5d98f";
+    ctx.fillText(relief, 12, 38);
     const notes = [];
     if (!sunVis) notes.push("Es de noche aquí: el Sol está bajo el horizonte (se muestra en transparencia).");
     if (tr.earthFixed) notes.push("La Tierra casi no se mueve en el cielo lunar: es normal, la Luna siempre muestra la misma cara.");

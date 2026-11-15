@@ -1,0 +1,58 @@
+{
+  "globe": {
+    "w": 1024,
+    "h": 512,
+    "heights": "globe_lola_1024x512.i16",
+    "albedo": "globe_albedo_1024x512.u8",
+    "heights_source": "NASA LRO LOLA Global LDEM 118 m (USGS Astrogeology), promedio a 1024x512",
+    "albedo_source": "Clementine UVVIS 750 nm Global Mosaic 118 m v2 (USGS Astrogeology), estirado p1-p99 en |lat|<60°; por encima de 60° se funde a gris neutro (dato poco fiable en los polos)",
+    "layout": "equirectangular, fila 0 = 90°N, columna 0 = 180°W; Int16 LE en metros / Uint8"
+  },
+  "ground": {
+    "n": 256,
+    "extent_m": 8000.0,
+    "layout": "fila 0 = norte, columna 0 = oeste; Int16 LE en metros",
+    "sites": {
+      "0.6740_23.4730": {
+        "file": "ground/ground_0.6740_23.4730.i16",
+        "source": "LOLA Global_LDEM_118m_Mar2014 (118 m/px)"
+      },
+      "-3.0130_-23.4220": {
+        "file": "ground/ground_-3.0130_-23.4220.i16",
+        "source": "LOLA Global_LDEM_118m_Mar2014 (118 m/px)"
+      },
+      "-3.6450_-17.4710": {
+        "file": "ground/ground_-3.6450_-17.4710.i16",
+        "source": "LOLA Global_LDEM_118m_Mar2014 (118 m/px)"
+      },
+      "26.1320_3.6330": {
+        "file": "ground/ground_26.1320_3.6330.i16",
+        "source": "LOLA Global_LDEM_118m_Mar2014 (118 m/px)"
+      },
+      "-8.9730_15.5000": {
+        "file": "ground/ground_-8.9730_15.5000.i16",
+        "source": "LOLA Global_LDEM_118m_Mar2014 (118 m/px)"
+      },
+      "20.1910_30.7720": {
+        "file": "ground/ground_20.1910_30.7720.i16",
+        "source": "LOLA Global_LDEM_118m_Mar2014 (118 m/px)"
+      },
+      "-69.3730_32.3190": {
+        "file": "ground/ground_-69.3730_32.3190.i16",
+        "source": "LOLA Global_LDEM_118m_Mar2014 (118 m/px)"
+      },
+      "-84.7900_29.2000": {
+        "file": "ground/ground_-84.7900_29.2000.i16",
+        "source": "LOLA LDEM_80S_80MPP_ADJ (80 m/px)"
+      },
+      "-89.9000_129.8000": {
+        "file": "ground/ground_-89.9000_129.8000.i16",
+        "source": "LOLA LDEM_80S_80MPP_ADJ (80 m/px)"
+      },
+      "-90.0000_0.0000": {
+        "file": "ground/ground_-90.0000_0.0000.i16",
+        "source": "LOLA LDEM_80S_80MPP_ADJ (80 m/px)"
+      }
+    }
+  }
+}
