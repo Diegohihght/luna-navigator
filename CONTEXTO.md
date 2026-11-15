@@ -83,8 +83,8 @@ Regla: Sol/Tierra visible si su elevación > elevación del horizonte en ese azi
 | Rol | Persona | Archivos | Entrega |
 |---|---|---|---|
 | A. Efemérides | **Martin** | `backend/ephemeris.py` | az/el de Sol y Tierra reales, validados contra JPL Horizons |
-| B. Terreno | **Sennie** | `backend/horizon.py`, `data/dem/` | perfil de horizonte con LOLA, cacheado para los sitios curados |
-| C. Frontend | **Luis** | `frontend/` | selector, vista de horizonte, línea de tiempo, comparación |
+| B. Terreno | **Sennie** | `backend/horizon.py`, `data/dem/`, `data/horizons/` | perfil de horizonte con LOLA (DEM polar local o DEM global remoto), precalculado para los sitios curados |
+| C. Frontend | **Luis** | `frontend/` | selector, vista de horizonte, línea de tiempo, comparación, vistas 3D (`vista3d.js`) con relieve de `frontend/data/relief/` |
 | D. Métricas e integración | **Diego** | `backend/metrics.py`, `backend/main.py`, docs, pitch | métricas, heatmap sitio × fecha, modo educativo, README, presentación |
 
 Cómo trabajamos con Claude: Diego usa Claude Code con acceso al repo (lee `CLAUDE.md`). Martin, Sennie y Luis usan el chat de claude.ai y siguen `PROMPTS.md`. El repo es la memoria compartida.
@@ -124,12 +124,14 @@ Si algo se atrasa, se recorta alcance, no calidad del núcleo: terreno plano + e
 - [ ] Confirmar requisitos de entrega (formato, video, repositorio público, etc.).
 - [ ] Verificar coordenadas de `data/sites.json` con Quickmap. **Urgente para Shackleton**: con `-89.9, 129.8` el horizonte llega a 33° y da 0 % de Sol, lo que sugiere un punto dentro del cráter y no en el borde. Si cambia una coordenada, regenerar su perfil con `scripts/build_horizons.py <id>`.
 - [ ] Decidir sitios finales de la lista curada.
+- [ ] Revisar y mergear PR #7 (`diego/siguiente`, terreno real; Sennie debe revisar `horizon.py`). Después, abrir y mergear el PR de `diego/relieve-3d` (vistas 3D de Luis con relieve real; ya contiene el PR #7, así que conviene mergear #7 primero o cerrarlo como duplicado).
+- [ ] Decidir si se sustituye el "relieve ilustrativo" de las coordenadas personalizadas por un DEM local de respaldo.
 
 ## Estado
 | Módulo | Estado | Notas |
 |---|---|---|
 | Repo + mocks | listo | subido a GitHub (`Diegohihght/luna-navigator`) |
 | A. Efemérides | real en `main` (`source: "skyfield-de421"`) | PR #1 (cálculo con Skyfield) y PR #3 (validación contra JPL Horizons). Pendiente: revisar rendimiento con rangos largos |
-| B. Terreno | real para los 10 sitios curados (LOLA) | PR #5 (Sennie): DEM polar. Rama `diego/siguiente`: DEM global remoto y horizontes precalculados en `data/horizons/`. Ya no queda ningún sitio curado en mock |
-| C. Frontend | rediseño y tema compartido en `main` (PR #4 y #6) | `index.html` con selector, horizonte SVG, línea de tiempo y comparación; `theme.css` común a las tres páginas. Vistas 3D (`vista3d.js`, Luis) con relieve real en la rama `diego/relieve-3d` |
+| B. Terreno | real para los 10 sitios curados (LOLA) | PR #5 (Sennie, en `main`): DEM polar. PR #7 (`diego/siguiente`, abierto): DEM global remoto y horizontes precalculados en `data/horizons/`. Ya no queda ningún sitio curado en mock |
+| C. Frontend | rediseño y tema compartido en `main` (PR #4 y #6) | `index.html` con selector, horizonte SVG, línea de tiempo y comparación; `theme.css` común a las tres páginas. Vistas 3D con relieve real (`vista3d.js` de Luis + `frontend/data/relief/`) en la rama `diego/relieve-3d`, sin PR todavía |
 | D. Métricas e integración | en `main` con tests | métricas (PR #2 heatmap sitio × fecha y modo educativo). Pendiente: README y guion del pitch |
