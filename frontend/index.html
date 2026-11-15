@@ -10,7 +10,6 @@
   --bg:#171b26; --panel:#202638; --panel2:#283048; --line:#343d58;
   --text:#e8eaf2; --muted:#9aa3bd; --sun:#f4b942; --earth:#5ab0f0;
   --ok:#5fcf9a; --bad:#ef7b6b; --accent:#b9a6ff;
-  --font:"Segoe UI","Helvetica Neue",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.45}
@@ -70,6 +69,48 @@ td.best{color:var(--ok);font-weight:650}
 .empty{color:var(--muted);font-size:14px;padding:6px 0}
 </style>
 <link rel="stylesheet" href="/theme.css">
+<style>
+/* Barra lateral fija: controles + resumen siempre a la vista mientras se explora el horizonte. */
+.layout{grid-template-columns:minmax(300px,350px) 1fr}
+aside{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+.autonote{font-size:12px;color:var(--muted);margin:-6px 0 0;text-align:center}
+#siteinfo{border-top:1px solid var(--line);padding-top:12px}
+.summary{border-top:1px solid var(--line);padding-top:14px}
+.summary h2{margin:0 0 2px;font-size:15px;font-weight:650}
+.summary .hint{margin:0 0 10px}
+.summary .metrics{grid-template-columns:1fr 1fr;gap:8px}
+.summary .m{padding:9px 10px 9px 13px}
+.summary .m span{font-size:10.5px;line-height:1.25;min-height:2.5em}
+.summary .m b{font-size:19px}
+body.edu .summary .metrics{grid-template-columns:1fr}
+body.edu .summary .m span{min-height:0}
+.busy #go{opacity:.7}
+@media(max-width:900px){.layout{grid-template-columns:1fr}aside{position:static;max-height:none}}
+.kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--muted)}
+.shortcuts{color:var(--muted);font-size:12px;margin:10px 0 0}
+.cmpbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.btn.sm{width:auto;padding:6px 14px;font-size:13px}
+.cmpcount{color:var(--muted);font-size:12.5px;margin-left:auto}
+.chip.on{border-color:var(--accent);background:rgba(76,201,240,.12)}
+.cmpbest{font-size:13.5px;color:var(--text);margin-top:2px}
+.cmpbest b{color:var(--ok)}
+th.win,td.winc{background:rgba(79,224,164,.06)}
+/* Selector de sitios: un solo desplegable en lugar de una fila de botones. */
+.dropsel{position:relative;margin-bottom:12px}
+.dropsel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--panel2);border:1px solid var(--line-strong);border-radius:12px;user-select:none;transition:border-color .2s,box-shadow .2s}
+.dropsel>summary::-webkit-details-marker{display:none}
+.dropsel>summary:hover,.dropsel[open]>summary{border-color:var(--accent);box-shadow:0 0 0 3px rgba(76,201,240,.12)}
+.dsl{font-weight:650}
+.dsn{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.dropsel .cmpcount{margin-left:auto;white-space:nowrap;font-family:var(--mono)}
+.dchev{flex:none;width:9px;height:9px;border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(45deg);transition:transform .25s;margin:0 4px 3px 0}
+.dropsel[open] .dchev{transform:rotate(-135deg);margin-bottom:-3px}
+.dsel-panel{position:absolute;z-index:15;left:0;right:0;top:calc(100% + 8px);background:#0b1122;border:1px solid var(--line-strong);border-radius:14px;padding:14px;box-shadow:0 26px 60px rgba(0,0,0,.65);max-height:min(60vh,420px);overflow:auto;animation:dselIn .22s ease both}
+@keyframes dselIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.dsel-panel .cmpbar{margin-bottom:12px}
+.dsel-panel .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:0}
+.dsel-panel .chip{border-radius:10px}
+</style>
 </head>
 <body>
 <header>
@@ -96,18 +137,18 @@ td.best{color:var(--ok);font-weight:650}
       <label>Paso (min)<select id="step"><option>15</option><option>30</option><option selected>60</option><option>180</option></select></label>
     </div>
     <button class="btn" id="go">Calcular escenario</button>
+    <div class="autonote" id="autonote">Se recalcula solo al cambiar sitio, fechas o paso.</div>
     <div id="siteinfo">Elige un sitio y calcula.</div>
+    <section class="summary" aria-labelledby="sumh">
+      <h2 id="sumh">Resumen del periodo</h2>
+      <p class="hint">Métricas de todo el rango de fechas elegido.</p>
+      <div class="metrics" id="metrics"><div class="empty">Sin datos todavía.</div></div>
+    </section>
   </aside>
 
   <main>
     <div id="banner">Datos de demostración: el backend aún devuelve valores de prueba (mock). Los números no son reales todavía.</div>
     <div id="err"></div>
-
-    <section class="card">
-      <h2>Resumen del periodo</h2>
-      <p class="hint">Métricas calculadas sobre todo el rango de fechas elegido.</p>
-      <div class="metrics" id="metrics"><div class="empty">Sin datos todavía.</div></div>
-    </section>
 
     <section class="card">
       <h2>Vista del horizonte</h2>
@@ -119,13 +160,30 @@ td.best{color:var(--ok);font-weight:650}
         <input type="range" id="slider" min="0" max="0" value="0" style="flex:1" aria-label="Momento del periodo">
         <div id="tlabel">—</div>
       </div>
+      <p class="shortcuts"><span class="kbd">Espacio</span> reproducir · <span class="kbd">←</span> <span class="kbd">→</span> mover una hora · <span class="kbd">↑</span> <span class="kbd">↓</span> mover un día · <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> cambiar de vista · <span class="kbd">Z</span> alejar/acercar la vista 3D</p>
     </section>
 
     <section class="card">
       <h2>Comparar sitios</h2>
-      <p class="hint">Marca dos o más sitios y compara el mismo periodo lado a lado. En verde, el mejor valor de cada fila.</p>
-      <div class="chips" id="chips"></div>
-      <button class="btn ghost" id="cmp" style="width:auto;padding:9px 18px">Comparar seleccionados</button>
+      <p class="hint">Marca dos o más sitios y la comparación se actualiza sola, con el mismo periodo del panel izquierdo. En verde, el mejor valor de cada fila.</p>
+      <details class="dropsel" id="dsel">
+        <summary>
+          <span class="dsl">Sitios a comparar</span>
+          <span class="dsn" id="dsn"></span>
+          <span class="cmpcount" id="cmpcount"></span>
+          <i class="dchev" aria-hidden="true"></i>
+        </summary>
+        <div class="dsel-panel">
+          <div class="cmpbar">
+            <button class="btn ghost sm" id="cmpAll">Seleccionar todos</button>
+            <button class="btn ghost sm" id="cmpNone">Quitar todos</button>
+            <button class="btn ghost sm" id="cmpInv">Invertir</button>
+            <button class="btn ghost sm" id="cmpCur" title="Deja marcado solo el sitio elegido arriba, más el siguiente">Solo el sitio actual</button>
+          </div>
+          <div class="chips" id="chips"></div>
+        </div>
+      </details>
+      <div id="cmpbest" class="cmpbest"></div>
       <div id="cmpout" style="margin-top:14px;overflow-x:auto"></div>
     </section>
   </main>
@@ -161,8 +219,13 @@ async function loadSites(){
   catch(e){ showErr("No se pudo cargar la lista de sitios. ¿Está corriendo el servidor (uvicorn backend.main:app --reload)?"); return; }
   $("site").innerHTML = S.sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join("")
     + `<option value="__custom">Coordenadas personalizadas…</option>`;
-  $("chips").innerHTML = S.sites.map((s,i)=>
-    `<label class="chip"><input type="checkbox" value="${s.id}" ${i<2?"checked":""}>${s.name}</label>`).join("");
+  let saved = null;
+  try{ saved = JSON.parse(localStorage.getItem("lunar.cmp")||"null"); }catch(e){}
+  const valid = Array.isArray(saved) ? saved.filter(id=>S.sites.some(s=>s.id===id)) : [];
+  const sel = valid.length>=2 ? valid : S.sites.slice(0,2).map(s=>s.id);
+  $("chips").innerHTML = S.sites.map(s=>
+    `<label class="chip"><input type="checkbox" value="${s.id}" ${sel.includes(s.id)?"checked":""}>${s.name}</label>`).join("");
+  syncChips();
   updateSiteInfo();
 }
 function currentSite(){
@@ -185,8 +248,10 @@ function range(){
 }
 
 /* ---------- Cálculo principal ---------- */
+let runSeq = 0;
 async function run(){
-  const s = currentSite(); if(!s) return;
+  const s = currentSite(); if(!s || !Number.isFinite(s.lat) || !Number.isFinite(s.lon)) return;
+  const my = ++runSeq;
   showErr(""); $("go").disabled = true; $("go").textContent = "Calculando…"; stop();
   const base = {lat:s.lat, lon:s.lon};
   try{
@@ -195,15 +260,21 @@ async function run(){
       api("horizon",{...base,radius_km:50}),
       api("metrics",{...base,...range()})
     ]);
+    if(my !== runSeq) return;   // llegó una respuesta más nueva: esta ya no sirve
     S.eph=eph; S.hor=hor; S.met=met; S.i=0;
     const mock = [eph.source, hor.source, JSON.stringify(met.source)].join().includes("mock");
     $("banner").style.display = mock ? "block" : "none";
     renderMetrics(); drawChart();
     const sl=$("slider"); sl.max = eph.t.length-1; sl.value=0;
     updateNow();
-  }catch(e){ showErr(e.message+". Revisa que el backend esté corriendo y los parámetros sean válidos."); }
+  }catch(e){ if(my !== runSeq) return; showErr(e.message+". Revisa que el backend esté corriendo y los parámetros sean válidos."); }
   $("go").disabled=false; $("go").textContent="Calcular escenario";
 }
+/* Recalcula solo al cambiar un control (con una pausa corta para no pedir en cada tecla). */
+let autoTimer = null;
+function autoRun(){ clearTimeout(autoTimer); autoTimer = setTimeout(run, 350); }
+["site","lat","lon","start","days","step"].forEach(id => $(id).addEventListener("change", autoRun));
+["lat","lon","days"].forEach(id => $(id).addEventListener("input", autoRun));
 
 function renderMetrics(){
   const m = S.met;
@@ -286,29 +357,89 @@ $("play").onclick = ()=>{
   },80);
 };
 $("slider").oninput = e=>{ S.i=+e.target.value; updateNow(); };
+$("slider").addEventListener("change", ()=>$("slider").blur());   // para que las flechas del teclado vuelvan a funcionar
+
+/* ---------- Atajos de teclado (no actúan mientras se escribe en un campo) ---------- */
+document.addEventListener("keydown", ev=>{
+  if(!S.eph || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const t = ev.target, tag = t && t.tagName;
+  if(tag==="INPUT" || tag==="SELECT" || tag==="TEXTAREA" || tag==="BUTTON") return;
+  const per = Math.max(1, Math.round(60/(+$("step").value)));   // muestras por hora
+  const go = n => { S.i = Math.min(S.eph.t.length-1, Math.max(0, S.i+n)); $("slider").value=S.i; updateNow(); ev.preventDefault(); };
+  if(ev.key===" ") { $("play").click(); ev.preventDefault(); }
+  else if(ev.key==="ArrowRight") go(per);
+  else if(ev.key==="ArrowLeft") go(-per);
+  else if(ev.key==="ArrowUp") go(per*24);
+  else if(ev.key==="ArrowDown") go(-per*24);
+});
 
 /* ---------- Comparación ---------- */
-$("cmp").onclick = async ()=>{
-  const ids=[...document.querySelectorAll("#chips input:checked")].map(c=>c.value);
-  if(ids.length<2){ $("cmpout").innerHTML='<div class="empty">Marca al menos dos sitios.</div>'; return; }
-  $("cmpout").innerHTML='<div class="empty">Calculando…</div>';
+const chipBoxes = () => [...document.querySelectorAll("#chips input")];
+const chipIds = () => chipBoxes().filter(c=>c.checked).map(c=>c.value);
+let cmpKey = "", cmpSeq = 0, cmpTimer = null;
+function syncChips(){
+  chipBoxes().forEach(c=>c.closest(".chip").classList.toggle("on", c.checked));
+  const n = chipIds().length, tot = chipBoxes().length;
+  $("cmpcount").textContent = `${n} de ${tot} seleccionados`;
+  const names = chipBoxes().filter(c=>c.checked).map(c=>c.closest(".chip").textContent.trim().replace(/\s*\(.*\)$/,""));
+  $("dsn").textContent = names.length ? names.slice(0,3).join(", ") + (names.length>3 ? ` +${names.length-3}` : "") : "Ninguno";
+  try{ localStorage.setItem("lunar.cmp", JSON.stringify(chipIds())); }catch(e){}
+}
+function setChips(fn){ chipBoxes().forEach((c,i)=>{ c.checked = fn(c,i); }); syncChips(); autoCompare(); }
+/* Compara solo cuando cambia algo (sitios o fechas), con una pausa corta para agrupar clics. */
+function autoCompare(force){ clearTimeout(cmpTimer); cmpTimer = setTimeout(()=>compare(force), 300); }
+async function compare(force){
+  const ids = chipIds();
+  if(ids.length<2){ cmpKey=""; $("cmpbest").innerHTML=""; $("cmpout").innerHTML='<div class="empty">Marca al menos dos sitios.</div>'; return; }
+  const rg = range(), key = ids.join(",")+"|"+rg.start+"|"+rg.end+"|"+rg.step_min;
+  if(!force && key===cmpKey) return;
+  const my = ++cmpSeq;
+  $("cmpout").innerHTML='<div class="empty">Calculando…</div>'; $("cmpbest").innerHTML="";
   try{
-    const res = await api("compare",{sites:ids.join(","),...range()});
-    const head = res.map(r=>`<th>${r.name}</th>`).join("");
+    const res = await api("compare",{sites:ids.join(","),...rg});
+    if(my!==cmpSeq) return;
+    cmpKey = key;
+    const wins = res.map(()=>0);
     const rows = METRICS.map(([k,name,u,,,dir])=>{
       const vals=res.map(r=>r.metrics[k]);
       const best = dir===0 ? null : (dir>0?Math.max(...vals):Math.min(...vals));
-      return `<tr><th>${name}</th>${vals.map(v=>`<td class="${best!==null&&v===best&&new Set(vals).size>1?"best":""}">${fmt(v)} ${u}</td>`).join("")}</tr>`;
+      const decisive = best!==null && new Set(vals).size>1;
+      return `<tr><th>${name}</th>${vals.map((v,j)=>{
+        const w = decisive && v===best; if(w) wins[j]++;
+        return `<td class="${w?"best":""}">${fmt(v)} ${u}</td>`;
+      }).join("")}</tr>`;
     }).join("");
+    const top = Math.max(...wins), leaders = res.filter((_,j)=>wins[j]===top);
+    const head = res.map((r,j)=>`<th class="${top>0&&wins[j]===top?"win":""}">${r.name}</th>`).join("");
+    const scored = METRICS.filter(m=>m[5]!==0).length;
+    $("cmpbest").innerHTML = top>0 && leaders.length===1
+      ? `Mejor opción en este periodo: <b>${leaders[0].name}</b>, gana en ${top} de ${scored} métricas comparables.`
+      : top>0 ? `Empate entre <b>${leaders.map(l=>l.name).join("</b> y <b>")}</b> (${top} de ${scored} métricas cada uno).` : "";
     $("cmpout").innerHTML=`<table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
-  }catch(e){ $("cmpout").innerHTML=`<div class="empty">${e.message}</div>`; }
+  }catch(e){ if(my!==cmpSeq) return; $("cmpout").innerHTML=`<div class="empty">${e.message}</div>`; }
+}
+$("chips").addEventListener("change", ()=>{ syncChips(); autoCompare(); });
+$("cmpAll").onclick = ()=>setChips(()=>true);
+$("cmpNone").onclick = ()=>setChips(()=>false);
+$("cmpInv").onclick = ()=>setChips(c=>!c.checked);
+$("cmpCur").onclick = ()=>{
+  const cur = $("site").value, ids = S.sites.map(s=>s.id), i = ids.indexOf(cur);
+  const pick = new Set([cur, ids[(i+1)%ids.length]]);
+  setChips(c=>pick.has(c.value));
 };
+/* Si cambian las fechas o el paso, la comparación se rehace sola (el sitio del panel no la afecta). */
+["start","days","step"].forEach(id => $(id).addEventListener("change", ()=>autoCompare()));
+$("days").addEventListener("input", ()=>autoCompare());
+
+/* El desplegable de sitios se cierra al hacer clic fuera o con Escape. */
+document.addEventListener("click", ev => { const d=$("dsel"); if(d && d.open && !d.contains(ev.target)) d.open=false; });
+document.addEventListener("keydown", ev => { const d=$("dsel"); if(ev.key==="Escape" && d && d.open){ d.open=false; d.querySelector("summary").focus(); } });
 
 /* ---------- Eventos e inicio ---------- */
 $("site").onchange = updateSiteInfo;
 $("go").onclick = run;
 $("edu").onchange = e=>document.body.classList.toggle("edu", e.target.checked);
-loadSites().then(run);
+loadSites().then(()=>{ run(); compare(); });
 </script>
 <script src="/vista3d.js"></script>
 </body>

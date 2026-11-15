@@ -13,18 +13,31 @@
     .hero { display: flex; align-items: center; gap: 22px; }
     .hero h2 { margin: 2px 0 6px; font-size: 28px; line-height: 1.15; letter-spacing: -.3px; font-weight: 650; }
     .hero p { margin: 0; color: var(--muted); max-width: 70ch; }
+    #heroMoon { width: 128px; height: 128px; flex: none; filter: drop-shadow(0 0 22px rgba(190,200,230,.18)); }
     .controls { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
     .controls input, .controls select, .controls .btn { height: 40px; }
-    @media (max-width: 800px) { .controls { grid-template-columns: 1fr 1fr; } }
-    .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; width: max-content; }
-    .tabs button { padding: 7px 18px; border: 0; background: none; border-radius: 999px; cursor: pointer; color: var(--muted); font-size: 13.5px; }
+    @media (max-width: 800px) { .controls { grid-template-columns: 1fr 1fr; } .hero { flex-direction: column; align-items: flex-start; } }
+
+    /* ---------- Pestañas ---------- */
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; width: max-content; max-width: 100%; flex-wrap: wrap; }
+    .tabs button { padding: 7px 18px; border: 0; background: none; border-radius: 999px; cursor: pointer; color: var(--muted); font-size: 13.5px; transition: color .2s, background .2s, box-shadow .2s; }
+    .tabs button:hover { color: var(--text); }
     .tabs button.on { background: rgba(76, 201, 240, .16); color: var(--text); box-shadow: inset 0 0 0 1px rgba(76, 201, 240, .5); }
+    .pane { display: none; gap: 18px; }
+    .pane.on { display: grid; animation: paneIn .45s ease both; }
+    @keyframes paneIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* ---------- Lecciones ---------- */
     .lesson { display: grid; gap: 14px; }
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.in { opacity: 1; transform: none; }
     .lesson-head { display: flex; align-items: center; gap: 14px; }
     .num { font-family: var(--mono); font-size: 13px; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
            background: rgba(76, 201, 240, .12); border: 1px solid rgba(76, 201, 240, .45); color: var(--accent); flex: none; }
     .num.sun { background: rgba(255, 180, 59, .12); border-color: rgba(255, 180, 59, .5); color: var(--sun); }
     .num.earth { background: rgba(77, 163, 255, .12); border-color: rgba(77, 163, 255, .5); color: var(--earth); }
+    .num.ok { background: rgba(79, 224, 164, .12); border-color: rgba(79, 224, 164, .5); color: var(--ok); }
+    .num.bad { background: rgba(255, 122, 107, .12); border-color: rgba(255, 122, 107, .5); color: var(--bad); }
     .lesson h2 { margin: 0; font-size: 19px; letter-spacing: -.1px; }
     .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 22px; align-items: start; }
     @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
@@ -32,22 +45,124 @@
     .readout { background: rgba(5, 9, 20, .6); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; color: #d5dcee; }
     .readout b { font-family: var(--mono); color: #fff; font-weight: 600; }
     .readout .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-    .stat { flex: 1 1 110px; background: var(--panel2); border-radius: 10px; padding: 8px 10px; border: 1px solid var(--line); }
+    .stat { flex: 1 1 110px; background: linear-gradient(160deg, var(--panel2), rgba(20,26,46,.7)); border-radius: 10px; padding: 8px 10px; border: 1px solid var(--line); transition: transform .2s, border-color .2s; }
+    .stat:hover { transform: translateY(-2px); border-color: rgba(76,201,240,.45); }
     .stat span { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-    .stat b { font-size: 20px; }
+    .stat b { font-size: 20px; font-variant-numeric: tabular-nums; }
     .stat.sun b { color: var(--sun); } .stat.earth b { color: var(--earth); } .stat.ok b { color: var(--ok); } .stat.bad b { color: var(--bad); }
     .plot { height: 300px; }
-    #c1 { height: 400px; }
-    svg.tilt { width: 100%; max-width: 360px; height: auto; display: block; margin: 10px 0 0; }
-    .myths { display: grid; gap: 12px; }
-    .myth { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
-    @media (max-width: 800px) { .myth { grid-template-columns: 1fr; } }
-    .myth > div { padding: 14px 18px; }
-    .myth .m { background: rgba(255, 122, 107, .07); border-right: 1px solid var(--line); }
-    .myth .f { background: rgba(79, 224, 164, .06); }
-    .myth .lab { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 4px; display: block; }
-    .myth .m .lab { color: var(--bad); } .myth .f .lab { color: var(--ok); }
+    .plot.sm { height: 280px; }
+    #c1 { height: 380px; }
+    #c4, #c5 { height: 320px; }
+
+    /* Esferas con textura (canvas) */
+    .tiltpair { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .sph { position: relative; width: 186px; height: 186px; margin: 0; }
+    .sph canvas { position: absolute; left: 14%; top: 14%; width: 72%; height: 72%; }
+    .sph svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .sph figcaption { position: absolute; left: 0; right: 0; bottom: -6px; text-align: center; font-size: 12px; color: var(--muted); }
+    .sph.earthg canvas { filter: drop-shadow(0 0 10px rgba(90,160,255,.45)); }
+    .sph.moong canvas { filter: drop-shadow(0 0 8px rgba(200,205,225,.25)); }
+
+    /* ---------- Desplegables (charts): bien visibles para que no se pasen por alto ---------- */
+    details.dd { border: 1px solid rgba(76,201,240,.5); border-left: 4px solid var(--accent); border-radius: 12px; overflow: hidden;
+                 background: linear-gradient(90deg, rgba(76,201,240,.17), rgba(143,123,255,.09) 55%, rgba(8,12,26,.6));
+                 transition: border-color .25s, box-shadow .25s; }
+    details.dd:not([open]) { animation: ddGlow 3.2s ease-in-out infinite; }
+    @keyframes ddGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(76,201,240,0); } 50% { box-shadow: 0 0 0 4px rgba(76,201,240,.16), 0 8px 24px -10px rgba(76,201,240,.55); } }
+    details.dd:hover { border-color: var(--accent); }
+    details.dd[open] { box-shadow: 0 14px 34px -18px rgba(76,201,240,.7); }
+    details.dd > summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 650; color: #fff; user-select: none; }
+    details.dd > summary::-webkit-details-marker { display: none; }
+    details.dd > summary::before { content: "DESPLEGABLE"; font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .14em; padding: 4px 9px; border-radius: 7px;
+                                   background: rgba(76,201,240,.22); color: var(--accent); border: 1px solid rgba(76,201,240,.5); flex: none; }
+    details.dd > summary > span { flex: 1; min-width: 0; }
+    details.dd .chev { flex: none; width: auto; height: auto; margin: 0; transform: none; font-style: normal; font-family: var(--mono); font-size: 12.5px; font-weight: 500; padding: 6px 14px; border-radius: 999px;
+                       background: var(--accent); color: #04222d; border: 0; box-shadow: 0 4px 14px rgba(76,201,240,.35); transition: transform .2s, background .2s; }
+    details.dd .chev::before { content: "Abrir ▾"; }
+    details.dd:not([open]) .chev { animation: ddNudge 2.4s ease-in-out infinite; }
+    @keyframes ddNudge { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(3px); } 90% { transform: translateY(-2px); } }
+    details.dd:hover .chev { transform: translateY(-1px) scale(1.05); }
+    details.dd[open] .chev { background: rgba(255,255,255,.14); color: #fff; box-shadow: none; }
+    details.dd[open] .chev::before { content: "Cerrar ▴"; }
+    details.dd .dd-body { padding: 4px 14px 14px; animation: ddOpen .4s ease both; }
+    @keyframes ddOpen { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    @media (max-width: 640px) { details.dd > summary::before { display: none; } }
+
+    /* ---------- Botones con movimiento ---------- */
+    .mbtn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text);
+            padding: 9px 16px; border-radius: 999px; cursor: pointer; font-size: 13.5px; text-decoration: none; font-family: inherit;
+            transition: transform .22s cubic-bezier(.3,1.7,.5,1), box-shadow .25s, background .25s, border-color .25s; }
+    .mbtn:hover { transform: translateY(-3px); box-shadow: 0 10px 22px -10px rgba(76,201,240,.7); border-color: rgba(76,201,240,.65); }
+    .mbtn:active { transform: translateY(0) scale(.95); }
+    .mbtn:disabled { opacity: .4; pointer-events: none; }
+    .mbtn.primary { background: linear-gradient(135deg, #4cc9f0, #7a8cff); color: #07111f; font-weight: 650; border-color: transparent; }
+    .mbtn.primary.pulse { animation: pulse 2.4s infinite; }
+    .mbtn.on { background: rgba(76, 201, 240, .2); border-color: rgba(76, 201, 240, .75); box-shadow: inset 0 0 0 1px rgba(76,201,240,.35); }
+    .mbtn .ico { display: inline-block; transition: transform .3s; }
+    .mbtn:hover .ico.r { transform: translateX(4px); } .mbtn:hover .ico.l { transform: translateX(-4px); } .mbtn:hover .ico.s { transform: rotate(20deg) scale(1.15); }
+    .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.5); transform: scale(0); animation: rip .65s ease-out; pointer-events: none; }
+    @keyframes rip { to { transform: scale(2.8); opacity: 0; } }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(76,201,240,.55); } 70% { box-shadow: 0 0 0 14px rgba(76,201,240,0); } 100% { box-shadow: 0 0 0 0 rgba(76,201,240,0); } }
+
+    /* ---------- Carrusel paso a paso ---------- */
+    .stepper { display: grid; gap: 14px; }
+    .car-view { overflow: hidden; border-radius: 16px; touch-action: pan-y; transition: height .5s ease; }
+    .car-track { display: flex; align-items: flex-start; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+    .slide { box-sizing: border-box; flex: 0 0 100%; min-width: 0; padding: 4px; display: grid; gap: 14px; align-content: start; opacity: .35; transform: scale(.97); transition: opacity .5s, transform .5s; }
+    .slide.act { opacity: 1; transform: none; }
+    .slide-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 22px; align-items: center; }
+    @media (max-width: 900px) { .slide-grid { grid-template-columns: 1fr; } }
+    .kick { font-family: var(--mono); font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+    .slide h3 { margin: 6px 0 10px; font-size: 22px; letter-spacing: -.2px; }
+    .slide p { color: #c3cce2; margin: 0 0 12px; }
+    .ctrls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 10px; align-items: center; }
+    .ctrls input[type=range] { flex: 1 1 140px; min-width: 120px; accent-color: var(--accent); }
+    .slide-note { min-height: 44px; font-size: 13.5px; color: #d5dcee; background: rgba(5,9,20,.6); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+    .slide-note b { color: #fff; font-family: var(--mono); font-weight: 600; }
+    .slide-vis { background: radial-gradient(120% 120% at 50% 0%, #0d1530, #04060e); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .slide-vis canvas { display: block; width: 100%; height: auto; }
+    .car-ctrl { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .dots { display: flex; gap: 8px; align-items: center; }
+    .dots button { width: 10px; height: 10px; border-radius: 50%; border: 0; background: rgba(150,165,205,.35); cursor: pointer; padding: 0; transition: width .35s, background .3s, transform .2s; }
+    .dots button:hover { transform: scale(1.4); }
+    .dots button.on { width: 30px; border-radius: 6px; background: var(--accent); }
+    .bars { display: grid; gap: 10px; margin: 4px 0 6px; }
+    .bar { display: grid; grid-template-columns: 150px 1fr 56px; gap: 10px; align-items: center; font-size: 13.5px; }
+    .bar i { display: block; height: 10px; border-radius: 6px; background: rgba(150,165,205,.16); overflow: hidden; }
+    .bar i u { display: block; height: 100%; width: 0; border-radius: 6px; transition: width 1.1s cubic-bezier(.2,.8,.2,1); text-decoration: none; }
+    .bar b { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .verdict { margin-top: 6px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,20,.6); }
+    .verdict strong { font-size: 16px; }
+
+    /* Protagonistas (carrusel horizontal) */
+    .cast { display: grid; gap: 10px; }
+    .cast-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .cast-head h3 { margin: 0; font-size: 17px; }
+    .cast-row { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 2px 14px; scrollbar-width: thin; }
+    .cast-card { flex: 0 0 240px; scroll-snap-align: start; background: linear-gradient(170deg, var(--panel), #0b1020); border: 1px solid var(--line); border-radius: 16px; padding: 14px; text-align: center;
+                 transition: transform .3s cubic-bezier(.3,1.5,.5,1), border-color .3s, box-shadow .3s; }
+    .cast-card:hover { transform: translateY(-6px) rotate(-.4deg); border-color: rgba(76,201,240,.6); box-shadow: 0 18px 34px -18px rgba(76,201,240,.65); }
+    .cast-card canvas { width: 150px; height: 150px; }
+    .cast-card h4 { margin: 6px 0 4px; font-size: 16px; }
+    .cast-card ul { list-style: none; margin: 0; padding: 0; font-size: 12.5px; color: var(--muted); text-align: left; display: grid; gap: 3px; }
+    .cast-card li b { color: #dfe5f6; font-weight: 600; }
+
+    /* ---------- Mitos (acordeón) ---------- */
+    .myths { gap: 12px; }
+    .myth { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); transition: border-color .3s, box-shadow .3s; }
+    .myth:hover { border-color: rgba(255,122,107,.45); }
+    .myth.open { border-color: rgba(79,224,164,.5); box-shadow: 0 14px 30px -20px rgba(79,224,164,.6); }
+    .myth button.q { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 14px 18px; background: rgba(255, 122, 107, .07); }
+    .myth .lab { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+    .myth .q .lab { color: var(--bad); } .myth .a .lab { color: var(--ok); display: block; margin-bottom: 4px; }
+    .myth .tog { font-size: 12px; color: var(--muted); transition: transform .35s; }
+        .myth .body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s ease; }
+    .myth.open .body { grid-template-rows: 1fr; }
+    .myth .body > div { overflow: hidden; }
+    .myth .a { padding: 14px 18px; background: rgba(79, 224, 164, .06); }
     #banner, #error { margin: 0; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
@@ -63,11 +178,11 @@
 
   <div class="page">
     <section class="hero">
-      <div class="moon-orb big" aria-hidden="true"></div>
+      <canvas id="heroMoon" width="200" height="200" aria-hidden="true"></canvas>
       <div>
         <div class="eyebrow">Cómo se ve el cielo desde la Luna</div>
-        <h2>Tres preguntas, respondidas con los datos de tu sitio</h2>
-        <p>Elige un sitio y un periodo. Las cifras de cada lección se calculan para ese lugar: el Sol, la Tierra y el relieve del horizonte.</p>
+        <h2>Cinco preguntas, respondidas con los datos de tu sitio</h2>
+        <p>Elige un sitio y un periodo. Las cifras de cada lección se calculan para ese lugar: el Sol, la Tierra y el relieve del horizonte. Si prefieres ir despacio, usa la pestaña <b>Paso a paso</b>.</p>
       </div>
     </section>
 
@@ -84,44 +199,43 @@
     </section>
 
     <div class="tabs" role="tablist">
-      <button id="tab-q" class="on" role="tab">Tu sitio</button>
-      <button id="tab-m" role="tab">Mitos y datos</button>
+      <button id="tab-q" class="on" role="tab" data-tab="q">Tu sitio</button>
+      <button id="tab-s" role="tab" data-tab="s">Paso a paso</button>
+      <button id="tab-m" role="tab" data-tab="m">Mitos y datos</button>
     </div>
 
-    <section id="pane-q" style="display:grid;gap:18px">
-      <article class="card lesson">
+    <!-- ======================= TU SITIO: 5 lecciones ======================= -->
+    <section id="pane-q" class="pane on">
+      <article class="card lesson reveal">
         <div class="lesson-head"><span class="num sun">01</span><h2>¿Por qué el Sol casi no sube en el polo sur?</h2></div>
         <div class="split">
           <div>
             <p class="why">El eje de la Luna está inclinado solo ~1.5° respecto a su órbita (el de la Tierra, 23.4°). Por eso no hay estaciones marcadas, y cerca de los polos el Sol da vueltas casi pegado al horizonte. Las sombras son larguísimas.</p>
             <div class="readout" id="d1"></div>
-            <svg class="tilt" viewBox="0 0 360 150" role="img" aria-label="Inclinación del eje: Tierra 23.4 grados, Luna 1.5 grados">
-              <defs>
-                <radialGradient id="gE" cx="32%" cy="28%"><stop offset="0" stop-color="#8fd0ff"/><stop offset=".6" stop-color="#2f6fc4"/><stop offset="1" stop-color="#0d2552"/></radialGradient>
-                <radialGradient id="gM" cx="32%" cy="28%"><stop offset="0" stop-color="#f4f1ea"/><stop offset=".55" stop-color="#9a9792"/><stop offset="1" stop-color="#2a2b33"/></radialGradient>
-              </defs>
-              <g transform="translate(90 78)">
-                <line x1="0" y1="-66" x2="0" y2="66" stroke="rgba(142,155,186,.45)" stroke-dasharray="4 4"/>
-                <circle r="40" fill="url(#gE)"/>
-                <g transform="rotate(23.4)"><line x1="0" y1="-62" x2="0" y2="62" stroke="#ffb43b" stroke-width="2.5" stroke-linecap="round"/></g>
-                <path d="M0 -50 A50 50 0 0 1 19.8 -45.9" fill="none" stroke="#ffb43b" stroke-width="1.5"/>
-                <text x="26" y="-52" fill="#ffb43b" font-size="12" font-family="ui-monospace, Menlo, monospace">23.4°</text>
-                <text x="0" y="86" fill="#8e9bba" font-size="12" text-anchor="middle">Tierra</text>
-              </g>
-              <g transform="translate(270 78)">
-                <line x1="0" y1="-66" x2="0" y2="66" stroke="rgba(142,155,186,.45)" stroke-dasharray="4 4"/>
-                <circle r="30" fill="url(#gM)"/>
-                <g transform="rotate(1.5)"><line x1="0" y1="-62" x2="0" y2="62" stroke="#4cc9f0" stroke-width="2.5" stroke-linecap="round"/></g>
-                <text x="10" y="-52" fill="#4cc9f0" font-size="12" font-family="ui-monospace, Menlo, monospace">1.5°</text>
-                <text x="0" y="86" fill="#8e9bba" font-size="12" text-anchor="middle">Luna</text>
-              </g>
-            </svg>
+            <div class="tiltpair">
+              <figure class="sph earthg"><canvas id="cvE" width="220" height="220"></canvas>
+                <svg viewBox="0 0 200 200" aria-label="Eje de la Tierra inclinado 23.4 grados">
+                  <line x1="100" y1="6" x2="100" y2="194" stroke="rgba(142,155,186,.5)" stroke-dasharray="4 4"/>
+                  <g transform="rotate(23.4 100 100)"><line x1="100" y1="2" x2="100" y2="198" stroke="#ffb43b" stroke-width="2.6" stroke-linecap="round"/></g>
+                  <path d="M100 16 A84 84 0 0 1 133.2 22.9" fill="none" stroke="#ffb43b" stroke-width="1.6"/>
+                  <text x="128" y="14" fill="#ffb43b" font-size="12" font-family="DM Mono, ui-monospace, Menlo, monospace">23.4°</text>
+                </svg><figcaption>Tierra</figcaption></figure>
+              <figure class="sph moong"><canvas id="cvM" width="220" height="220"></canvas>
+                <svg viewBox="0 0 200 200" aria-label="Eje de la Luna inclinado 1.5 grados">
+                  <line x1="100" y1="6" x2="100" y2="194" stroke="rgba(142,155,186,.5)" stroke-dasharray="4 4"/>
+                  <g transform="rotate(1.5 100 100)"><line x1="100" y1="2" x2="100" y2="198" stroke="#4cc9f0" stroke-width="2.6" stroke-linecap="round"/></g>
+                  <text x="110" y="14" fill="#4cc9f0" font-size="12" font-family="DM Mono, ui-monospace, Menlo, monospace">1.5°</text>
+                </svg><figcaption>Luna</figcaption></figure>
+            </div>
           </div>
-          <div id="c1" class="plot"></div>
+          <div>
+            <div id="c1" class="plot"></div>
+          </div>
         </div>
+        <details class="dd" data-plot="c1b"><summary><span>📊 Elevación máxima del Sol, día por día</span><i class="chev"></i></summary><div class="dd-body"><div id="c1b" class="plot sm"></div></div></details>
       </article>
 
-      <article class="card lesson">
+      <article class="card lesson reveal">
         <div class="lesson-head"><span class="num earth">02</span><h2>¿Por qué la Tierra casi no se mueve en el cielo?</h2></div>
         <div class="split">
           <div>
@@ -130,9 +244,10 @@
           </div>
           <div id="c2" class="plot"></div>
         </div>
+        <details class="dd" data-plot="c2b"><summary><span>🧭 Vista de cielo (círculo): dónde cae la Tierra</span><i class="chev"></i></summary><div class="dd-body"><div id="c2b" class="plot sm"></div></div></details>
       </article>
 
-      <article class="card lesson">
+      <article class="card lesson reveal">
         <div class="lesson-head"><span class="num">03</span><h2>¿Qué cambia el terreno?</h2></div>
         <div class="split">
           <div>
@@ -141,122 +256,770 @@
           </div>
           <div id="c3" class="plot"></div>
         </div>
+        <details class="dd" data-plot="c3b"><summary><span>⛰ El relieve visto desde arriba (perfil circular)</span><i class="chev"></i></summary><div class="dd-body"><div id="c3b" class="plot sm"></div></div></details>
+      </article>
+
+      <article class="card lesson reveal">
+        <div class="lesson-head"><span class="num ok">04</span><h2>¿Cuánto dura un día lunar?</h2></div>
+        <div class="split">
+          <div>
+            <p class="why">Un día lunar (de amanecer a amanecer) dura ≈ 29.5 días terrestres: es el tiempo que tarda la Luna en repetir su fase. Es más largo que lo que tarda en girar sobre su eje (27.3 d) porque, mientras gira, la Tierra y la Luna también avanzan alrededor del Sol. Una noche puede durar unas dos semanas; en el polo sur, con el relieve, los ciclos se acortan y se mezclan.</p>
+            <div class="readout" id="d4"></div>
+          </div>
+          <div id="c4" class="plot"></div>
+        </div>
+      </article>
+
+      <article class="card lesson reveal">
+        <div class="lesson-head"><span class="num bad">05</span><h2>¿Qué pasa en un lugar que casi nunca ve el Sol?</h2></div>
+        <div class="split">
+          <div>
+            <p class="why">En el polo sur hay cráteres cuyo fondo nunca recibe luz directa: el Sol queda siempre por debajo del borde. Esas «trampas frías» pueden bajar de −200 °C y se han detectado indicios de hielo de agua, por eso interesan tanto. Aquí se separa el tiempo en tres estados: Sol visible, Sol tapado por el terreno y noche (Sol bajo 0°).</p>
+            <div class="readout" id="d5"></div>
+          </div>
+          <div id="c5" class="plot"></div>
+        </div>
+        <details class="dd" data-plot="c5b"><summary><span>☀ El recorrido del Sol contra el horizonte</span><i class="chev"></i></summary><div class="dd-body"><div id="c5b" class="plot sm"></div></div></details>
       </article>
     </section>
 
-    <section id="pane-m" class="myths" hidden>
-      <div class="myth"><div class="m"><span class="lab">Mito</span>"En la Luna hay un lado oscuro donde nunca llega el Sol."</div><div class="f"><span class="lab">Dato</span>Todos los puntos reciben Sol; el día lunar dura ≈ 29.5 días terrestres. Lo que cambia es el lado que mira a la Tierra: el lado oculto nunca la ve, pero sí tiene días y noches.</div></div>
-      <div class="myth"><div class="m"><span class="lab">Mito</span>"El cielo lunar se ve azul de día."</div><div class="f"><span class="lab">Dato</span>Sin atmósfera no hay dispersión de luz ni refracción: el cielo es negro incluso con el Sol sobre el horizonte.</div></div>
-      <div class="myth"><div class="m"><span class="lab">Mito</span>"El Sol sube alto en todas partes."</div><div class="f"><span class="lab">Dato</span>En el ecuador sube hasta el cenit, pero en el polo sur apenas unos pocos grados por la inclinación axial de ~1.5°. Por eso interesa el polo sur: hay cráteres en sombra permanente y picos con luz casi continua.</div></div>
-      <div class="myth"><div class="m"><span class="lab">Mito</span>"La Tierra sale y se pone como la Luna en nuestro cielo."</div><div class="f"><span class="lab">Dato</span>Desde la Luna, la Tierra está casi fija en el cielo (con oscilación por libración) o no se ve nunca, según el sitio.</div></div>
-      <div class="myth"><div class="m"><span class="lab">Mito</span>"Si el Sol está sobre 0°, hay luz."</div><div class="f"><span class="lab">Dato</span>Hay luz solo si el Sol está por encima del <i>horizonte local</i>, que incluye el terreno. En el polo sur esa diferencia puede ser decisiva.</div></div>
+    <!-- ======================= PASO A PASO ======================= -->
+    <section id="pane-s" class="pane">
+      <div class="cast reveal">
+        <div class="cast-head"><h3>Los protagonistas</h3>
+          <div style="display:flex;gap:8px">
+            <button class="mbtn" id="castL" aria-label="Anterior"><span class="ico l">←</span></button>
+            <button class="mbtn" id="castR" aria-label="Siguiente"><span class="ico r">→</span></button>
+          </div></div>
+        <div class="cast-row" id="castRow">
+          <div class="cast-card"><canvas id="cs0" width="240" height="240"></canvas><h4>El Sol</h4><ul><li>Diámetro: <b>1.39 millones km</b></li><li>Distancia: <b>≈ 150 millones km</b></li><li>Su luz tarda <b>≈ 8 min 20 s</b> en llegar</li></ul></div>
+          <div class="cast-card"><canvas id="cs1" width="240" height="240"></canvas><h4>La Tierra</h4><ul><li>Diámetro: <b>12,742 km</b></li><li>Inclinación del eje: <b>23.4°</b></li><li>Desde la Luna se ve <b>≈ 3.7×</b> más ancha que la Luna desde aquí</li></ul></div>
+          <div class="cast-card"><canvas id="cs2" width="240" height="240"></canvas><h4>La Luna</h4><ul><li>Diámetro: <b>3,474 km</b></li><li>Inclinación del eje: <b>1.5°</b></li><li>Gira en <b>27.3 d</b>; su día solar dura <b>29.5 d</b></li></ul></div>
+          <div class="cast-card"><canvas id="cs3" width="240" height="240"></canvas><h4>El polo sur</h4><ul><li>El Sol apenas sube <b>unos pocos grados</b></li><li>Cráteres en <b>sombra permanente</b></li><li>Picos con <b>luz casi continua</b></li></ul></div>
+        </div>
+      </div>
+
+      <div class="stepper">
+        <div class="car-view" id="carView">
+          <div class="car-track" id="carTrack">
+
+            <!-- Paso 1 -->
+            <div class="slide act">
+              <div class="slide-grid">
+                <div>
+                  <span class="kick">Paso 1 de 6</span>
+                  <h3>La Luna siempre muestra la misma cara</h3>
+                  <p>Gira sobre su eje justo al ritmo en que orbita la Tierra. El punto rojo marca el lugar que siempre mira hacia nosotros: desde allí la Tierra queda casi fija en el cielo. Mueve la Luna y mira cómo cambia lo que ilumina el Sol.</p>
+                  <div class="ctrls">
+                    <button class="mbtn" id="s1play"><span class="ico s">⏸</span> Pausar</button>
+                    <button class="mbtn" data-ph="0"><span class="ico s">●</span> Nueva</button>
+                    <button class="mbtn" data-ph="1.5708"><span class="ico s">◑</span> Cuarto</button>
+                    <button class="mbtn" data-ph="3.1416"><span class="ico s">○</span> Llena</button>
+                  </div>
+                  <div class="slide-note" id="n1"></div>
+                </div>
+                <div class="slide-vis"><canvas id="cv1"></canvas></div>
+              </div>
+              <details class="dd" data-plot="p1"><summary><span>📈 Cuánta Luna ilumina el Sol, mes a mes</span><i class="chev"></i></summary><div class="dd-body"><div id="p1" class="plot sm"></div></div></details>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="slide">
+              <div class="slide-grid">
+                <div>
+                  <span class="kick">Paso 2 de 6</span>
+                  <h3>Un eje casi vertical: el Sol se queda bajo</h3>
+                  <p>Desde el polo, la altura máxima del Sol es igual a la inclinación del eje. En la Tierra son 23.4°; en la Luna, solo 1.5°. Cambia la inclinación y mira el ángulo entre el rayo de luz y el horizonte local (la línea blanca).</p>
+                  <div class="ctrls">
+                    <button class="mbtn on" data-tilt="23.4" data-body="earth"><span class="ico s">🌍</span> Tierra 23.4°</button>
+                    <button class="mbtn" data-tilt="1.5" data-body="moon"><span class="ico s">🌙</span> Luna 1.5°</button>
+                    <button class="mbtn" data-tilt="0" data-body="moon"><span class="ico s">⊘</span> Sin inclinación</button>
+                  </div>
+                  <div class="slide-note" id="n2"></div>
+                </div>
+                <div class="slide-vis"><canvas id="cv2"></canvas></div>
+              </div>
+              <details class="dd" data-plot="p2"><summary><span>📈 Altura máxima del Sol según la latitud</span><i class="chev"></i></summary><div class="dd-body"><div id="p2" class="plot sm"></div></div></details>
+            </div>
+
+            <!-- Paso 3 -->
+            <div class="slide">
+              <div class="slide-grid">
+                <div>
+                  <span class="kick">Paso 3 de 6</span>
+                  <h3>El Sol visto desde tu sitio</h3>
+                  <p>Mirando desde el lugar de aterrizaje: eje horizontal = dirección (azimut), vertical = altura. El Sol solo ilumina si queda por encima del relieve gris. Reproduce los días con los datos reales de tu sitio.</p>
+                  <div class="ctrls">
+                    <button class="mbtn primary" id="s3play"><span class="ico s">▶</span> Reproducir</button>
+                    <button class="mbtn on" data-sp="1">1×</button><button class="mbtn" data-sp="3">3×</button><button class="mbtn" data-sp="10">10×</button>
+                    <button class="mbtn" id="s3rise"><span class="ico s">🌅</span> Ir al amanecer</button>
+                    <input type="range" id="s3rng" min="0" max="0" value="0" aria-label="Momento">
+                  </div>
+                  <div class="slide-note" id="n3"></div>
+                </div>
+                <div class="slide-vis"><canvas id="cv3"></canvas></div>
+              </div>
+              <details class="dd" data-plot="p3"><summary><span>📈 Los primeros 5 días: Sol contra el terreno</span><i class="chev"></i></summary><div class="dd-body"><div id="p3" class="plot sm"></div></div></details>
+            </div>
+
+            <!-- Paso 4 -->
+            <div class="slide">
+              <div class="slide-grid">
+                <div>
+                  <span class="kick">Paso 4 de 6</span>
+                  <h3>El terreno decide: sin atmósfera, el horizonte es geométrico</h3>
+                  <p>No hay refracción que «levante» la luz sobre las montañas. Si el Sol queda más bajo que la cresta, desaparece. Prueba combinaciones de relieve y altura del Sol.</p>
+                  <div class="ctrls">
+                    <button class="mbtn" data-mt="0">Plano 0°</button>
+                    <button class="mbtn on" data-mt="3">Colina 3°</button>
+                    <button class="mbtn" data-mt="8">Montaña 8°</button>
+                  </div>
+                  <div class="ctrls" style="margin-top:0">
+                    <button class="mbtn" data-se="1"><span class="ico s">☀</span> Sol 1°</button>
+                    <button class="mbtn on" data-se="2"><span class="ico s">☀</span> Sol 2°</button>
+                    <button class="mbtn" data-se="6"><span class="ico s">☀</span> Sol 6°</button>
+                  </div>
+                  <div class="slide-note" id="n4"></div>
+                </div>
+                <div class="slide-vis"><canvas id="cv4"></canvas></div>
+              </div>
+              <details class="dd" data-plot="p4"><summary><span>⛰ El horizonte real de tu sitio</span><i class="chev"></i></summary><div class="dd-body"><div id="p4" class="plot sm"></div></div></details>
+            </div>
+
+            <!-- Paso 5 -->
+            <div class="slide">
+              <div class="slide-grid">
+                <div>
+                  <span class="kick">Paso 5 de 6</span>
+                  <h3>La Tierra: casi quieta, a veces tapada</h3>
+                  <p>Para comunicarse sin relevo hace falta línea de vista a la Tierra. Cada punto es una hora: la Tierra apenas se mueve (libración). Si está bajo el relieve, no hay enlace directo.</p>
+                  <div class="ctrls">
+                    <button class="mbtn primary" id="s5play"><span class="ico s">▶</span> Reproducir</button>
+                    <button class="mbtn" data-show="earth">Solo Tierra</button>
+                    <button class="mbtn on" data-show="both">Sol y Tierra</button>
+                    <input type="range" id="s5rng" min="0" max="0" value="0" aria-label="Momento">
+                  </div>
+                  <div class="slide-note" id="n5"></div>
+                </div>
+                <div class="slide-vis"><canvas id="cv5"></canvas></div>
+              </div>
+              <details class="dd" data-plot="p5"><summary><span>📈 Cuánto se mueve la Tierra en el cielo</span><i class="chev"></i></summary><div class="dd-body"><div id="p5" class="plot sm"></div></div></details>
+            </div>
+
+            <!-- Paso 6 -->
+            <div class="slide">
+              <div class="slide-grid">
+                <div>
+                  <span class="kick">Paso 6 de 6</span>
+                  <h3>Juntando todo: ¿es buen sitio y buena fecha?</h3>
+                  <p>Un buen candidato tiene mucho Sol (energía), buena línea de vista a la Tierra (comunicación) y noches o cortes cortos. Cambia el sitio o las fechas arriba y compara.</p>
+                  <div class="ctrls">
+                    <a class="mbtn primary pulse" href="/"><span class="ico s">🚀</span> Abrir el navegador</a>
+                    <a class="mbtn" href="/heatmap.html"><span class="ico s">🗓</span> Heatmap sitio × fecha</a>
+                  </div>
+                  <div class="slide-note" id="n6"></div>
+                </div>
+                <div>
+                  <div class="bars" id="bars6"></div>
+                  <div class="verdict" id="verdict6"></div>
+                </div>
+              </div>
+              <details class="dd" data-plot="p6"><summary><span>🕸 Perfil del sitio (radar)</span><i class="chev"></i></summary><div class="dd-body"><div id="p6" class="plot sm"></div></div></details>
+            </div>
+
+          </div>
+        </div>
+        <div class="car-ctrl">
+          <button class="mbtn" id="prev"><span class="ico l">←</span> Anterior</button>
+          <div class="dots" id="dots"></div>
+          <button class="mbtn primary pulse" id="next">Siguiente <span class="ico r">→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= MITOS ======================= -->
+    <section id="pane-m" class="pane myths">
+      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"En la Luna hay un lado oscuro donde nunca llega el Sol."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Todos los puntos reciben Sol; el día lunar dura ≈ 29.5 días terrestres. Lo que cambia es el lado que mira a la Tierra: el lado oculto nunca la ve, pero sí tiene días y noches.</div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"El cielo lunar se ve azul de día."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Sin atmósfera no hay dispersión de luz ni refracción: el cielo es negro incluso con el Sol sobre el horizonte.</div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"El Sol sube alto en todas partes."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>En el ecuador sube hasta el cenit, pero en el polo sur apenas unos pocos grados por la inclinación axial de ~1.5°. Por eso interesa el polo sur: hay cráteres en sombra permanente y picos con luz casi continua.</div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"La Tierra sale y se pone como la Luna en nuestro cielo."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Desde la Luna, la Tierra está casi fija en el cielo (con oscilación por libración) o no se ve nunca, según el sitio.</div></div></div></div>
+      <div class="myth"><button class="q"><span class="lab">Mito</span><span>"Si el Sol está sobre 0°, hay luz."</span><span class="tog">▼ ver dato</span></button><div class="body"><div><div class="a"><span class="lab">Dato</span>Hay luz solo si el Sol está por encima del <i>horizonte local</i>, que incluye el terreno. En el polo sur esa diferencia puede ser decisiva.</div></div></div></div>
     </section>
   </div>
 
   <script>
-    const $ = id => document.getElementById(id);
-    const T = window.LunarTheme;
-    let sites = [];
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const FONT = '"Public Sans","Helvetica Neue",Helvetica,Arial,sans-serif', MONO = '"DM Mono",ui-monospace,Menlo,monospace';
+  const D2R = Math.PI / 180, TAU = Math.PI * 2;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const T = window.LunarTheme || {};
+  const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const C = {
+    sun: (T.C && T.C.sun) || cssv('--sun') || '#ffb43b',
+    earth: (T.C && T.C.earth) || cssv('--earth') || '#4da3ff',
+    accent: (T.C && T.C.accent) || cssv('--accent') || '#4cc9f0',
+    ok: cssv('--ok') || '#4fe0a4', bad: cssv('--bad') || '#ff7a6b',
+    terrain: 'rgba(138,150,180,.28)', terrainLine: '#8a96b4', ink: '#c8d0e6', grid: 'rgba(120,135,175,.14)', night: '#1b2340',
+  };
+  let sites = [], D = null;
 
-    /** Elevación del horizonte interpolada (periódica) en un azimut. */
-    function horizonAt(hor, az) {
-      const step = hor.az_step_deg || 1, n = hor.el.length;
-      const x = (((az % 360) + 360) % 360) / step;
-      const i = Math.floor(x) % n, j = (i + 1) % n, f = x - Math.floor(x);
-      return hor.el[i] * (1 - f) + hor.el[j] * f;
+  /* ================= Utilidades de datos ================= */
+  function horizonAt(hor, az) {
+    const step = hor.az_step_deg || 1, n = hor.el.length;
+    const x = (((az % 360) + 360) % 360) / step;
+    const i = Math.floor(x) % n, j = (i + 1) % n, f = x - Math.floor(x);
+    return hor.el[i] * (1 - f) + hor.el[j] * f;
+  }
+  const pct = arr => arr.length ? 100 * arr.filter(Boolean).length / arr.length : 0;
+  const r1 = v => Math.round(v * 10) / 10;
+  const stat = (cls, label, v, d = 1, suf = '') => `<div class="stat ${cls}"><span>${label}</span><b data-v="${v}" data-d="${d}" data-s="${suf}">${(+v).toFixed(d)}${suf}</b></div>`;
+  function countUps(root) {
+    root.querySelectorAll('[data-v]').forEach(el => {
+      const v = +el.dataset.v, d = +el.dataset.d || 0, s = el.dataset.s || '', t0 = performance.now();
+      const f = now => { const k = Math.min(1, (now - t0) / 800), e = 1 - Math.pow(1 - k, 3); el.textContent = (v * e).toFixed(d) + s; if (k < 1) requestAnimationFrame(f); };
+      requestAnimationFrame(f);
+    });
+  }
+  function runsOf(arr, val) { const out = []; let c = 0; for (const x of arr) { if (x === val) c++; else if (c) { out.push(c); c = 0; } } if (c) out.push(c); return out; }
+
+  function derive(s, eph, hor, met) {
+    const n = eph.t.length, t0 = Date.parse(eph.t[0]);
+    const stepH = n > 1 ? (Date.parse(eph.t[1]) - t0) / 3.6e6 : 1;
+    const hz = eph.sun.az.map(a => horizonAt(hor, a));
+    const hzE = eph.earth.az.map(a => horizonAt(hor, a));
+    const lit = eph.sun.el.map((e, i) => e > hz[i]);
+    const eVis = eph.earth.el.map((e, i) => e > hzE[i]);
+    const cat = eph.sun.el.map((e, i) => lit[i] ? 0 : (e > 0 ? 1 : 2));
+    const rises = []; for (let i = 1; i < n; i++) if (lit[i] && !lit[i - 1]) rises.push(i);
+    const spd = Math.max(1, Math.round(24 / stepH)), days = Math.ceil(n / spd), daily = [], dailyMax = [], dayLab = [];
+    for (let d = 0; d < days; d++) {
+      let c = 0, mx = -90; for (let i = d * spd; i < Math.min(n, (d + 1) * spd); i++) { if (lit[i]) c++; mx = Math.max(mx, eph.sun.el[i]); }
+      daily.push(c * stepH); dailyMax.push(mx); dayLab.push(eph.t[d * spd].slice(0, 10));
     }
-    const pct = arr => arr.length ? 100 * arr.filter(Boolean).length / arr.length : 0;
-    const r1 = v => Math.round(v * 10) / 10;
-    const stat = (cls, label, val) => `<div class="stat ${cls}"><span>${label}</span><b>${val}</b></div>`;
+    return { s, eph, hor, met, n, stepH, hz, hzE, lit, eVis, cat, rises, daily, dailyMax, dayLab, spd,
+      horMax: Math.max(...hor.el), horMean: hor.el.reduce((a, b) => a + b, 0) / hor.el.length,
+      maxSun: Math.max(...eph.sun.el), maxEarth: Math.max(...eph.earth.el), minSun: Math.min(...eph.sun.el) };
+  }
 
-    function showError(msg) { $('error').textContent = msg; $('error').className = msg ? 'errbox' : ''; $('error').hidden = !msg; }
+  /* ================= Gráficas (Plotly) ================= */
+  function merge(a, b) { for (const k in b) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) a[k] = merge(a[k] && typeof a[k] === 'object' ? a[k] : {}, b[k]); else a[k] = b[k]; } return a; }
+  function layout(extra) {
+    const ax = { gridcolor: C.grid, zerolinecolor: 'rgba(150,165,205,.3)', linecolor: 'rgba(150,165,205,.25)', tickcolor: 'rgba(150,165,205,.25)', automargin: true };
+    return merge({ paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: { color: C.ink, size: 12, family: FONT },
+      margin: { l: 54, r: 18, t: 34, b: 46 }, legend: { orientation: 'h', y: 1.15, x: 0, bgcolor: 'rgba(0,0,0,0)' },
+      hoverlabel: { bgcolor: '#0b1020', bordercolor: 'rgba(76,201,240,.55)', font: { color: '#fff' } }, xaxis: { ...ax }, yaxis: { ...ax } }, extra || {});
+  }
+  const CONFIG = { displayModeBar: false, responsive: true };
+  function plot(id, data, lay) { const el = $(id); if (el && window.Plotly) Plotly.react(el, data, layout(lay), CONFIG); }
+  const grad = (rgb, a0, a1) => ({ type: 'vertical', colorscale: [[0, `rgba(${rgb},${a0})`], [1, `rgba(${rgb},${a1})`]] });
 
-    async function getJson(url) {
-      const r = await fetch(url);
-      if (!r.ok) {
-        let d = r.statusText;
-        try { d = (await r.json()).detail ?? d; } catch (_) {}
-        throw new Error(`${url.split('?')[0]} → ${r.status}: ${typeof d === 'string' ? d : JSON.stringify(d)}`);
+  const JOBS = {
+    c1b() {
+      plot('c1b', [{ type: 'bar', x: D.dayLab, y: D.dailyMax, name: 'Máx. del día', marker: { color: D.dailyMax, colorscale: [[0, '#6b4a14'], [1, C.sun]], cornerradius: 4 }, hovertemplate: '%{x}<br>%{y:.2f}°<extra></extra>' }],
+        { xaxis: { title: { text: 'Día (UTC)' } }, yaxis: { title: { text: 'Elevación máx. (°)' } }, showlegend: false, bargap: .25 });
+    },
+    c2b() {
+      const e = D.eph, th = [...Array(360).keys()];
+      plot('c2b', [
+        { type: 'scatterpolar', mode: 'lines', r: [...D.hor.el.map(v => 90 - v), 90 - D.hor.el[0]], theta: [...th, 360], fill: 'toself', fillcolor: 'rgba(138,150,180,.3)', line: { color: C.terrainLine, width: 1.5 }, name: 'Terreno', hoverinfo: 'skip' },
+        { type: 'scatterpolar', mode: 'markers', r: e.earth.el.map(v => 90 - v), theta: e.earth.az, name: 'Tierra', marker: { size: 6, color: e.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#9fd2ff']], opacity: .9 }, hovertemplate: 'Az %{theta:.0f}° · Elev %{customdata:.1f}°<extra>Tierra</extra>', customdata: e.earth.el },
+      ], { polar: { bgcolor: 'rgba(0,0,0,0)', angularaxis: { rotation: 90, direction: 'clockwise', gridcolor: C.grid, tickvals: [0, 90, 180, 270], ticktext: ['N', 'E', 'S', 'O'] },
+        radialaxis: { range: [0, 90], tickvals: [0, 30, 60, 90], ticktext: ['90°', '60°', '30°', '0°'], gridcolor: C.grid, angle: 90 } }, margin: { l: 40, r: 40, t: 30, b: 30 } });
+    },
+    c3b() {
+      const th = [...Array(360).keys()];
+      plot('c3b', [{ type: 'scatterpolar', mode: 'lines', r: [...D.hor.el, D.hor.el[0]], theta: [...th, 360], fill: 'toself', fillcolor: 'rgba(138,150,180,.32)', line: { color: '#b9c3de', width: 1.6 }, name: 'Altura del horizonte', hovertemplate: 'Az %{theta:.0f}° · %{r:.1f}°<extra></extra>' }],
+        { polar: { bgcolor: 'rgba(0,0,0,0)', angularaxis: { rotation: 90, direction: 'clockwise', gridcolor: C.grid, tickvals: [0, 90, 180, 270], ticktext: ['N', 'E', 'S', 'O'] }, radialaxis: { gridcolor: C.grid, ticksuffix: '°', angle: 90, range: [0, Math.max(5, Math.ceil(D.horMax + 1))] } }, margin: { l: 40, r: 40, t: 30, b: 30 }, showlegend: false });
+    },
+    c5b() {
+      const e = D.eph, groups = [[0, 'Sol visible', C.sun], [1, 'Tapado por terreno', '#8a96b4'], [2, 'Noche', '#3a4a86']];
+      const traces = [{ x: [...Array(360).keys()], y: D.hor.el, name: 'Horizonte', mode: 'lines', fill: 'tozeroy', line: { color: C.terrainLine, width: 1.5 }, fillcolor: C.terrain, hoverinfo: 'skip' }];
+      groups.forEach(([k, name, col]) => { const idx = e.sun.el.map((_, i) => i).filter(i => D.cat[i] === k); traces.push({ x: idx.map(i => e.sun.az[i]), y: idx.map(i => e.sun.el[i]), name, mode: 'markers', marker: { size: 6, color: col, opacity: .85 }, hovertemplate: 'Az %{x:.0f}° · Elev %{y:.1f}°<extra>' + name + '</extra>' }); });
+      plot('c5b', traces, { xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360] }, yaxis: { title: { text: 'Elevación (°)' } } });
+    },
+    p1() {
+      const x = [], y = []; for (let d = 0; d <= 29.53; d += .25) { x.push(d); y.push((1 - Math.cos(TAU * d / 29.53)) / 2 * 100); }
+      plot('p1', [{ x, y, mode: 'lines', fill: 'tozeroy', fillgradient: grad('255,226,150', .05, .6), fillcolor: 'rgba(255,226,150,.2)', line: { color: '#ffe29a', width: 2.5, shape: 'spline' }, hovertemplate: 'Día %{x:.1f}<br>%{y:.0f}% iluminado<extra></extra>' }],
+        { xaxis: { title: { text: 'Días desde Luna nueva' }, range: [0, 29.53] }, yaxis: { title: { text: '% iluminado (visto desde la Tierra)' }, range: [0, 105] }, showlegend: false,
+          annotations: [{ x: 0.3, y: 6, text: 'Nueva', showarrow: false, font: { color: C.ink } }, { x: 14.8, y: 100, text: 'Llena', showarrow: false, yshift: 12, font: { color: C.ink } }, { x: 29, y: 6, text: 'Nueva', showarrow: false, font: { color: C.ink } }] });
+    },
+    p2() {
+      const lat = [], ea = [], mo = []; for (let l = 55; l <= 90; l += 1) { lat.push(l); ea.push(90 - l + 23.44); mo.push(90 - l + 1.54); }
+      plot('p2', [
+        { x: lat, y: ea, name: 'Tierra (23.4°)', mode: 'lines', line: { color: C.earth, width: 3 }, fill: 'tozeroy', fillgradient: grad('77,163,255', .02, .35), fillcolor: 'rgba(77,163,255,.15)' },
+        { x: lat, y: mo, name: 'Luna (1.5°)', mode: 'lines', line: { color: '#d5d9e6', width: 3 }, fill: 'tozeroy', fillcolor: 'rgba(213,217,230,.18)' }],
+        { xaxis: { title: { text: 'Latitud (°)' } }, yaxis: { title: { text: 'Altura máx. del Sol (°)' }, rangemode: 'tozero' }, annotations: [{ x: 90, y: 1.54, text: 'Polo: 1.5°', ax: -40, ay: -40, font: { color: '#fff' }, arrowcolor: '#d5d9e6' }] });
+    },
+    p3() {
+      const k = Math.min(D.n, Math.round(120 / D.stepH));
+      plot('p3', [
+        { x: D.eph.t.slice(0, k), y: D.hz.slice(0, k), name: 'Horizonte en la dirección del Sol', mode: 'lines', fill: 'tozeroy', line: { color: C.terrainLine, width: 1.2, shape: 'hv' }, fillcolor: C.terrain },
+        { x: D.eph.t.slice(0, k), y: D.eph.sun.el.slice(0, k), name: 'Elevación del Sol', mode: 'lines', line: { color: C.sun, width: 2.5, shape: 'spline' }, fill: 'tozeroy', fillgradient: grad('255,180,59', 0, .3), fillcolor: 'rgba(255,180,59,.1)' }],
+        { yaxis: { title: { text: 'Elevación (°)' } } });
+    },
+    p4() {
+      plot('p4', [{ x: [...Array(360).keys()], y: D.hor.el, mode: 'lines', fill: 'tozeroy', fillgradient: grad('138,150,180', .08, .55), fillcolor: C.terrain, line: { color: '#b9c3de', width: 1.8, shape: 'spline' }, hovertemplate: 'Az %{x}° · %{y:.1f}°<extra></extra>' }],
+        { xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360], tickvals: [0, 90, 180, 270, 360], ticktext: ['N', 'E', 'S', 'O', 'N'] }, yaxis: { title: { text: 'Altura del horizonte (°)' }, rangemode: 'tozero' }, showlegend: false,
+          annotations: [{ x: D.hor.el.indexOf(D.horMax), y: D.horMax, text: 'Cresta máx. ' + r1(D.horMax) + '°', ax: 50, ay: -30, font: { color: '#fff' }, arrowcolor: '#b9c3de' }] });
+    },
+    p5() {
+      const e = D.eph;
+      plot('p5', [
+        { x: e.t, y: e.earth.el, name: 'Elevación', mode: 'lines', line: { color: C.earth, width: 2.5, shape: 'spline' }, yaxis: 'y' },
+        { x: e.t, y: e.earth.az, name: 'Azimut', mode: 'lines', line: { color: '#9fd2ff', width: 1.6, dash: 'dot' }, yaxis: 'y2' }],
+        { yaxis: { title: { text: 'Elevación (°)' } }, yaxis2: { title: { text: 'Azimut (°)' }, overlaying: 'y', side: 'right', showgrid: false } });
+    },
+    p6() {
+      const m = D.met, tot = D.n * D.stepH;
+      const r = [m.sun_lit_pct, m.earth_visible_pct, 100 * (1 - m.longest_dark_h / tot), 100 * (1 - m.longest_comms_gap_h / tot), 100 * (1 - D.horMax / 30)].map(v => clamp(v, 0, 100));
+      const th = ['Sol', 'Tierra visible', 'Noches cortas', 'Cortes cortos', 'Horizonte bajo'];
+      plot('p6', [{ type: 'scatterpolar', r: [...r, r[0]], theta: [...th, th[0]], fill: 'toself', fillcolor: 'rgba(76,201,240,.25)', line: { color: C.accent, width: 2.5 }, marker: { size: 7, color: C.accent }, hovertemplate: '%{theta}: %{r:.0f}/100<extra></extra>' }],
+        { polar: { bgcolor: 'rgba(0,0,0,0)', radialaxis: { range: [0, 100], gridcolor: C.grid, tickvals: [0, 50, 100] }, angularaxis: { gridcolor: C.grid } }, showlegend: false, margin: { l: 50, r: 50, t: 30, b: 30 } });
+    },
+  };
+  function runJob(id) { if (D && JOBS[id]) JOBS[id](); }
+  document.addEventListener('toggle', ev => { const d = ev.target; if (d.matches && d.matches('details.dd') && d.open) requestAnimationFrame(() => runJob(d.dataset.plot)); }, true);
+  function replotOpen() { document.querySelectorAll('details.dd[open]').forEach(d => runJob(d.dataset.plot)); }
+
+  /* ================= Texturas procedurales o reales ================= */
+  const TEX = { sun: null, moon: null, earth: null, v: 0 };
+  const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const sm = t => t * t * (3 - 2 * t);
+  function fbm(W, H, seed, octs, base, amp0) {
+    const out = new Float32Array(W * H), r = rng(seed);
+    for (let o = 0; o < octs; o++) {
+      const gx = base << o, gy = Math.max(2, Math.round(gx * H / W)), gw = gx + 1, g = new Float32Array(gw * (gy + 1)), amp = amp0 / (1 << o);
+      for (let j = 0; j <= gy; j++) { for (let i = 0; i < gx; i++) g[j * gw + i] = (r() * 2 - 1) * amp; g[j * gw + gx] = g[j * gw]; }
+      for (let y = 0; y < H; y++) { const fy = y / H * gy, j = fy | 0, ty = sm(fy - j), r0 = j * gw, r1 = (j + 1) * gw;
+        for (let x = 0; x < W; x++) { const fx = x / W * gx, i = fx | 0, tx = sm(fx - i);
+          const a = g[r0 + i] + (g[r0 + i + 1] - g[r0 + i]) * tx, b = g[r1 + i] + (g[r1 + i + 1] - g[r1 + i]) * tx; out[y * W + x] += a + (b - a) * ty; } }
+    }
+    return out;
+  }
+  function genMoon() {
+    const W = 1024, H = 512, a = fbm(W, H, 9, 5, 4, .16), r = rng(7);
+    for (let k = 0; k < a.length; k++) a[k] += .6;
+    const MARIA = [[33, -16, 13], [28, 18, 7], [8, 31, 8], [17, 59, 5], [-21, -15, 8], [-24, -39, 6], [18, -57, 17], [-3, -8, 4], [43, -30, 6]];
+    for (const [la, lo, rad] of MARIA) {
+      const yc = (90 - la) / 180 * H, xc = (lo + 180) / 360 * W, ry = Math.ceil(rad * 1.5 * H / 180), rx = Math.ceil(rad * 1.5 / Math.max(.2, Math.cos(la * D2R)) * W / 360);
+      for (let y = Math.max(0, Math.floor(yc - ry)); y <= Math.min(H - 1, Math.floor(yc + ry)); y++) { const cl = Math.max(.15, Math.cos((90 - (y + .5) / H * 180) * D2R));
+        for (let xx = Math.floor(xc - rx); xx <= xc + rx; xx++) { const x = ((xx % W) + W) % W, idx = y * W + x;
+          const d = Math.hypot((xx - xc) * 360 / W * cl, (y - yc) * 180 / H) * (1 + (a[idx] - .6) * 5), w = clamp((rad - d) / (rad * .3), 0, 1);
+          if (w > 0) a[idx] += (.27 - a[idx]) * w * .92; } }
+    }
+    for (let i = 0; i < 1500; i++) {
+      const lat = Math.asin(r() * 2 - 1) / D2R, lon = r() * 360 - 180, rp = 1.5 + 13 * Math.pow(r(), 3.2);
+      const yc = (90 - lat) / 180 * H, xc = (lon + 180) / 360 * W, kx = 1 / Math.max(.2, Math.cos(lat * D2R)), R = Math.ceil(rp * 1.7);
+      for (let dy = -R; dy <= R; dy++) { const y = Math.round(yc + dy); if (y < 0 || y >= H) continue;
+        for (let dx = -Math.ceil(R * kx); dx <= Math.ceil(R * kx); dx++) { const q = Math.hypot(dx / kx, dy) / rp; if (q > 1.7) continue;
+          const idx = y * W + ((((Math.round(xc + dx)) % W) + W) % W);
+          if (q < 1) a[idx] -= .09 * (1 - q * q) * (rp > 6 ? 1 : .7);
+          a[idx] += .16 * Math.exp(-Math.pow((q - 1) / .12, 2)) + (q > 1 ? .07 / (q * q * q) : 0); } }
+    }
+    const data = new Uint8ClampedArray(W * H * 4);
+    for (let k = 0; k < a.length; k++) { const v = clamp(a[k], .12, .97) * 255; data[k * 4] = v; data[k * 4 + 1] = v * .985; data[k * 4 + 2] = v * .96; data[k * 4 + 3] = 255; }
+    return { w: W, h: H, data, photo: false };
+  }
+  function genEarth() {
+    const W = 512, H = 256, nz = fbm(W, H, 41, 5, 4, .5), cl = fbm(W, H, 77, 5, 4, .55), data = new Uint8ClampedArray(W * H * 4);
+    const BL = [[48, -100, 30, 20], [-15, -60, 14, 28], [5, 20, 22, 28], [52, 20, 22, 10], [50, 85, 45, 22], [22, 78, 10, 12], [0, 110, 14, 9], [-25, 134, 16, 11], [72, -40, 12, 9], [62, -110, 22, 10]];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const la = 90 - (y + .5) / H * 180, lo = (x + .5) / W * 360 - 180; let m = la < -68 ? 1 : -1;
+      for (const [a, b, rx, ry] of BL) { const dx = Math.min(Math.abs(lo - b), 360 - Math.abs(lo - b)) / rx, dy = (la - a) / ry; m = Math.max(m, 1 - dx * dx - dy * dy); }
+      m += nz[y * W + x] * 1.5;
+      const k = y * W + x, ice = Math.abs(la) > 72 || (la < -66 && m > 0);
+      let R, G, B;
+      if (ice) { R = 236; G = 241; B = 246; }
+      else if (m > .12) { const dry = clamp(1 - Math.abs(la) / 55 + nz[k] * .8, 0, 1) * (Math.abs(la) < 40 ? 1 : .45); R = 62 + 110 * dry; G = 104 + 38 * dry; B = 52 + 22 * dry; }
+      else { const d = clamp(-m, 0, 1.2); R = 16 - 8 * d; G = 62 - 22 * d; B = 140 - 36 * d; }
+      const c = clamp(cl[k] * 2.2 + .22, 0, 1) * .9; R += (248 - R) * c; G += (249 - G) * c; B += (252 - B) * c;
+      data[k * 4] = R; data[k * 4 + 1] = G; data[k * 4 + 2] = B; data[k * 4 + 3] = 255;
+    }
+    return { w: W, h: H, data, photo: false };
+  }
+  function genSun() {
+    const W = 512, H = 256, g1 = fbm(W, H, 5, 6, 8, .5), g2 = fbm(W, H, 17, 4, 24, .3), data = new Uint8ClampedArray(W * H * 4), r = rng(3);
+    const spots = []; for (let i = 0; i < 6; i++) spots.push([r() * W, H * (.3 + r() * .4), 5 + r() * 9]);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const k = y * W + x; let v = .78 + g1[k] * .55 + g2[k] * .3;
+      for (const [sx, sy, sr] of spots) { const d = Math.hypot(x - sx, (y - sy) * 1.5) / sr; if (d < 1.6) v -= .5 * Math.exp(-d * d * 1.2); }
+      v = clamp(v, .35, 1.2);
+      data[k * 4] = clamp(255 * v, 0, 255); data[k * 4 + 1] = clamp(190 * v * v, 0, 255); data[k * 4 + 2] = clamp(70 * v * v * v, 0, 255); data[k * 4 + 3] = 255;
+    }
+    return { w: W, h: H, data, photo: false };
+  }
+  function imgTex(urls) {
+    return new Promise(res => { let i = 0; (function next() {
+      if (i >= urls.length) return res(null);
+      const im = new Image(); im.onload = () => { try { const c = document.createElement('canvas'); c.width = Math.min(1024, im.width); c.height = Math.round(c.width * im.height / im.width);
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0, c.width, c.height); const d = x.getImageData(0, 0, c.width, c.height); res({ w: c.width, h: c.height, data: d.data, photo: true }); } catch (e) { res(null); } };
+      im.onerror = () => { i++; next(); }; im.src = urls[i]; })(); });
+  }
+  async function realMoon() {
+    const m = await (await fetch('/data/relief/manifest.json')).json(), g = m.globe;
+    const [hb, ab] = await Promise.all([fetch('/data/relief/' + g.heights).then(r => r.arrayBuffer()), fetch('/data/relief/' + g.albedo).then(r => r.arrayBuffer())]);
+    const h16 = new Int16Array(hb), a8 = new Uint8Array(ab), W = g.w, H = g.h, data = new Uint8ClampedArray(W * H * 4), texel = TAU * 1737400 / W;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const k = y * W + x, sl = (h16[y * W + (x + W - 1) % W] - h16[y * W + (x + 1) % W]) / (2 * texel), sh = clamp(1 + 3.2 * sl, .55, 1.5);
+      const v = clamp((.2 + .72 * a8[k] / 255) * sh * 1.18, 0, 1) * 255; data[k * 4] = v; data[k * 4 + 1] = v * .985; data[k * 4 + 2] = v * .96; data[k * 4 + 3] = 255;
+    }
+    return { w: W, h: H, data, photo: true };
+  }
+  const tick1 = () => new Promise(r => setTimeout(r, 16));
+  async function loadTextures() {
+    TEX.sun = genSun(); TEX.v++; await tick1();
+    try { TEX.moon = await realMoon(); } catch (e) { TEX.moon = genMoon(); }
+    TEX.v++; await tick1();
+    TEX.earth = await imgTex(['/data/earth.jpg', '/data/relief/earth.jpg', '/data/earth.png']) || genEarth(); TEX.v++;
+  }
+
+  /* ================= Render de esferas con luz real ================= */
+  const NRM = {};
+  function normals(S) {
+    if (NRM[S]) return NRM[S];
+    const n = S * S, nx = new Float32Array(n), ny = new Float32Array(n), nz = new Float32Array(n), al = new Float32Array(n);
+    for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) {
+      const x = (i + .5) / S * 2 - 1, y = 1 - (j + .5) / S * 2, r2 = x * x + y * y, k = j * S + i;
+      if (r2 > 1) continue; nx[k] = x; ny[k] = y; nz[k] = Math.sqrt(1 - r2); al[k] = Math.min(1, (1 - Math.sqrt(r2)) * S * .5);
+    }
+    return (NRM[S] = { nx, ny, nz, al });
+  }
+  /** Dibuja una esfera con textura equirectangular. tilt: inclinación del eje (°), pitch: vista desde un polo, rot: giro (rad), light: dirección de la luz. */
+  function renderSphere(cv, o) {
+    const S = cv.width, ctx = cv.getContext('2d'), N = normals(S), Tx = o.tex;
+    if (!Tx) { ctx.clearRect(0, 0, S, S); return; }
+    const img = (cv._img && cv._img.width === S) ? cv._img : (cv._img = ctx.createImageData(S, S)), d = img.data;
+    const ct = Math.cos((o.tilt || 0) * D2R), st = Math.sin((o.tilt || 0) * D2R), cp = Math.cos((o.pitch || 0) * D2R), sp = Math.sin((o.pitch || 0) * D2R);
+    const L = o.light || [-.8, .25, .55], tw = Tx.w, th = Tx.h, td = Tx.data, rot = o.rot || 0, emi = !!o.emissive, atmo = !!o.atmo;
+    const { nx, ny, nz, al } = N;
+    for (let k = 0; k < S * S; k++) {
+      const a = al[k], p = k * 4;
+      if (!a) { d[p + 3] = 0; continue; }
+      const x = nx[k], y0 = ny[k], z0 = nz[k], y1 = y0 * cp - z0 * sp, z1 = y0 * sp + z0 * cp, bx = x * ct - y1 * st, by = x * st + y1 * ct;
+      const lat = Math.asin(clamp(by, -1, 1)), lon = Math.atan2(bx, z1) + rot;
+      let u = (lon / TAU + .5) * tw; u = ((u % tw) + tw) % tw;
+      const v = clamp((.5 - lat / Math.PI) * th, 0, th - 1), ti = ((v | 0) * tw + (u | 0)) * 4;
+      let R = td[ti], G = td[ti + 1], B = td[ti + 2], f;
+      if (emi) { f = .55 + .6 * Math.pow(z0, .55); R *= f; G *= f; B *= f; }
+      else {
+        const ld = x * L[0] + y0 * L[1] + z0 * L[2];
+        f = .03 + 1.12 * Math.max(0, ld) * clamp((ld + .07) / .22, 0, 1);
+        let rim = 0; if (atmo) rim = Math.pow(1 - z0, 2.7) * (.18 + Math.max(0, ld) * 1.1);
+        R = R * f + 55 * rim; G = G * f + 120 * rim; B = B * f + 255 * rim;
       }
-      return r.json();
+      d[p] = R; d[p + 1] = G; d[p + 2] = B; d[p + 3] = a * 255;
     }
+    ctx.putImageData(img, 0, 0);
+  }
+  const SPR = {};
+  function sprite(key, size, opts) {
+    let s = SPR[key + size]; if (!s) { s = SPR[key + size] = document.createElement('canvas'); s.width = s.height = size; }
+    if (s._v !== TEX.v || opts.always) { renderSphere(s, opts); s._v = TEX.v; }
+    return s;
+  }
+  function setupCanvas(cv, w, h) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); cv.width = w * dpr; cv.height = h * dpr; cv.style.aspectRatio = w + '/' + h;
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return { ctx, w, h };
+  }
 
-    async function init() {
-      sites = await getJson('/api/sites');
-      $('site').innerHTML = sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      $('site').value = sites.some(s => s.id === 'shackleton') ? 'shackleton' : sites[0].id;
-      $('load').onclick = load;
-      $('tab-q').onclick = () => tab(true);
-      $('tab-m').onclick = () => tab(false);
-      load();
+  /* ================= Bucle de animación (solo lo visible) ================= */
+  const anims = []; let lastTs = 0;
+  const IO = new IntersectionObserver(es => es.forEach(e => { e.target._vis = e.isIntersecting; }), { threshold: .02 });
+  function animate(el, tick) { IO.observe(el); anims.push({ el, tick }); }
+  function loop(ts) {
+    const dt = (ts - lastTs) / 1000;
+    if (dt >= 1 / 32) { lastTs = ts; for (const a of anims) if (a.el._vis) a.tick(ts / 1000, Math.min(dt, .1)); }
+    requestAnimationFrame(loop);
+  }
+  const REVEAL = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); REVEAL.unobserve(e.target); } }), { threshold: .08 });
+
+  /* Esferas decorativas (héroe, lección 1, protagonistas) */
+  function spin(id, texKey, o, speed) {
+    const cv = $(id); if (!cv) return; let rot = o.rot || 0;
+    animate(cv, (t, dt) => { rot += dt * speed; renderSphere(cv, { ...o, tex: TEX[texKey], rot }); });
+  }
+  function initSpheres() {
+    spin('heroMoon', 'moon', { tilt: 1.5, light: [-.7, .35, .62] }, .18);
+    spin('cvE', 'earth', { tilt: 23.4, atmo: true, light: [-.78, .3, .55] }, .45);
+    spin('cvM', 'moon', { tilt: 1.5, light: [-.78, .3, .55] }, .1);
+    spin('cs0', 'sun', { emissive: true, tilt: 7 }, .12);
+    spin('cs1', 'earth', { tilt: 23.4, atmo: true, light: [-.75, .3, .58] }, .4);
+    spin('cs2', 'moon', { tilt: 1.5, light: [-.75, .3, .58] }, .1);
+    spin('cs3', 'moon', { pitch: 76, tilt: 1.5, light: [-.85, .4, .35] }, .05);
+    $('cs0').style.filter = 'drop-shadow(0 0 22px rgba(255,170,60,.6))';
+    $('cs1').style.filter = 'drop-shadow(0 0 14px rgba(90,160,255,.5))';
+  }
+
+  /* ================= Lecciones (render con datos) ================= */
+  function renderLessons() {
+    const { s, eph, hor, met, n } = D, span = `${eph.t[0].slice(0, 10)} → ${eph.t[n - 1].slice(0, 10)}`;
+    const sunFlat = pct(eph.sun.el.map(e => e > 0)), sunTerr = pct(D.lit), earthFlat = pct(eph.earth.el.map(e => e > 0)), earthTerr = pct(D.eVis);
+
+    // 1. Sol
+    $('d1').innerHTML = `<b>${s.name}</b> · ${span}<div class="row">${stat('sun', 'Elevación máx.', met.sun_el_max_deg, 1, '°')}${stat('sun', 'Sol visible', met.sun_lit_pct, 1, '%')}${stat('bad', 'Noche más larga', met.longest_dark_h, 1, ' h')}</div>`;
+    plot('c1', [
+      { x: eph.t, y: D.hz, name: 'Horizonte (terreno) hacia el Sol', mode: 'lines', line: { color: C.terrainLine, width: 1.2, shape: 'hv' }, fill: 'tozeroy', fillcolor: C.terrain, hovertemplate: 'Terreno: %{y:.1f}°<extra></extra>' },
+      { x: eph.t, y: eph.sun.el, name: 'Elevación del Sol', mode: 'lines', line: { color: C.sun, width: 2.6, shape: 'spline', smoothing: .6 }, fill: 'tozeroy', fillgradient: grad('255,180,59', .0, .42), fillcolor: 'rgba(255,180,59,.12)', hovertemplate: '%{y:.2f}°<extra>Sol</extra>' },
+      { x: [eph.t[eph.sun.el.indexOf(D.maxSun)]], y: [D.maxSun], name: 'Máximo', mode: 'markers', marker: { size: 11, color: '#fff', line: { color: C.sun, width: 3 } }, hovertemplate: 'Máx. %{y:.2f}°<extra></extra>' },
+    ], { yaxis: { title: { text: 'Elevación (°)' } }, xaxis: { title: { text: 'UTC' } }, hovermode: 'x unified',
+         shapes: [{ type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 0, y1: 0, line: { color: 'rgba(255,255,255,.35)', width: 1, dash: 'dash' } }] });
+
+    // 2. Tierra
+    const earthLine = met.earth_visible_pct === 0 ? `En este periodo <b>no se ve la Tierra</b> desde este sitio.` : `La Tierra está sobre el horizonte local parte del periodo.`;
+    $('d2').innerHTML = `<b>${s.name}</b><div style="margin-top:6px">${earthLine}</div><div class="row">${stat('earth', 'Tierra visible', met.earth_visible_pct, 1, '%')}${stat('bad', 'Mayor corte', met.longest_comms_gap_h, 1, ' h')}</div>`;
+    plot('c2', [
+      { x: [...Array(360).keys()], y: hor.el, name: 'Horizonte (terreno)', mode: 'lines', fill: 'tozeroy', fillgradient: grad('138,150,180', .1, .55), line: { color: C.terrainLine, width: 1.6, shape: 'spline' }, fillcolor: C.terrain, hoverinfo: 'skip' },
+      { x: eph.earth.az, y: eph.earth.el, name: 'Tierra (cada hora)', mode: 'markers', marker: { size: 7, color: eph.earth.el.map((_, i) => i), colorscale: [[0, '#2a5fa8'], [1, '#a9d8ff']], opacity: .9, line: { color: 'rgba(255,255,255,.5)', width: .6 } },
+        customdata: eph.t.map(t => t.slice(0, 16).replace('T', ' ')), hovertemplate: '%{customdata}<br>Az %{x:.0f}° · Elev %{y:.1f}°<extra>Tierra</extra>' },
+    ], { xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360], tickvals: [0, 90, 180, 270, 360], ticktext: ['N', 'E', 'S', 'O', 'N'] }, yaxis: { title: { text: 'Elevación (°)' } } });
+
+    // 3. Terreno
+    $('d3').innerHTML = `El horizonte llega hasta <b>${r1(D.horMax)}°</b> de elevación.<div class="row" style="display:grid;grid-template-columns:1fr 1fr">${stat('sun', 'Sol · plano', sunFlat, 1, '%')}${stat('sun', 'Sol · terreno', sunTerr, 1, '%')}${stat('earth', 'Tierra · plano', earthFlat, 1, '%')}${stat('earth', 'Tierra · terreno', earthTerr, 1, '%')}</div>`;
+    plot('c3', [
+      { type: 'bar', x: ['Sol', 'Tierra'], y: [sunFlat, earthFlat], name: 'Horizonte plano', marker: { color: '#5b6788', cornerradius: 8 }, text: [sunFlat, earthFlat].map(v => r1(v) + '%'), textposition: 'outside', cliponaxis: false },
+      { type: 'bar', x: ['Sol', 'Tierra'], y: [sunTerr, earthTerr], name: 'Con terreno', marker: { color: [C.sun, C.earth], line: { color: '#fff', width: 1 }, cornerradius: 8 }, text: [sunTerr, earthTerr].map(v => r1(v) + '%'), textposition: 'outside', cliponaxis: false },
+    ], { barmode: 'group', bargap: .35, yaxis: { title: { text: '% del tiempo visible' }, range: [0, 112] } });
+
+    // 4. Día lunar
+    const sunrises = D.rises.length, cycle = sunrises >= 2 ? (D.rises[sunrises - 1] - D.rises[0]) * D.stepH / 24 / (sunrises - 1) : null;
+    const dayMax = Math.max(0, ...runsOf(D.lit, true)) * D.stepH, nightMax = Math.max(0, ...runsOf(D.lit, false)) * D.stepH;
+    $('d4').innerHTML = `Amaneceres detectados en el periodo: <b>${sunrises}</b>.${cycle == null ? `<div style="margin-top:6px">Con ${r1(n * D.stepH / 24)} días no se alcanzan a ver dos amaneceres: amplía las fechas a ≥ 30 días para medir el ciclo.</div>` : ''}` +
+      `<div class="row">${stat('ok', 'Día más largo', dayMax, 0, ' h')}${stat('bad', 'Noche más larga', nightMax, 0, ' h')}${cycle != null ? stat('sun', 'Ciclo medido', cycle, 1, ' d') : stat('sun', 'Ciclo teórico', 29.5, 1, ' d')}</div>`;
+    plot('c4', [
+      { type: 'bar', x: D.dayLab, y: D.daily, name: 'Horas de Sol por día', marker: { color: D.daily, colorscale: [[0, '#26315c'], [.5, '#c98a24'], [1, C.sun]], cornerradius: 3 }, yaxis: 'y', hovertemplate: '%{x}<br>%{y:.0f} h de Sol<extra></extra>' },
+      { type: 'heatmap', x: eph.t, y: ['Sol'], z: [D.lit.map(v => v ? 1 : 0)], showscale: false, colorscale: [[0, '#10162e'], [1, C.sun]], xaxis: 'x', yaxis: 'y2', hovertemplate: '%{x}<extra></extra>', xgap: 0 },
+    ], { yaxis: { domain: [.3, 1], title: { text: 'Horas de Sol / día' }, range: [0, 24] }, yaxis2: { domain: [0, .2], showticklabels: false, showgrid: false }, xaxis: { anchor: 'y2', title: { text: 'UTC' } }, showlegend: false, bargap: .2,
+         annotations: [{ xref: 'paper', yref: 'paper', x: 0, y: .22, text: 'Franja: dorado = Sol sobre el horizonte', showarrow: false, xanchor: 'left', font: { size: 11, color: '#9aa6c8' } }] });
+
+    // 5. Sombra
+    const pl = pct(D.cat.map(v => v === 0)), ps = pct(D.cat.map(v => v === 1)), pn = pct(D.cat.map(v => v === 2));
+    const verdict = pl === 0 ? `En este periodo el punto <b>no recibe luz directa</b>: se comporta como un cráter en sombra permanente.` : ps > pn ? `El terreno tapa más Sol (<b>${r1(ps)}%</b>) del que oculta la noche.` : `La mayor parte del tiempo sin luz es noche (<b>${r1(pn)}%</b>), no sombra del relieve.`;
+    $('d5').innerHTML = `${verdict}<div class="row">${stat('sun', 'Sol visible', pl, 1, '%')}${stat('', 'Tapado por terreno', ps, 1, '%')}${stat('bad', 'Noche', pn, 1, '%')}</div>`;
+    plot('c5', [{ type: 'pie', hole: .64, sort: false, direction: 'clockwise', labels: ['Sol visible', 'Tapado por terreno', 'Noche (Sol bajo 0°)'], values: [pl, ps, pn], marker: { colors: [C.sun, '#7f8bab', '#2b3a73'], line: { color: '#0a0f20', width: 3 } }, textinfo: 'text', text: [pl, ps, pn].map(v => v > 3 ? r1(v) + '%' : ''), textfont: { color: '#fff' }, pull: [.04, 0, 0], hovertemplate: '%{label}: %{value:.1f}%<extra></extra>' }],
+      { showlegend: true, legend: { orientation: 'h', y: -.05 }, margin: { l: 10, r: 10, t: 10, b: 30 }, annotations: [{ text: `<b>${r1(pl)}%</b><br><span style="font-size:11px">con luz</span>`, showarrow: false, font: { size: 24, color: '#fff' } }] });
+
+    countUps($('pane-q')); replotOpen();
+  }
+
+  /* ================= Paso a paso: visuales ================= */
+  function drawSunSprite(ctx, x, y, r, a = 1) {
+    ctx.save(); ctx.globalAlpha = a; let g = ctx.createRadialGradient(x, y, r * .6, x, y, r * 5);
+    g.addColorStop(0, 'rgba(255,210,120,.55)'); g.addColorStop(1, 'rgba(255,170,60,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 5, 0, 7); ctx.fill();
+    g = ctx.createRadialGradient(x - r * .25, y - r * .25, 0, x, y, r); g.addColorStop(0, '#fffef0'); g.addColorStop(.7, '#ffd36a'); g.addColorStop(1, '#ff9c30');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore();
+  }
+  function starsBg(ctx, w, h, seed) { const r = rng(seed); ctx.fillStyle = '#04060e'; ctx.fillRect(0, 0, w, h); for (let i = 0; i < 90; i++) { ctx.fillStyle = `rgba(255,255,255,${.15 + r() * .6})`; ctx.fillRect(r() * w, r() * h, r() > .85 ? 1.8 : 1, r() > .85 ? 1.8 : 1); } }
+  const wrapPi = a => { a = (a + Math.PI) % TAU; if (a < 0) a += TAU; return a - Math.PI; };
+  const phaseName = th => { const f = (1 - Math.cos(th)) / 2, x = ((th % TAU) + TAU) % TAU, w = x < Math.PI;
+    if (f < .06) return 'Luna nueva'; if (f > .94) return 'Luna llena'; if (Math.abs(f - .5) < .06) return w ? 'Cuarto creciente' : 'Cuarto menguante';
+    return f < .5 ? (w ? 'Creciente' : 'Menguante') : (w ? 'Gibosa creciente' : 'Gibosa menguante'); };
+
+  /* Paso 1: órbita y fases */
+  function slideOrbit() {
+    const cv = $('cv1'), { ctx, w, h } = setupCanvas(cv, 480, 340), note = $('n1'); const stars = document.createElement('canvas'); stars.width = w; stars.height = h; starsBg(stars.getContext('2d'), w, h, 11);
+    let th = .5, target = null, auto = true, rot = 0;
+    const eCv = document.createElement('canvas'); eCv.width = eCv.height = 110;
+    animate(cv, (t, dt) => {
+      if (target != null) { const df = wrapPi(target - th); th += df * Math.min(1, dt * 4); if (Math.abs(df) < .01) { th = target; target = null; } } else if (auto) th += dt * .45;
+      rot += dt * .8; const cx = w * .4, cy = h / 2, R = 118;
+      ctx.drawImage(stars, 0, 0, w, h);
+      ctx.strokeStyle = 'rgba(150,165,205,.28)'; ctx.setLineDash([4, 6]); ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+      for (let k = -2; k <= 2; k++) { ctx.strokeStyle = 'rgba(255,215,130,.6)'; ctx.lineWidth = 2; const y = cy + k * 34; ctx.beginPath(); ctx.moveTo(w - 70, y); ctx.lineTo(w - 22, y); ctx.lineTo(w - 32, y - 5); ctx.moveTo(w - 22, y); ctx.lineTo(w - 32, y + 5); ctx.stroke(); }
+      ctx.fillStyle = '#ffd98a'; ctx.font = '600 12px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('Luz del Sol', w - 46, cy - 98); ctx.textAlign = 'left';
+      renderSphere(eCv, { tex: TEX.earth, tilt: 23.4, rot, atmo: true, light: [.9, .25, .45] }); ctx.drawImage(eCv, cx - 45, cy - 45, 90, 90);
+      const mx = cx + R * Math.cos(th), my = cy - R * Math.sin(th), mr = 27, ms = sprite('m1', 60, { tex: TEX.moon, light: [0, 0, 1], tilt: 0, rot: 0, always: false });
+      ctx.save(); ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.clip(); ctx.drawImage(ms, mx - mr, my - mr, mr * 2, mr * 2);
+      ctx.fillStyle = 'rgba(2,4,10,.86)'; ctx.fillRect(mx - mr - 2, my - mr - 2, mr + 2, mr * 2 + 4); ctx.restore();   // mitad sin Sol (lado opuesto a la luz)
+      ctx.strokeStyle = 'rgba(200,210,235,.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.stroke();
+      const ux = (cx - mx) / R, uy = (cy - my) / R; ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(mx + ux * mr * .8, my + uy * mr * .8, 4.5, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,107,107,.35)'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(mx + ux * mr * .8, my + uy * mr * .8); ctx.lineTo(cx - ux * 48, cy - uy * 48); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText('Tierra', cx - 16, cy + 62); ctx.fillText('Luna', mx - 12, my - mr - 7);
+      note.innerHTML = `<b>${phaseName(th)}</b> · ${Math.round((1 - Math.cos(th)) / 2 * 100)}% iluminada vista desde la Tierra. El punto rojo siempre mira a la Tierra.`;
+    });
+    $('s1play').onclick = e => { auto = !auto; target = null; e.currentTarget.innerHTML = auto ? '<span class="ico s">⏸</span> Pausar' : '<span class="ico s">▶</span> Girar'; };
+    document.querySelectorAll('[data-ph]').forEach(b => b.onclick = () => { target = +b.dataset.ph; auto = false; $('s1play').innerHTML = '<span class="ico s">▶</span> Girar'; });
+  }
+
+  /* Paso 2: inclinación del eje */
+  function slideTilt() {
+    const cv = $('cv2'), { ctx, w, h } = setupCanvas(cv, 480, 340), note = $('n2'), sc = document.createElement('canvas'); sc.width = sc.height = 230;
+    const stars = document.createElement('canvas'); stars.width = w; stars.height = h; starsBg(stars.getContext('2d'), w, h, 4);
+    let cur = 23.4, target = 23.4, body = 'earth', rot = 0;
+    animate(cv, (t, dt) => {
+      cur += (target - cur) * Math.min(1, dt * 5); rot += dt * (body === 'earth' ? .5 : .12);
+      ctx.drawImage(stars, 0, 0, w, h); const cx = w * .42, cy = h / 2 + 4, R = 100;
+      renderSphere(sc, { tex: TEX[body], tilt: cur, rot, atmo: body === 'earth', light: [.9, .22, .4] }); ctx.drawImage(sc, cx - 115, cy - 115, 230, 230);
+      const a = cur * D2R, ax = Math.sin(a), ay = -Math.cos(a), px = cx + ax * R, py = cy + ay * R;       // polo norte
+      ctx.strokeStyle = '#ffb43b'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(cx - ax * (R + 30), cy - ay * (R + 30)); ctx.lineTo(px + ax * 36, py + ay * 36); ctx.stroke();
+      const tx = Math.cos(a), ty = Math.sin(a);                                                              // horizonte local (tangente en el polo)
+      ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px - tx * 60, py - ty * 60); ctx.lineTo(px + tx * 110, py + ty * 110); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,214,120,.95)'; ctx.setLineDash([6, 5]); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(w - 70, py); ctx.stroke(); ctx.setLineDash([]);
+      drawSunSprite(ctx, w - 44, py, 15);
+      ctx.strokeStyle = '#ffd36a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, 50, 0, -a, true); ctx.stroke();
+      ctx.fillStyle = '#ffd36a'; ctx.font = '600 13px ' + MONO; ctx.fillText(cur.toFixed(1) + '°', px + 56, py - 6);
+      ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText('horizonte local', px + 70, py + ty * 90 + 12); ctx.fillText('eje', px + ax * 40 + 6, py + ay * 40);
+      note.innerHTML = `Eje inclinado <b>${cur.toFixed(1)}°</b> → en el polo el Sol sube como máximo <b>≈ ${cur.toFixed(1)}°</b> sobre el horizonte.`;
+    });
+    document.querySelectorAll('[data-tilt]').forEach(b => b.onclick = () => { target = +b.dataset.tilt; body = b.dataset.body; document.querySelectorAll('[data-tilt]').forEach(x => x.classList.toggle('on', x === b)); });
+  }
+
+  /* Pasos 3 y 5: cielo local con datos reales */
+  function makeSky(cv, mode, note, rng_, playBtn) {
+    const { ctx, w, h } = setupCanvas(cv, 640, 330), L = 46, Rr = 14, Tp = 16, B = 34;
+    let i = 0, playing = false, speed = 1, acc = 0, show = mode, lastKey = null; const stars = document.createElement('canvas'); stars.width = w; stars.height = h; starsBg(stars.getContext('2d'), w, h, mode === 'sun' ? 21 : 31);
+    const api = {
+      toggle() { playing = !playing; if (playBtn) playBtn.innerHTML = playing ? '<span class="ico s">⏸</span> Pausar' : '<span class="ico s">▶</span> Reproducir'; },
+      speed(s) { speed = s; }, show(m) { show = m; }, set(k) { i = k; playing = false; if (playBtn) playBtn.innerHTML = '<span class="ico s">▶</span> Reproducir'; },
+      riseIndex() { return D && D.rises.length ? D.rises[0] : 0; }, get i() { return i; },
+    };
+    animate(cv, (t, dt) => {
+      ctx.drawImage(stars, 0, 0, w, h);
+      if (!D) { ctx.fillStyle = '#9aa6c8'; ctx.font = '14px ' + FONT; ctx.fillText('Cargando datos del sitio…', 20, h / 2); return; }
+      if (lastKey !== D) { lastKey = D; rng_.max = D.n - 1; rng_.value = 0; i = 0; }
+      if (playing) { acc += dt * 24 * speed; if (acc >= 1) { i = (i + Math.floor(acc)) % D.n; acc %= 1; } rng_.value = i; } else i = +rng_.value;
+      const e = D.eph, top = Math.max(10, Math.ceil(Math.max(D.horMax, show !== 'earth' ? D.maxSun : 0, D.maxEarth) + 3)), bot = -6;
+      const X = a => L + a / 360 * (w - L - Rr), Y = v => Tp + (top - v) / (top - bot) * (h - Tp - B);
+      ctx.strokeStyle = 'rgba(120,135,175,.14)'; ctx.fillStyle = '#7f8cb0'; ctx.font = '11px ' + FONT; ctx.textAlign = 'right';
+      const ys = top <= 14 ? 2 : top <= 30 ? 5 : 10; for (let v = Math.ceil(bot / ys) * ys; v <= top; v += ys) { ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(w - Rr, Y(v)); ctx.stroke(); ctx.fillText(v + '°', L - 6, Y(v) + 4); }
+      ctx.textAlign = 'center'; [[0, 'N'], [90, 'E'], [180, 'S'], [270, 'O'], [360, 'N']].forEach(([a, n]) => { ctx.beginPath(); ctx.moveTo(X(a), Tp); ctx.lineTo(X(a), h - B); ctx.stroke(); ctx.fillText(n, X(a), h - B + 16); });
+      ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(L, Y(0), w - L - Rr, Y(bot) - Y(0));
+      const g = ctx.createLinearGradient(0, Y(D.horMax), 0, Y(0)); g.addColorStop(0, 'rgba(165,175,200,.75)'); g.addColorStop(1, 'rgba(70,78,100,.85)');
+      ctx.beginPath(); ctx.moveTo(X(0), Y(0)); D.hor.el.forEach((v, k) => { ctx.lineTo(X(k), Y(v)); ctx.lineTo(X(k + 1), Y(v)); }); ctx.lineTo(X(360), Y(0)); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = 'rgba(210,220,245,.7)'; ctx.lineWidth = 1.3; ctx.beginPath(); D.hor.el.forEach((v, k) => { k ? ctx.lineTo(X(k), Y(v)) : ctx.moveTo(X(k), Y(v)); }); ctx.stroke(); ctx.lineWidth = 1;
+      const step = Math.max(1, Math.floor(D.n / 300));
+      const track = (az, el, col) => { ctx.fillStyle = col; for (let k = 0; k < D.n; k += step) ctx.fillRect(X(az[k]) - 1, Y(el[k]) - 1, 2.2, 2.2); };
+      if (show !== 'earth') track(e.sun.az, e.sun.el, 'rgba(255,200,90,.35)'); if (show !== 'sun') track(e.earth.az, e.earth.el, 'rgba(110,175,255,.4)');
+      const sunV = D.lit[i], eV = D.eVis[i];
+      if (show !== 'earth') drawSunSprite(ctx, X(e.sun.az[i]), Y(e.sun.el[i]), 11, sunV ? 1 : .4);
+      if (show !== 'sun') { const es = sprite('e3', 40, { tex: TEX.earth, atmo: true, light: [.6, .3, .7] }); ctx.save(); ctx.globalAlpha = eV ? 1 : .4; ctx.drawImage(es, X(e.earth.az[i]) - 14, Y(e.earth.el[i]) - 14, 28, 28); ctx.restore(); }
+      ctx.fillStyle = '#9aa6c8'; ctx.font = '12px ' + FONT; ctx.fillText('Azimut →', w / 2 - 26, h - 4);
+      const txt = [];
+      if (show !== 'earth') txt.push(`Sol ${e.sun.el[i].toFixed(1)}° <b>${sunV ? 'visible' : (e.sun.el[i] > 0 ? 'tapado por el terreno' : 'bajo el horizonte')}</b>`);
+      if (show !== 'sun') txt.push(`Tierra ${e.earth.el[i].toFixed(1)}° <b>${eV ? 'visible' : 'oculta'}</b>`);
+      note.innerHTML = `${e.t[i].slice(0, 16).replace('T', ' ')} UTC · ${txt.join(' · ')}`;
+    });
+    return api;
+  }
+
+  /* Paso 4: terreno y rayo de luz */
+  function slideTerrain() {
+    const cv = $('cv4'), { ctx, w, h } = setupCanvas(cv, 480, 340), note = $('n4'), gY = h * .8, ex = 62, ey = gY - 18;
+    let cur = 3, target = 3, sunE = 2; const tn = a => Math.tan(a * 3.2 * D2R);   // ángulos dibujados ×3.2 para que se aprecien
+    const sky = ctx.createLinearGradient(0, 0, 0, gY); sky.addColorStop(0, '#02030a'); sky.addColorStop(1, '#0e1530');
+    animate(cv, (t, dt) => {
+      cur += (target - cur) * Math.min(1, dt * 6);
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h); const r = rng(5); for (let i = 0; i < 50; i++) { ctx.fillStyle = `rgba(255,255,255,${.2 + r() * .5})`; ctx.fillRect(r() * w, r() * gY * .8, 1.3, 1.3); }
+      const mx = 280, peakY = ey - (mx - ex) * tn(cur), sx = 440, sy = ey - (sx - ex) * tn(sunE), hidden = sunE < cur - .01;
+      let hitX = null; if (hidden) { for (let x = 395; x >= mx; x -= 1) { const ym = peakY + (x - mx) * (gY - peakY) / 115, yr = ey - (x - ex) * tn(sunE); if (yr >= ym) { hitX = x; break; } } }
+      drawSunSprite(ctx, sx, sy, 13, hidden ? .55 : 1);
+      const ray = (x2, y2, a, dash) => { ctx.strokeStyle = `rgba(255,214,120,${a})`; ctx.lineWidth = 2; ctx.setLineDash(dash ? [6, 6] : []); ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]); };
+      if (hitX == null) ray(ex, ey, .85, false); else { const yy = ey - (hitX - ex) * tn(sunE); ray(hitX, yy, .85, false); ctx.strokeStyle = 'rgba(255,214,120,.2)'; ctx.setLineDash([4, 6]); ctx.beginPath(); ctx.moveTo(hitX, yy); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]); }
+      const gg = ctx.createLinearGradient(0, peakY, 0, gY); gg.addColorStop(0, '#9aa3bb'); gg.addColorStop(1, '#3b4258');
+      ctx.fillStyle = gg; ctx.beginPath(); ctx.moveTo(mx - 120, gY); ctx.lineTo(mx - 8, peakY + 6 * (cur > 0)); ctx.lineTo(mx, peakY); ctx.lineTo(mx + 115, gY); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#2a3045'; ctx.fillRect(0, gY, w, h - gY); ctx.strokeStyle = 'rgba(200,210,235,.5)'; ctx.beginPath(); ctx.moveTo(0, gY); ctx.lineTo(w, gY); ctx.stroke();
+      if (hidden) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, gY - 120, mx - 120, 120); }
+      ctx.fillStyle = '#dfe5f6'; ctx.fillRect(ex - 9, gY - 18, 18, 12); ctx.fillStyle = '#ffb43b'; ctx.fillRect(ex - 2, gY - 26, 4, 8); ctx.strokeStyle = '#dfe5f6'; ctx.beginPath(); ctx.moveTo(ex - 9, gY - 6); ctx.lineTo(ex - 15, gY); ctx.moveTo(ex + 9, gY - 6); ctx.lineTo(ex + 15, gY); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(mx, peakY); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#fff'; ctx.font = '600 12px ' + MONO; ctx.fillText('cresta ' + cur.toFixed(1) + '°', mx - 40, peakY - 10); ctx.fillStyle = '#ffd36a'; ctx.fillText('Sol ' + sunE + '°', sx - 48, sy - 22); ctx.fillStyle = '#c8d0e6'; ctx.font = '12px ' + FONT; ctx.fillText('módulo', ex - 20, gY + 18); ctx.fillStyle = '#7f8cb0'; ctx.font = '11px ' + FONT; ctx.fillText('Ángulos dibujados ×3.2 para que se aprecien', 12, h - 10);
+      note.innerHTML = hidden ? `El Sol (<b>${sunE}°</b>) está más bajo que la cresta (<b>${cur.toFixed(1)}°</b>): <b>tapado</b>. Sin atmósfera no hay refracción que lo «levante».` : `El Sol (<b>${sunE}°</b>) supera la cresta (<b>${cur.toFixed(1)}°</b>): <b>hay luz</b> directa.`;
+    });
+    document.querySelectorAll('[data-mt]').forEach(b => b.onclick = () => { target = +b.dataset.mt; document.querySelectorAll('[data-mt]').forEach(x => x.classList.toggle('on', x === b)); });
+    document.querySelectorAll('[data-se]').forEach(b => b.onclick = () => { sunE = +b.dataset.se; document.querySelectorAll('[data-se]').forEach(x => x.classList.toggle('on', x === b)); });
+  }
+
+  /* Paso 6: resumen con barras y veredicto */
+  function renderSummary() {
+    const m = D.met, tot = D.n * D.stepH, rows = [
+      ['Sol (energía)', m.sun_lit_pct, '%', C.sun], ['Tierra (comunicación)', m.earth_visible_pct, '%', C.earth],
+      ['Noches cortas', 100 * (1 - m.longest_dark_h / tot), '', '#7a8cff'], ['Sin cortes largos', 100 * (1 - m.longest_comms_gap_h / tot), '', '#4fe0a4']].map(r => [r[0], clamp(r[1], 0, 100), r[2], r[3]]);
+    $('bars6').innerHTML = rows.map(([n, v, s, c]) => `<div class="bar"><span>${n}</span><i><u style="background:${c}" data-w="${v}"></u></i><b>${Math.round(v)}${s}</b></div>`).join('');
+    requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll('#bars6 u').forEach(u => { u.style.width = u.dataset.w + '%'; })));
+    const score = (rows[0][1] + rows[1][1]) / 2, [t, col] = score >= 60 ? ['Buen candidato', C.ok] : score >= 30 ? ['Candidato con condiciones', C.sun] : ['Difícil en este periodo', C.bad];
+    const tip = score >= 60 ? 'Mucha luz y buen enlace con la Tierra. Revisa igualmente las noches más largas.' : score >= 30 ? 'Planea batería extra, calefacción y relevo de comunicaciones para los tramos sin Sol o sin Tierra.' : 'Prueba otra fecha o sitio: usa el heatmap para ver cuándo mejora.';
+    $('verdict6').innerHTML = `<strong style="color:${col}">${t}</strong><div style="color:#c3cce2;margin-top:4px">${tip}</div>`;
+    $('n6').innerHTML = `<b>${D.s.name}</b> · ${D.eph.t[0].slice(0, 10)} → ${D.eph.t[D.n - 1].slice(0, 10)}`;
+  }
+
+  /* Paso 4 / resumen leen D; el resto de visuales ya lo hacen en su tick */
+
+  /* ================= Carrusel ================= */
+  function initCarousel() {
+    const track = $('carTrack'), slides = [...track.children], dots = $('dots'); let idx = 0;
+    slides.forEach((_, k) => { const b = document.createElement('button'); b.setAttribute('aria-label', 'Paso ' + (k + 1)); b.onclick = () => go(k); dots.appendChild(b); });
+    function go(k) {
+      idx = clamp(k, 0, slides.length - 1); track.style.transform = `translateX(${-idx * 100}%)`;
+      slides.forEach((s, j) => s.classList.toggle('act', j === idx)); [...dots.children].forEach((d, j) => d.classList.toggle('on', j === idx));
+      $('prev').disabled = idx === 0; const nx = $('next'); nx.innerHTML = idx === slides.length - 1 ? 'Volver al inicio <span class="ico l">↺</span>' : 'Siguiente <span class="ico r">→</span>';
+      requestAnimationFrame(() => { const d = slides[idx].querySelector('details[open]'); if (d) runJob(d.dataset.plot); });
     }
+    $('prev').onclick = () => go(idx - 1); $('next').onclick = () => go(idx === slides.length - 1 ? 0 : idx + 1);
+    let x0 = null; const v = $('carView');
+    v.addEventListener('pointerdown', e => { if (e.target.closest('canvas,input,button,details,a')) { x0 = null; return; } x0 = e.clientX; });
+    v.addEventListener('pointerup', e => { if (x0 == null) return; const dx = e.clientX - x0; if (Math.abs(dx) > 50) go(idx + (dx < 0 ? 1 : -1)); x0 = null; });
+    document.addEventListener('keydown', e => { if (!$('pane-s').classList.contains('on') || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'ArrowRight') go(idx + 1); else if (e.key === 'ArrowLeft') go(idx - 1); });
+    const fit = () => { v.style.height = slides[idx].offsetHeight + 'px'; };
+    const ro = new ResizeObserver(fit); slides.forEach(sl => ro.observe(sl));
+    $('next').addEventListener('click', () => requestAnimationFrame(fit));
+    go(0); fit();
+    const row = $('castRow'); $('castL').onclick = () => row.scrollBy({ left: -260, behavior: 'smooth' }); $('castR').onclick = () => row.scrollBy({ left: 260, behavior: 'smooth' });
+  }
 
-    function tab(q) {
-      $('pane-q').style.display = q ? 'grid' : 'none'; $('pane-m').hidden = q;
-      $('tab-q').classList.toggle('on', q); $('tab-m').classList.toggle('on', !q);
-    }
+  function initSteps() {
+    slideOrbit(); slideTilt(); slideTerrain();
+    const sky3 = makeSky($('cv3'), 'sun', $('n3'), $('s3rng'), $('s3play'));
+    $('s3play').onclick = sky3.toggle;
+    document.querySelectorAll('[data-sp]').forEach(b => b.onclick = () => { sky3.speed(+b.dataset.sp); document.querySelectorAll('[data-sp]').forEach(x => x.classList.toggle('on', x === b)); });
+    $('s3rise').onclick = () => { sky3.set(Math.max(0, sky3.riseIndex() - Math.round(6 / (D ? D.stepH : 1)))); $('s3rng').value = Math.max(0, sky3.riseIndex() - Math.round(6 / (D ? D.stepH : 1))); };
+    const sky5 = makeSky($('cv5'), 'both', $('n5'), $('s5rng'), $('s5play'));
+    $('s5play').onclick = sky5.toggle;
+    document.querySelectorAll('[data-show]').forEach(b => b.onclick = () => { sky5.show(b.dataset.show); document.querySelectorAll('[data-show]').forEach(x => x.classList.toggle('on', x === b)); });
+    initCarousel();
+  }
 
-    async function load() {
-      showError('');
-      const s = sites.find(x => x.id === $('site').value);
-      const q = new URLSearchParams({
-        lat: s.lat, lon: s.lon,
-        start: $('start').value + 'T00:00:00Z', end: $('end').value + 'T00:00:00Z', step_min: 60,
-      });
-      $('load').disabled = true;
-      try {
-        const [eph, hor, met] = await Promise.all(['ephemeris', 'horizon', 'metrics'].map(p => getJson(`/api/${p}?${q}`)));
-        render(s, eph, hor, met);
-      } catch (e) {
-        showError(e.message);
-      } finally {
-        $('load').disabled = false;
-      }
-    }
+  /* ================= Mitos, pestañas y botones ================= */
+  function initMyths() { document.querySelectorAll('.myth .q').forEach(b => b.onclick = () => { const m = b.parentElement, open = m.classList.toggle('open'); b.querySelector('.tog').textContent = open ? '▲ ocultar' : '▼ ver dato'; }); }
+  function showTab(name) {
+    ['q', 's', 'm'].forEach(k => { $('pane-' + k).classList.toggle('on', k === name); $('tab-' + k).classList.toggle('on', k === name); });
+    if (history.replaceState) history.replaceState(null, '', name === 's' ? '#paso' : name === 'm' ? '#mitos' : location.pathname + location.search);
+    requestAnimationFrame(() => { document.querySelectorAll('#pane-' + name + ' .js-plotly-plot').forEach(p => window.Plotly && Plotly.Plots.resize(p)); });
+  }
+  document.addEventListener('click', e => {   // ondas al pulsar cualquier botón animado
+    const b = e.target.closest('.mbtn'); if (!b) return; const r = b.getBoundingClientRect(), sz = Math.max(r.width, r.height), s = document.createElement('span');
+    s.className = 'ripple'; s.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX - r.left - sz / 2}px;top:${e.clientY - r.top - sz / 2}px`; b.appendChild(s); setTimeout(() => s.remove(), 700);
+  });
 
-    function render(s, eph, hor, met) {
-      const mock = [eph.source, hor.source, met.source?.ephemeris, met.source?.horizon].includes('mock');
-      $('banner').hidden = !mock;
-      const n = eph.t.length;
-      const span = `${eph.t[0].slice(0, 10)} → ${eph.t[n - 1].slice(0, 10)}`;
-
-      // Con y sin terreno (sin terreno = horizonte plano a 0°).
-      const sunFlat = pct(eph.sun.el.map(e => e > 0));
-      const sunTerr = pct(eph.sun.el.map((e, i) => e > horizonAt(hor, eph.sun.az[i])));
-      const earthFlat = pct(eph.earth.el.map(e => e > 0));
-      const earthTerr = pct(eph.earth.el.map((e, i) => e > horizonAt(hor, eph.earth.az[i])));
-      const horMax = Math.max(...hor.el), horMean = hor.el.reduce((a, b) => a + b, 0) / hor.el.length;
-
-      // 1. Sol
-      $('d1').innerHTML = `<b>${s.name}</b> · ${span}` +
-        `<div class="row">${stat('sun', 'Elevación máx.', r1(met.sun_el_max_deg) + '°')}${stat('sun', 'Sol visible', r1(met.sun_lit_pct) + '%')}${stat('bad', 'Noche más larga', r1(met.longest_dark_h) + ' h')}</div>`;
-      Plotly.react('c1', [
-        { x: eph.t, y: eph.sun.el, name: 'Elevación del Sol', mode: 'lines', line: { color: T.C.sun, width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(255,180,59,.10)' },
-        { x: [eph.t[0], eph.t[n - 1]], y: [horMean, horMean], name: 'Horizonte medio', mode: 'lines', line: { color: T.C.terrainLine, dash: 'dot', width: 1.5 } },
-      ], T.layout({ yaxis: { title: { text: 'Elevación (°)' } }, xaxis: { title: { text: 'UTC' } } }), T.config);
-
-      // 2. Tierra
-      const earthLine = met.earth_visible_pct === 0
-        ? `En este periodo <b>no se ve la Tierra</b> desde este sitio.`
-        : `La Tierra está sobre el horizonte local parte del periodo.`;
-      $('d2').innerHTML = `<b>${s.name}</b><div style="margin-top:6px">${earthLine}</div>` +
-        `<div class="row">${stat('earth', 'Tierra visible', r1(met.earth_visible_pct) + '%')}${stat('bad', 'Mayor corte', r1(met.longest_comms_gap_h) + ' h')}</div>`;
-      Plotly.react('c2', [
-        { x: [...Array(360).keys()], y: hor.el, name: 'Horizonte (terreno)', mode: 'lines', fill: 'tozeroy', line: { color: T.C.terrainLine, width: 1.5 }, fillcolor: T.C.terrain },
-        { x: eph.earth.az, y: eph.earth.el, name: 'Tierra (cada hora)', mode: 'markers', marker: { size: 6, color: T.C.earth, opacity: .9 } },
-      ], T.layout({ xaxis: { title: { text: 'Azimut (°)' }, range: [0, 360] }, yaxis: { title: { text: 'Elevación (°)' } } }), T.config);
-
-      // 3. Terreno
-      $('d3').innerHTML = `El horizonte llega hasta <b>${r1(horMax)}°</b> de elevación.` +
-        `<div class="row" style="display:grid;grid-template-columns:1fr 1fr">${stat('sun', 'Sol · plano', r1(sunFlat) + '%')}${stat('sun', 'Sol · terreno', r1(sunTerr) + '%')}` +
-        `${stat('earth', 'Tierra · plano', r1(earthFlat) + '%')}${stat('earth', 'Tierra · terreno', r1(earthTerr) + '%')}</div>`;
-      Plotly.react('c3', [
-        { type: 'bar', x: ['Sol', 'Tierra'], y: [sunFlat, earthFlat], name: 'Horizonte plano', marker: { color: '#5b6788' } },
-        { type: 'bar', x: ['Sol', 'Tierra'], y: [sunTerr, earthTerr], name: 'Con terreno', marker: { color: T.C.accent } },
-      ], T.layout({ barmode: 'group', bargap: .35, yaxis: { title: { text: '% del tiempo visible' }, range: [0, 100] } }), T.config);
-    }
-
-    init();
+  /* ================= Carga de datos ================= */
+  function showError(msg) { $('error').textContent = msg; $('error').className = msg ? 'errbox' : ''; $('error').hidden = !msg; }
+  async function getJson(url) {
+    const r = await fetch(url);
+    if (!r.ok) { let d = r.statusText; try { d = (await r.json()).detail ?? d; } catch (_) {} throw new Error(`${url.split('?')[0]} → ${r.status}: ${typeof d === 'string' ? d : JSON.stringify(d)}`); }
+    return r.json();
+  }
+  async function init() {
+    document.querySelectorAll('.reveal').forEach(el => REVEAL.observe(el));
+    $('tab-q').onclick = () => showTab('q'); $('tab-s').onclick = () => showTab('s'); $('tab-m').onclick = () => showTab('m');
+    initMyths(); loadTextures().then(() => {}); initSpheres(); initSteps(); requestAnimationFrame(loop);
+    if (location.hash === '#paso') showTab('s'); else if (location.hash === '#mitos') showTab('m');
+    sites = await getJson('/api/sites');
+    $('site').innerHTML = sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    $('site').value = sites.some(s => s.id === 'shackleton') ? 'shackleton' : sites[0].id;
+    $('load').onclick = load; load();
+  }
+  async function load() {
+    showError('');
+    const s = sites.find(x => x.id === $('site').value);
+    const q = new URLSearchParams({ lat: s.lat, lon: s.lon, start: $('start').value + 'T00:00:00Z', end: $('end').value + 'T00:00:00Z', step_min: 60 });
+    $('load').disabled = true;
+    try {
+      const [eph, hor, met] = await Promise.all(['ephemeris', 'horizon', 'metrics'].map(p => getJson(`/api/${p}?${q}`)));
+      $('banner').hidden = ![eph.source, hor.source, met.source?.ephemeris, met.source?.horizon].includes('mock');
+      D = derive(s, eph, hor, met);
+      renderLessons(); renderSummary();
+    } catch (e) { showError(e.message); }
+    finally { $('load').disabled = false; }
+  }
+  init().catch(e => showError(e.message));
   </script>
 </body>
 </html>
