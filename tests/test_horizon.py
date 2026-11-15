@@ -3,7 +3,9 @@
 Las pruebas del núcleo usan terreno sintético (no necesitan el DEM).
 La prueba con LOLA real se omite si falta el archivo o rasterio.
 """
+import json
 import math
+import os
 
 import numpy as np
 import pytest
@@ -82,13 +84,48 @@ def test_missing_data_is_ignored():
     assert np.all(np.isfinite(prof))
 
 
+def _isolate(monkeypatch, tmp_path, dem_file=None, global_dem="off"):
+    """Aísla el horizonte: sin precalculados ni caché reales, DEMs controlados."""
+    monkeypatch.setattr(horizon, "CACHE_DIR", tmp_path / "cache")
+    monkeypatch.setattr(horizon, "PRECOMPUTED_DIR", tmp_path / "pre")
+    monkeypatch.setattr(horizon, "DEM_FILE", dem_file or (tmp_path / "no_existe.TIF"))
+    monkeypatch.setattr(horizon, "GLOBAL_DEM", global_dem)
+
+
 def test_outside_dem_falls_back_to_flat(tmp_path, monkeypatch):
-    """Apolo 11 (0.7°N) queda fuera del DEM polar: horizonte plano con source mock."""
-    monkeypatch.setattr(horizon, "CACHE_DIR", tmp_path)
+    """Sin DEM que cubra el sitio (ni precalculado): horizonte plano con source mock."""
+    _isolate(monkeypatch, tmp_path)
     r = horizon.get_horizon(0.674, 23.473)
     assert r["source"] == "mock"
     assert len(r["el"]) == 360 and set(r["el"]) == {0.0}
     assert r["az_step_deg"] == 1
+
+
+def test_precomputed_profiles_cover_all_sites(tmp_path, monkeypatch):
+    """Los sitios curados tienen horizonte real versionado: la app corre sin DEMs."""
+    precomputed = horizon.PRECOMPUTED_DIR
+    _isolate(monkeypatch, tmp_path)
+    monkeypatch.setattr(horizon, "PRECOMPUTED_DIR", precomputed)
+    sites = json.loads((horizon.ROOT / "data" / "sites.json").read_text(encoding="utf-8"))
+    for s in sites:
+        r = horizon.get_horizon(s["lat"], s["lon"], 50)
+        assert r["source"].startswith("LOLA"), (s["id"], r["source"])
+        assert set(r) == {"az_step_deg", "el", "source"}  # contrato intacto
+        assert len(r["el"]) == 360 and all(math.isfinite(v) for v in r["el"])
+
+
+@pytest.mark.skipif(os.environ.get("LUNAR_NET_TESTS") != "1",
+                    reason="prueba con red (DEM global remoto); activar con LUNAR_NET_TESTS=1")
+def test_global_dem_remote(tmp_path, monkeypatch):
+    """Apolo 17: el Macizo Norte (~1.8 km de alto, ~7 km al norte) eleva el horizonte."""
+    pytest.importorskip("rasterio")
+    pytest.importorskip("pyproj")
+    _isolate(monkeypatch, tmp_path, global_dem=horizon.GLOBAL_DEM_DEFAULT)
+    r = horizon.get_horizon(20.191, 30.772, 50)
+    assert r["source"].startswith("LOLA Global")
+    el = r["el"]
+    assert 10.0 < max(el) < 20.0
+    assert min(abs(el.index(max(el)) - 0), 360 - el.index(max(el))) <= 20  # hacia el norte
 
 
 def test_real_lola_dem(tmp_path, monkeypatch):
@@ -96,7 +133,7 @@ def test_real_lola_dem(tmp_path, monkeypatch):
     pytest.importorskip("pyproj")
     if not horizon.DEM_FILE.exists():
         pytest.skip("falta data/dem/LDEM_80S_80MPP_ADJ.TIF")
-    monkeypatch.setattr(horizon, "CACHE_DIR", tmp_path)
+    _isolate(monkeypatch, tmp_path, dem_file=horizon.DEM_FILE)
 
     for lat, lon in [(-84.79, 29.20), (-89.9, 129.8), (-90.0, 0.0)]:  # im2, shackleton, polo
         r = horizon.get_horizon(lat, lon, 50)

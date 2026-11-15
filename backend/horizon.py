@@ -2,11 +2,17 @@
 
 RESPONSABLE: Sennie (rol B)
 
-ESTADO: cálculo real con el DEM polar de LOLA (data/dem/). Si el sitio queda
-fuera del DEM, o falta el archivo o una librería, devuelve horizonte plano con
-source="mock" para que el resto de la app no se rompa.
+ESTADO: cálculo real con DEMs de LOLA (NASA LRO). Orden de búsqueda:
+  1. Horizonte precalculado en data/horizons/ (versionado en Git: permite
+     correr la app sin descargar ningún DEM; lo genera scripts/build_horizons.py).
+  2. Caché local en data/cache/.
+  3. DEM polar local data/dem/LDEM_80S_80MPP_ADJ.TIF (80°S al polo, 80 m/px).
+  4. DEM global de LOLA (118 m/px) leído en remoto por HTTP, solo la ventana
+     del sitio (requiere internet; ~40 s la primera vez). Se desactiva con la
+     variable de entorno LUNAR_GLOBAL_DEM="off" o se apunta a una copia local.
+  5. Si nada funciona: horizonte plano con source="mock" (la app no se rompe).
 
-Cómo funciona:
+Cómo funciona el cálculo:
   1. Se lee del DEM solo una ventana alrededor del sitio (no el mapa completo).
   2. Para cada azimut 0..359 se camina sobre la esfera lunar (círculo máximo)
      desde el sitio hacia afuera, hasta radius_km.
@@ -30,6 +36,8 @@ from __future__ import annotations
 import json
 import logging
 import math
+import os
+import time
 from pathlib import Path
 from typing import Callable
 
@@ -40,6 +48,15 @@ log = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parent.parent
 DEM_FILE = ROOT / "data" / "dem" / "LDEM_80S_80MPP_ADJ.TIF"  # 80-90°S, 80 m/px
 CACHE_DIR = ROOT / "data" / "cache"
+PRECOMPUTED_DIR = ROOT / "data" / "horizons"  # versionado en Git
+
+# DEM global de LOLA (NASA LRO), 118 m/px, publicado por USGS Astrogeology:
+# https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m
+# Proyección cilíndrica simple, R = 1737.4 km, enteros con escala 0.5 (se aplica sola).
+GLOBAL_DEM_DEFAULT = "https://planetarymaps.usgs.gov/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
+GLOBAL_DEM = os.environ.get("LUNAR_GLOBAL_DEM", GLOBAL_DEM_DEFAULT)
+REMOTE_RETRY_S = 300.0  # tras un fallo de red, no se reintenta el remoto durante 5 min
+_remote_down_until = 0.0
 
 MOON_RADIUS_M = 1_737_400.0  # radio de referencia de los LDEM de LOLA
 AZ_STEP_DEG = 1
@@ -47,6 +64,7 @@ N_AZ = 360
 MIN_STEP_M = 50.0  # paso mínimo del ray-marching
 MAX_STEPS = 1500  # tope de pasos por rayo (limita memoria con radios grandes)
 OBSERVER_HEIGHT_M = 0.0  # altura de la antena o panel sobre el terreno
+MAX_WINDOW_PX = 12_000_000  # tope de píxeles leídos del DEM por sitio (~48 MB en float32)
 
 # Función que da la altura del terreno (m) en arreglos de lat/lon (grados).
 # Devuelve NaN donde no hay datos.
@@ -186,12 +204,26 @@ def _open_window(ds, lat: float, lon: float, radius_m: float):
     if not (0 <= col0 < ds.width and 0 <= row0 < ds.height):
         raise _NoTerrainData("el sitio está fuera de la cobertura del DEM")
 
+    # La ventana se calcula proyectando el círculo de radio radius_m alrededor
+    # del sitio: funciona con cualquier proyección (estereográfica polar o
+    # cilíndrica, donde a latitudes altas el círculo se estira en este-oeste).
+    # Igual que en compute_profile: en el polo exacto el rumbo no está definido.
+    lat_c = float(np.clip(lat, -90.0 + 1e-6, 90.0 - 1e-6))
+    ring_lat, ring_lon = _destination(lat_c, lon, np.arange(0.0, 360.0, 2.0), radius_m)
+    rx, ry = to_xy(np.append(ring_lon, lon), np.append(ring_lat, lat))
+    rx, ry = np.asarray(rx), np.asarray(ry)
+    ring_cols = inv.a * rx + inv.b * ry + inv.c
+    ring_rows = inv.d * rx + inv.e * ry + inv.f
+
     res_m = abs(ds.transform.a)
-    half = int(math.ceil(radius_m / res_m)) + 4
-    c_off = max(0, int(col0) - half)
-    r_off = max(0, int(row0) - half)
-    c_end = min(ds.width, int(col0) + half + 1)
-    r_end = min(ds.height, int(row0) + half + 1)
+    margin = 4
+    c_off = max(0, int(math.floor(ring_cols.min())) - margin)
+    r_off = max(0, int(math.floor(ring_rows.min())) - margin)
+    c_end = min(ds.width, int(math.ceil(ring_cols.max())) + margin + 1)
+    r_end = min(ds.height, int(math.ceil(ring_rows.max())) + margin + 1)
+    if (c_end - c_off) * (r_end - r_off) > MAX_WINDOW_PX:
+        # Pasa con la proyección cilíndrica muy cerca de un polo (o al cruzar ±180°).
+        raise _NoTerrainData("la ventana sería demasiado grande en este DEM (¿sitio cerca del polo?)")
 
     data = ds.read(1, window=Window(c_off, r_off, c_end - c_off, r_end - r_off), masked=True)
     arr = data.astype("float32").filled(np.nan)
@@ -208,30 +240,73 @@ def _open_window(ds, lat: float, lon: float, radius_m: float):
     return height_fn, res_m
 
 
+def _dem_sources() -> list[tuple[str, str, bool]]:
+    """DEMs a probar, en orden: (ruta o URL para rasterio, nombre, es_remoto)."""
+    out: list[tuple[str, str, bool]] = []
+    if DEM_FILE.exists():
+        out.append((str(DEM_FILE), DEM_FILE.stem, False))
+    g = (GLOBAL_DEM or "").strip()
+    if g and g.lower() != "off":
+        remote = g.startswith(("http://", "https://"))
+        if not remote and not Path(g).exists():
+            log.warning("LUNAR_GLOBAL_DEM apunta a un archivo que no existe: %s", g)
+        else:
+            path = f"/vsicurl/{g}" if remote else g
+            stem = Path(g.split("?")[0]).stem.replace("Lunar_LRO_LOLA_", "")
+            out.append((path, stem, remote))
+    return out
+
+
 def _compute_from_dem(lat: float, lon: float, radius_km: float) -> dict:
-    if not DEM_FILE.exists():
-        raise _NoTerrainData(f"no existe {DEM_FILE.name} en data/dem/")
+    global _remote_down_until
+    sources = _dem_sources()
+    if not sources:
+        raise _NoTerrainData(f"no existe {DEM_FILE.name} en data/dem/ y el DEM global está desactivado")
     import rasterio  # import tardío: el resto de la app corre sin rasterio
 
     radius_m = radius_km * 1000.0
-    with rasterio.open(DEM_FILE) as ds:
-        height_fn, res_m = _open_window(ds, lat, lon, radius_m)
+    reasons = []
+    for path, name, remote in sources:
+        if remote and time.monotonic() < _remote_down_until:
+            reasons.append(f"{name}: remoto no disponible (fallo reciente)")
+            continue
+        env = dict(
+            GDAL_HTTP_TIMEOUT=30, GDAL_HTTP_MAX_RETRY=2, GDAL_HTTP_RETRY_DELAY=1,
+            GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.TIF",
+        )
+        try:
+            with rasterio.Env(**env), rasterio.open(path) as ds:
+                height_fn, res_m = _open_window(ds, lat, lon, radius_m)
+        except _NoTerrainData as exc:
+            reasons.append(f"{name}: {exc}")
+            continue
+        except Exception as exc:  # noqa: BLE001  (red caída, archivo corrupto, etc.)
+            if remote:
+                _remote_down_until = time.monotonic() + REMOTE_RETRY_S
+            log.warning("No pude leer el DEM %s: %s", name, exc)
+            reasons.append(f"{name}: {exc}")
+            continue
 
-    step_m = max(res_m, MIN_STEP_M, radius_m / MAX_STEPS)
-    profile = compute_profile(lat, lon, radius_m, step_m, height_fn)
-    return {
-        "az_step_deg": AZ_STEP_DEG,
-        "el": [round(float(v), 3) for v in profile],
-        "source": f"LOLA {DEM_FILE.stem} ({res_m:.0f} m/px)",
-    }
+        step_m = max(res_m, MIN_STEP_M, radius_m / MAX_STEPS)
+        profile = compute_profile(lat, lon, radius_m, step_m, height_fn)
+        return {
+            "az_step_deg": AZ_STEP_DEG,
+            "el": [round(float(v), 3) for v in profile],
+            "source": f"LOLA {name} ({res_m:.0f} m/px)",
+        }
+    raise _NoTerrainData("; ".join(reasons))
 
 
 # ---------------------------------------------------------------------------
-# Caché y respaldo
+# Caché, perfiles precalculados y respaldo
 # ---------------------------------------------------------------------------
+def horizon_filename(lat: float, lon: float, radius_km: float) -> str:
+    """Nombre de archivo de un perfil (mismo esquema en caché y en precalculados)."""
+    return f"horizon_{lat:.4f}_{lon:.4f}_r{radius_km:g}.json"
+
+
 def _cache_path(lat: float, lon: float, radius_km: float) -> Path:
-    name = f"horizon_{DEM_FILE.stem}_{lat:.4f}_{lon:.4f}_r{radius_km:g}.json"
-    return CACHE_DIR / name
+    return CACHE_DIR / horizon_filename(lat, lon, radius_km)
 
 
 def _read_cache(path: Path) -> dict | None:
@@ -259,9 +334,13 @@ def _flat_horizon() -> dict:
 def get_horizon(lat: float, lon: float, radius_km: float = 50.0) -> dict:
     """Devuelve la elevación del horizonte para az = 0..359 (paso 1°).
 
-    Usa el DEM de LOLA cuando el sitio está dentro de su cobertura (80°S al
-    polo). En otro caso devuelve horizonte plano con source="mock".
+    Orden: perfil precalculado (data/horizons/), caché, DEM polar local, DEM
+    global remoto. Si ninguno sirve, horizonte plano con source="mock".
     """
+    pre = _read_cache(PRECOMPUTED_DIR / horizon_filename(lat, lon, radius_km))
+    if pre is not None:
+        return pre
+
     path = _cache_path(lat, lon, radius_km)
     cached = _read_cache(path)
     if cached is not None:

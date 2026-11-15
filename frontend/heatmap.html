@@ -4,62 +4,125 @@
   <meta charset="utf-8">
   <title>Heatmap sitio × fecha — Lunar Landing Site Navigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/theme.css">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="/theme.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 1.5rem auto; max-width: 1100px; padding: 0 1rem; }
-    .row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
-    label { display: flex; flex-direction: column; font-size: .85rem; gap: .2rem; }
-    #sites { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin-bottom: 1rem; }
-    #sites label { flex-direction: row; align-items: center; gap: .3rem; }
-    #banner { background: #fff3cd; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
-    #error { background: #f8d7da; padding: .5rem .75rem; border-radius: 6px; display: none; margin-bottom: 1rem; }
-    #status { font-size: .85rem; color: #555; margin-bottom: .5rem; }
+    .page { max-width: 1280px; margin: 0 auto; padding: 22px 28px 48px; display: grid; gap: 18px; }
+    .hero { display: flex; align-items: center; gap: 22px; }
+    .hero h2 { margin: 2px 0 6px; font-size: 28px; line-height: 1.15; letter-spacing: -.3px; font-weight: 650; }
+    .hero p { margin: 0; color: var(--muted); max-width: 70ch; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+    .controls input, .controls select, .controls .btn { height: 40px; }
+    .kpis { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .sites { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .sites .chip input { margin: 0; }
+    .sites-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+    .sites-actions button { padding: 4px 12px; font-size: 12.5px; border-radius: 999px; }
+    #status { font-family: var(--mono); font-size: 12.5px; color: var(--muted); min-height: 1.4em; }
+    .bar { height: 3px; background: var(--panel2); border-radius: 99px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--sun)); transition: width .2s; }
+    .head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+    #chart { height: 520px; border: 0; background: none; }
+    #tablewrap { overflow-x: auto; margin-top: 10px; }
+    #tablewrap td, #tablewrap th { white-space: nowrap; font-family: var(--mono); font-size: 12.5px; }
+    #tablewrap th:first-child, #tablewrap td:first-child { font-family: var(--font); position: sticky; left: 0; background: #0d1426; }
+    .scale { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; font-family: var(--mono); }
+    .scale i { display: block; width: 180px; height: 10px; border-radius: 99px; background: linear-gradient(90deg, #1a1626, #3a2230, #6b3418, #a8531a, #e07b1c, #ffb43b, #fff0b8); border: 1px solid var(--line); }
   </style>
 </head>
 <body>
-  <h1>Heatmap sitio × fecha</h1>
-  <p>Filas: sitios. Columnas: ventanas de fechas consecutivas. Color: % de tiempo con el Sol visible sobre el horizonte local.</p>
-  <p><a href="/">← Volver al navegador</a></p>
-  <div id="banner">⚠ Datos simulados (mock): aún no hay cálculo real en algún módulo.</div>
-  <div id="error"></div>
+  <header class="topbar">
+    <div class="brand"><div class="moon" aria-hidden="true"></div>
+      <div><h1>Lunar Landing Site Navigator</h1><div class="sub">Heatmap sitio × fecha</div></div></div>
+    <nav class="nav">
+      <a href="/">Navegador</a>
+      <a href="/heatmap.html" class="on">Heatmap</a>
+      <a href="/educativo.html">Educativo</a>
+    </nav>
+  </header>
 
-  <div class="row">
-    <label>Inicio <input type="date" id="start" value="2027-01-01"></label>
-    <label>Ventanas <input type="number" id="n" value="12" min="1" max="60" style="width:5rem"></label>
-    <label>Duración de ventana
-      <select id="dur">
-        <option value="1">1 día</option>
-        <option value="7">7 días</option>
-        <option value="29.5" selected>29.5 días (un día lunar)</option>
-      </select>
-    </label>
-    <label>Paso (min) <input type="number" id="step" value="60" min="1" max="1440" style="width:5rem"></label>
-    <button id="go">Calcular</button>
+  <div class="page">
+    <section class="hero">
+      <div class="moon-orb big" aria-hidden="true"></div>
+      <div>
+        <div class="eyebrow">Planificación de lanzamiento</div>
+        <h2>¿Qué pasa si se retrasa el lanzamiento?</h2>
+        <p>Cada celda es el porcentaje de tiempo con el Sol sobre el horizonte local de un sitio, durante una ventana de fechas. Las filas son sitios; las columnas, ventanas consecutivas.</p>
+      </div>
+    </section>
+
+    <div id="banner" hidden>⚠ Datos simulados (mock): aún no hay cálculo real en algún módulo. Los porcentajes sirven para probar la interfaz, no para decidir.</div>
+    <div id="error" hidden></div>
+
+    <section class="panel">
+      <div class="controls">
+        <label>Inicio (UTC) <input type="date" id="start" value="2027-01-01"></label>
+        <label>Ventanas <input type="number" id="n" value="12" min="1" max="60"></label>
+        <label>Duración de ventana
+          <select id="dur">
+            <option value="1">1 día</option>
+            <option value="7">7 días</option>
+            <option value="29.5" selected>29.5 días (un día lunar)</option>
+          </select>
+        </label>
+        <label>Paso (min) <input type="number" id="step" value="60" min="1" max="1440"></label>
+        <button class="btn" id="go">Calcular</button>
+      </div>
+      <div class="sites" id="sites"></div>
+      <div class="sites-actions">
+        <button class="btn ghost" id="all" type="button">Todos</button>
+        <button class="btn ghost" id="none" type="button">Ninguno</button>
+        <span id="status"></span>
+      </div>
+      <div class="bar" style="margin-top:10px"><i id="prog"></i></div>
+    </section>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="panel">
+      <div class="head">
+        <div><h2>Sol visible por sitio y ventana</h2><p class="hint" style="margin:0">Pasa el cursor sobre una celda para ver el detalle. Más claro = más Sol.</p></div>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <div class="scale">0 %<i></i>100 %</div>
+          <button class="btn ghost" id="toggle" type="button">Ver como tabla</button>
+        </div>
+      </div>
+      <div id="chart"></div>
+      <div id="tablewrap" hidden></div>
+    </section>
   </div>
-  <div id="sites"></div>
-  <div id="status"></div>
-  <div id="chart" style="height:480px"></div>
 
   <script>
     const $ = id => document.getElementById(id);
+    const T = window.LunarTheme;
     const CONCURRENCY = 4;
-    let sites = [];
+    let sites = [], last = null;
 
     const iso = d => d.toISOString().replace(/\.\d+Z$/, 'Z');
     const day = d => d.toISOString().slice(0, 10);
+    const short = n => n.replace(/\s*\(.*$/, '');
+    const r1 = v => Math.round(v * 10) / 10;
 
     async function init() {
-      sites = await (await fetch('/api/sites')).json();
+      try { sites = await (await fetch('/api/sites')).json(); }
+      catch (e) { showError('No se pudo cargar la lista de sitios. ¿Está corriendo el servidor?'); return; }
       $('sites').innerHTML = sites.map(s =>
-        `<label><input type="checkbox" value="${s.id}" checked> ${s.name}</label>`).join('');
+        `<label class="chip"><input type="checkbox" value="${s.id}" checked>${s.name}</label>`).join('');
       $('go').onclick = run;
+      $('all').onclick = () => document.querySelectorAll('#sites input').forEach(c => c.checked = true);
+      $('none').onclick = () => document.querySelectorAll('#sites input').forEach(c => c.checked = false);
+      $('toggle').onclick = () => {
+        const t = $('tablewrap').hidden;
+        $('tablewrap').hidden = !t; $('chart').hidden = t;
+        $('toggle').textContent = t ? 'Ver como gráfica' : 'Ver como tabla';
+        if (!t && last) Plotly.Plots.resize('chart');
+      };
       run();
     }
 
-    function showError(msg) {
-      $('error').textContent = msg;
-      $('error').style.display = msg ? 'block' : 'none';
-    }
+    function showError(msg) { $('error').textContent = msg; $('error').hidden = !msg; }
 
     async function fetchWindow(ids, w, step) {
       const q = new URLSearchParams({ sites: ids.join(','), start: iso(w.start), end: iso(w.end), step_min: step });
@@ -87,7 +150,7 @@
         end: new Date(t0.getTime() + (k + 1) * durMs),
       }));
 
-      $('go').disabled = true;
+      $('go').disabled = true; $('prog').style.width = '0';
       const results = new Array(n);
       let next = 0, done = 0;
       $('status').textContent = `Calculando 0/${n}…`;
@@ -96,7 +159,9 @@
           while (next < n) {
             const k = next++;
             results[k] = await fetchWindow(ids, wins[k], step);
-            $('status').textContent = `Calculando ${++done}/${n}…`;
+            done++;
+            $('status').textContent = `Calculando ${done}/${n}…`;
+            $('prog').style.width = (100 * done / n) + '%';
           }
         };
         await Promise.all(Array.from({ length: Math.min(CONCURRENCY, n) }, worker));
@@ -107,13 +172,12 @@
         return;
       }
       $('go').disabled = false;
-      $('status').textContent = `${ids.length} sitios × ${n} ventanas.`;
+      $('status').textContent = `${ids.length} sitios × ${n} ventanas`;
       draw(ids, wins, results);
     }
 
     function draw(ids, wins, results) {
-      // Las filas siguen el orden de `ids`; /api/compare devuelve en ese mismo orden, pero se indexa por id.
-      const names = {}, z = [], text = [];
+      const names = {}, z = [], text = [], rowMeta = [];
       let mock = false;
       ids.forEach(() => { z.push([]); text.push([]); });
       results.forEach((res, k) => {
@@ -122,7 +186,7 @@
           const r = byId[id], m = r.metrics;
           names[id] = r.name;
           z[i][k] = m.sun_lit_pct;
-          text[i][k] = `${r.name}<br>${day(wins[k].start)} → ${day(wins[k].end)}` +
+          text[i][k] = `<b>${r.name}</b><br>${day(wins[k].start)} → ${day(wins[k].end)}` +
             `<br>Sol visible: <b>${m.sun_lit_pct}%</b>` +
             `<br>Noche más larga: ${m.longest_dark_h} h` +
             `<br>Elevación solar máx.: ${m.sun_el_max_deg}°`;
@@ -130,21 +194,47 @@
           if (src.ephemeris === 'mock' || src.horizon === 'mock') mock = true;
         });
       });
-      $('banner').style.display = mock ? 'block' : 'none';
+      $('banner').hidden = !mock;
 
-      Plotly.react('chart', [{
-        type: 'heatmap',
-        x: wins.map(w => day(w.start)),
-        y: ids.map(id => names[id]),
-        z, text, hoverinfo: 'text',
-        zmin: 0, zmax: 100,
-        colorscale: 'Viridis',
-        colorbar: { title: '% Sol' },
-      }], {
-        xaxis: { title: 'Inicio de ventana (UTC)', type: 'category' },
-        yaxis: { autorange: 'reversed', automargin: true },
-        margin: { l: 60, r: 20, t: 20, b: 70 },
-      }, { responsive: true });
+      // --- Indicadores resumen ---
+      let best = { v: -1 }, zeros = 0, total = 0, sum = 0;
+      z.forEach((row, i) => row.forEach((v, k) => {
+        total++; sum += v; if (v === 0) zeros++;
+        if (v > best.v) best = { v, i, k };
+      }));
+      const means = z.map(row => row.reduce((a, b) => a + b, 0) / row.length);
+      const bi = means.indexOf(Math.max(...means));
+      const wi = means.indexOf(Math.min(...means));
+      $('kpis').innerHTML = [
+        ['', 'Mejor combinación', `${r1(best.v)} %`, `${short(names[ids[best.i]])} · ${day(wins[best.k].start)}`],
+        ['sun', 'Mejor sitio (promedio)', `${r1(means[bi])} %`, short(names[ids[bi]])],
+        ['earth', 'Sitio con menos Sol', `${r1(means[wi])} %`, short(names[ids[wi]])],
+        ['', 'Celdas sin Sol', `${zeros} / ${total}`, `${r1(100 * zeros / total)} % de las combinaciones`],
+      ].map(([c, a, b, s]) => `<div class="kpi ${c}"><span>${a}</span><b>${b}</b><small>${s}</small></div>`).join('');
+
+      // --- Heatmap ---
+      const xs = wins.map(w => day(w.start));
+      const ys = ids.map(id => short(names[id]));
+      const dense = ids.length * wins.length > 260;
+      const trace = {
+        type: 'heatmap', x: xs, y: ys, z, text, hoverinfo: 'text',
+        zmin: 0, zmax: 100, colorscale: T.sunScale, xgap: 2, ygap: 2,
+        colorbar: { thickness: 12, len: .92, tickfont: { color: T.C.muted, size: 11 }, outlinewidth: 0, ticksuffix: '%' },
+      };
+      if (!dense) { trace.texttemplate = '%{z:.0f}'; trace.textfont = { size: 11.5, family: 'ui-monospace, Menlo, monospace' }; }
+      const rows = Math.max(6, ids.length);
+      $('chart').style.height = Math.min(760, 150 + rows * 42) + 'px';
+      Plotly.react('chart', [trace], T.layout({
+        margin: { t: 8, l: 150, r: 10, b: 96 },
+        xaxis: { title: { text: 'Inicio de ventana (UTC)', standoff: 18 }, type: 'category', tickangle: -35, showgrid: false },
+        yaxis: { autorange: 'reversed', automargin: true, showgrid: false },
+      }), T.config);
+
+      // --- Tabla (misma información, accesible) ---
+      $('tablewrap').innerHTML = `<table><thead><tr><th>Sitio</th>${xs.map(x => `<th>${x.slice(5)}</th>`).join('')}</tr></thead><tbody>` +
+        ids.map((id, i) => `<tr><td>${short(names[id])}</td>${z[i].map(v => `<td>${r1(v)}</td>`).join('')}</tr>`).join('') +
+        `</tbody></table>`;
+      last = { ids, wins };
     }
 
     init();
