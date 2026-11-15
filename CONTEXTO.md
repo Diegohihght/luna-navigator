@@ -27,7 +27,7 @@ What is **not** done yet:
 - Site coordinates in `data/sites.json` verified with Quickmap (`verified: false`). **Urgent for Shackleton** (see §8).
 - Real terrain for custom coordinates: they currently use illustrative terrain, and the view says so.
 - Final captions, pitch script and pitch video.
-- Translation of the user-facing interface (HTML pages and 3D view text) and of the Spanish API error messages not yet covered.
+- Translation of the user-facing interface (HTML pages and 3D view text) and of `backend/horizon.py` and `tests/test_horizon.py`.
 
 ## 3. Key physical concepts
 - No atmosphere: no refraction; the horizon is geometric and set by the terrain.
@@ -120,7 +120,7 @@ Next:
 - [ ] Confirm the Space Apps submission requirements (format, video, public repository). Owner: Diego.
 - [ ] Review the challenge's Resources tab and add the data links to the README. Owner: Diego.
 - [ ] Decide whether custom coordinates use a local fallback DEM. Owner: Sennie.
-- [ ] Translate the remaining Spanish: interface text, `vista3d.js` comments, the Spanish error messages of the API, and the docstrings of `backend/horizon.py` and `tests/test_horizon.py`. Owners: Luis (interface and `vista3d.js`), Sennie (her files), Diego (the rest).
+- [ ] Translate the remaining Spanish: interface text, `vista3d.js` comments, and the docstrings of `backend/horizon.py` and `tests/test_horizon.py`. Owners: Luis (interface and `vista3d.js`), Sennie (her files).
 
 ## 9. Validation (before we consider anything good)
 - Sun and Earth against JPL Horizons at the 10 curated sites (done, Martin; see `tests/horizons_validation/validacion_horizons.md`).
