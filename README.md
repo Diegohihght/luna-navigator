@@ -41,9 +41,9 @@ conexión:
 
     python -c "from datetime import datetime, timezone; from backend.ephemeris import get_ephemeris; t = datetime(2027, 1, 1, tzinfo=timezone.utc); get_ephemeris(0, 0, t, t, 60)"
 
-Validación: `ephemeris.py` está comparado contra JPL Horizons en los 10 sitios
-curados (separación angular máxima 0.0064°). La tabla está en
-`tests/horizons_validation/validacion_horizons.md`.
+## Qué modela la efeméride
+
+La posición del Sol y de la Tierra se calcula con las efemérides JPL DE421 y la orientación física de la Luna (PCK lunar de JPL, marco Mean Earth), por lo que incluye de forma nativa la libración, la excentricidad orbital, la inclinación del eje y el paralaje del observador. Se validó contra JPL Horizons en los 10 sitios curados (separación angular máxima 0.0064°; tabla en `tests/horizons_validation/validacion_horizons.md`). Con esto la Tierra oscila entre 13° y 20° (pico a pico) en elevación según el sitio, y desde el polo sur queda sobre el horizonte geométrico solo cerca del 46% del tiempo, cruzándolo periódicamente.
 
 ## Equipo y módulos
 | Rol | Persona | Archivos |

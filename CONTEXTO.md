@@ -137,7 +137,7 @@ Siguiente:
 ## 11. Después de la entrega (largo plazo)
 - Horizonte LOLA para cualquier coordenada, con DEM global local.
 - Mapa polar 2D con el horizonte y las ventanas de luz superpuestas.
-- Libración real de la Tierra y comunicación con más de una antena.
+- Comunicación con más de una antena.
 - Más sitios: misiones CLPS y candidatos de la NASA y de la Agencia Espacial Canadiense.
 - Validación automática contra JPL en la integración continua.
 

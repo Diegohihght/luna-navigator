@@ -14,8 +14,6 @@ Contrato de salida:
   "source": "mock" | "skyfield-de421" | ...
 }
 
-Validar contra JPL Horizons (https://ssd.jpl.nasa.gov/horizons/) en 2-3 sitios.
-
 Notas de implementación:
 - Los kernels se descargan solos la primera vez (requiere internet) y se
   guardan en data/kernels/ (NO se suben a git).
