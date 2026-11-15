@@ -6,7 +6,7 @@ ESTADO: cálculo real con DEMs de LOLA (NASA LRO). Orden de búsqueda:
   1. Horizonte precalculado en data/horizons/ (versionado en Git: permite
      correr la app sin descargar ningún DEM; lo genera scripts/build_horizons.py).
   2. Caché local en data/cache/.
-  3. DEM polar local data/dem/LDEM_80S_80MPP_ADJ.TIF (80°S al polo, 80 m/px).
+  3. DEM polar local data/dem/LDEM_80S_80MPP_ADJ_i16.tif (80°S al polo, 80 m/px; int16 con escala 0.5 m).
   4. DEM global de LOLA (118 m/px) leído en remoto por HTTP, solo la ventana
      del sitio (requiere internet; ~40 s la primera vez). Se desactiva con la
      variable de entorno LUNAR_GLOBAL_DEM="off" o se apunta a una copia local.
@@ -46,7 +46,7 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parent.parent
-DEM_FILE = ROOT / "data" / "dem" / "LDEM_80S_80MPP_ADJ.TIF"  # 80-90°S, 80 m/px
+DEM_FILE = ROOT / "data" / "dem" / "LDEM_80S_80MPP_ADJ_i16.tif"  # 80-90°S, 80 m/px, int16 0.5 m (scripts/compress_dem.py)
 CACHE_DIR = ROOT / "data" / "cache"
 PRECOMPUTED_DIR = ROOT / "data" / "horizons"  # versionado en Git
 
