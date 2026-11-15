@@ -84,7 +84,7 @@ The same LOLA data can be explored in [NASA Moon Trek](https://trek.nasa.gov/moo
 
 - The horizon uses the LOLA elevation models as published. Heights are not corrected for local rock or dust, and the 80 m and 118 m grids cannot resolve small craters.
 - The 3D surface away from the curated sites is illustrative and is labelled as such in the interface.
-- **Shackleton rim coordinates are still unverified.** At the current coordinate the horizon is high and the Sun is hidden for most of the period. This is being checked against LROC Quickmap; treat that site's numbers as provisional.
+- **Shackleton** is placed on the crater rim (−89.954°, −31.976°), verified with LROC Quickmap. An earlier coordinate inside the crater gave 0 % Sun and was replaced. For 2027-01-01 to 2027-01-31 the Sun is above the local horizon 47.2 % of the time (maximum solar elevation 1.0°) and the Earth is visible 53.4 % of the time. The coordinates of the other curated sites are still marked `verified: false` in `data/sites.json`.
 - Earth libration is included implicitly, because the Earth position is computed for each site. The JPL check above covers the Sun and Earth positions, but libration has not been checked separately.
 - The Moon's orbital variations are included by the DE421 ephemeris.
 
