@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,7 +10,6 @@
   --bg:#171b26; --panel:#202638; --panel2:#283048; --line:#343d58;
   --text:#e8eaf2; --muted:#9aa3bd; --sun:#f4b942; --earth:#5ab0f0;
   --ok:#5fcf9a; --bad:#ef7b6b; --accent:#b9a6ff;
-  --font:"Segoe UI","Helvetica Neue",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.45}
@@ -70,62 +69,124 @@ td.best{color:var(--ok);font-weight:650}
 .empty{color:var(--muted);font-size:14px;padding:6px 0}
 </style>
 <link rel="stylesheet" href="/theme.css">
+<script src="/i18n.js"></script>
+<script src="/i18n-index.js"></script>
+<script src="/i18n-3d.js"></script>
+<style>
+/* Barra lateral fija: controles + resumen siempre a la vista mientras se explora el horizonte. */
+.layout{grid-template-columns:minmax(300px,350px) 1fr}
+aside{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+.autonote{font-size:12px;color:var(--muted);margin:-6px 0 0;text-align:center}
+#siteinfo{border-top:1px solid var(--line);padding-top:12px}
+.summary{border-top:1px solid var(--line);padding-top:14px}
+.summary h2{margin:0 0 2px;font-size:15px;font-weight:650}
+.summary .hint{margin:0 0 10px}
+.summary .metrics{grid-template-columns:1fr 1fr;gap:8px}
+.summary .m{padding:9px 10px 9px 13px}
+.summary .m span{font-size:10.5px;line-height:1.25;min-height:2.5em}
+.summary .m b{font-size:19px}
+body.edu .summary .metrics{grid-template-columns:1fr}
+body.edu .summary .m span{min-height:0}
+.busy #go{opacity:.7}
+@media(max-width:900px){.layout{grid-template-columns:1fr}aside{position:static;max-height:none}}
+.kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--muted)}
+.shortcuts{color:var(--muted);font-size:12px;margin:10px 0 0}
+.cmpbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.btn.sm{width:auto;padding:6px 14px;font-size:13px}
+.cmpcount{color:var(--muted);font-size:12.5px;margin-left:auto}
+.chip.on{border-color:var(--accent);background:rgba(76,201,240,.12)}
+.cmpbest{font-size:13.5px;color:var(--text);margin-top:2px}
+.cmpbest b{color:var(--ok)}
+th.win,td.winc{background:rgba(79,224,164,.06)}
+/* Selector de sitios: un solo desplegable en lugar de una fila de botones. */
+.dropsel{position:relative;margin-bottom:12px}
+.dropsel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--panel2);border:1px solid var(--line-strong);border-radius:12px;user-select:none;transition:border-color .2s,box-shadow .2s}
+.dropsel>summary::-webkit-details-marker{display:none}
+.dropsel>summary:hover,.dropsel[open]>summary{border-color:var(--accent);box-shadow:0 0 0 3px rgba(76,201,240,.12)}
+.dsl{font-weight:650}
+.dsn{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.dropsel .cmpcount{margin-left:auto;white-space:nowrap;font-family:var(--mono)}
+.dchev{flex:none;width:9px;height:9px;border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(45deg);transition:transform .25s;margin:0 4px 3px 0}
+.dropsel[open] .dchev{transform:rotate(-135deg);margin-bottom:-3px}
+.dsel-panel{position:absolute;z-index:15;left:0;right:0;top:calc(100% + 8px);background:#0b1122;border:1px solid var(--line-strong);border-radius:14px;padding:14px;box-shadow:0 26px 60px rgba(0,0,0,.65);max-height:min(60vh,420px);overflow:auto;animation:dselIn .22s ease both}
+@keyframes dselIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.dsel-panel .cmpbar{margin-bottom:12px}
+.dsel-panel .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:0}
+.dsel-panel .chip{border-radius:10px}
+</style>
 </head>
 <body>
 <header>
   <div class="brand"><div class="moon" aria-hidden="true"></div>
-    <div><h1>Lunar Landing Site Navigator</h1><div class="sub">Sol y Tierra sobre el horizonte lunar, para elegir dónde y cuándo aterrizar</div></div></div>
+    <div><h1>Lunar Landing Site Navigator</h1><div class="sub" data-i18n="idx.sub">Sun and Earth over the lunar horizon, to choose where and when to land</div></div></div>
   <div class="tools">
-    <a href="/heatmap.html">Heatmap sitio × fecha</a>
-    <a href="/educativo.html">Explicación paso a paso</a>
-    <label class="switch"><input type="checkbox" id="edu"> Modo educativo</label>
+    <a href="/heatmap.html" data-i18n="idx.nav.heatmap">Site × date heatmap</a>
+    <a href="/educativo.html" data-i18n="idx.nav.edu">Step-by-step explanation</a>
+    <label class="switch"><input type="checkbox" id="edu"> <span data-i18n="idx.edumode">Educational mode</span></label>
   </div>
 </header>
 
 <div class="layout">
   <aside>
-    <label>Sitio de aterrizaje
+    <label><span data-i18n="idx.site">Landing site</span>
       <select id="site"></select></label>
     <div id="custom" class="row">
-      <label>Latitud (°)<input id="lat" type="number" step="0.01" min="-90" max="90" value="-89.5"></label>
-      <label>Longitud (°)<input id="lon" type="number" step="0.01" min="-180" max="180" value="0"></label>
+      <label><span data-i18n="idx.lat">Latitude (°)</span><input id="lat" type="number" step="0.01" min="-90" max="90" value="-89.5"></label>
+      <label><span data-i18n="idx.lon">Longitude (°)</span><input id="lon" type="number" step="0.01" min="-180" max="180" value="0"></label>
     </div>
-    <label>Fecha de inicio (UTC)<input id="start" type="date" value="2027-01-01"></label>
+    <label><span data-i18n="idx.start">Start date (UTC)</span><input id="start" type="date" value="2027-01-01"></label>
     <div class="row">
-      <label>Duración (días)<input id="days" type="number" min="1" max="60" value="14"></label>
-      <label>Paso (min)<select id="step"><option>15</option><option>30</option><option selected>60</option><option>180</option></select></label>
+      <label><span data-i18n="idx.days">Duration (days)</span><input id="days" type="number" min="1" max="60" value="14"></label>
+      <label><span data-i18n="idx.step">Step (min)</span><select id="step"><option>15</option><option>30</option><option selected>60</option><option>180</option></select></label>
     </div>
-    <button class="btn" id="go">Calcular escenario</button>
-    <div id="siteinfo">Elige un sitio y calcula.</div>
+    <button class="btn" id="go">Calculate scenario</button>
+    <div class="autonote" id="autonote" data-i18n="idx.autonote">It recalculates when you change the site, dates or step.</div>
+    <div id="siteinfo">Choose a site and calculate.</div>
+    <section class="summary" aria-labelledby="sumh">
+      <h2 id="sumh" data-i18n="idx.summary">Period summary</h2>
+      <p class="hint" data-i18n="idx.summary.hint">Metrics for the whole chosen date range.</p>
+      <div class="metrics" id="metrics"><div class="empty" data-i18n="idx.nodata">No data yet.</div></div>
+    </section>
   </aside>
 
   <main>
-    <div id="banner">Datos de demostración: el backend aún devuelve valores de prueba (mock). Los números no son reales todavía.</div>
+    <div id="banner" data-i18n="idx.banner">Demo data: the backend still returns test values (mock). The numbers are not real yet.</div>
     <div id="err"></div>
 
     <section class="card">
-      <h2>Resumen del periodo</h2>
-      <p class="hint">Métricas calculadas sobre todo el rango de fechas elegido.</p>
-      <div class="metrics" id="metrics"><div class="empty">Sin datos todavía.</div></div>
-    </section>
-
-    <section class="card">
-      <h2>Vista del horizonte</h2>
-      <p class="hint">Mirando desde el sitio: el eje horizontal es el azimut (0° = norte lunar, sentido horario) y el vertical la elevación. El Sol o la Tierra son visibles solo si quedan por encima del relieve gris.</p>
+      <h2 data-i18n="idx.horizon">Horizon view</h2>
+      <p class="hint" data-i18n="idx.horizon.hint">Looking from the site: the horizontal axis is azimuth (0° = lunar north, clockwise) and the vertical axis is elevation. The Sun or the Earth are visible only when they are above the grey terrain.</p>
       <div class="now" id="now"></div>
       <div id="chart"></div>
       <div class="timeline">
-        <button class="btn ghost" id="play" aria-label="Reproducir o pausar">▶ Reproducir</button>
-        <input type="range" id="slider" min="0" max="0" value="0" style="flex:1" aria-label="Momento del periodo">
+        <button class="btn ghost" id="play" aria-label="Play or pause" data-i18n-attr="aria-label:idx.play.label">▶ Play</button>
+        <input type="range" id="slider" min="0" max="0" value="0" style="flex:1" aria-label="Moment in the period" data-i18n-attr="aria-label:idx.slider">
         <div id="tlabel">—</div>
       </div>
+      <p class="shortcuts" data-i18n-html="idx.shortcuts"><span class="kbd">Space</span> play · <span class="kbd">←</span> <span class="kbd">→</span> move one hour · <span class="kbd">↑</span> <span class="kbd">↓</span> move one day · <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> switch view · <span class="kbd">Z</span> zoom the 3D view out/in</p>
     </section>
 
     <section class="card">
-      <h2>Comparar sitios</h2>
-      <p class="hint">Marca dos o más sitios y compara el mismo periodo lado a lado. En verde, el mejor valor de cada fila.</p>
-      <div class="chips" id="chips"></div>
-      <button class="btn ghost" id="cmp" style="width:auto;padding:9px 18px">Comparar seleccionados</button>
+      <h2 data-i18n="idx.cmp">Compare sites</h2>
+      <p class="hint" data-i18n="idx.cmp.hint">Check two or more sites and the comparison updates by itself, using the same period as the left panel. The best value of each row is shown in green.</p>
+      <details class="dropsel" id="dsel">
+        <summary>
+          <span class="dsl" data-i18n="idx.cmp.sites">Sites to compare</span>
+          <span class="dsn" id="dsn"></span>
+          <span class="cmpcount" id="cmpcount"></span>
+          <i class="dchev" aria-hidden="true"></i>
+        </summary>
+        <div class="dsel-panel">
+          <div class="cmpbar">
+            <button class="btn ghost sm" id="cmpAll" data-i18n="idx.cmp.all">Select all</button>
+            <button class="btn ghost sm" id="cmpNone" data-i18n="idx.cmp.none">Clear all</button>
+            <button class="btn ghost sm" id="cmpInv" data-i18n="idx.cmp.inv">Invert</button>
+            <button class="btn ghost sm" id="cmpCur" title="Keeps only the site chosen above, plus the next one" data-i18n="idx.cmp.cur" data-i18n-attr="title:idx.cmp.cur.title">Current site only</button>
+          </div>
+          <div class="chips" id="chips"></div>
+        </div>
+      </details>
+      <div id="cmpbest" class="cmpbest"></div>
       <div id="cmpout" style="margin-top:14px;overflow-x:auto"></div>
     </section>
   </main>
@@ -135,15 +196,18 @@ td.best{color:var(--ok);font-weight:650}
 const $ = id => document.getElementById(id);
 const S = {sites:[], eph:null, hor:null, met:null, i:0, timer:null, X:null, Y:null};
 
-const METRICS = [
-  ["sun_lit_pct","Sol iluminado","%","Porcentaje del periodo con el Sol sobre el horizonte. Más luz, más energía solar.","sun",1],
-  ["longest_dark_h","Noche más larga","h","Mayor tramo continuo sin Sol. Define cuánta batería o calor necesita la misión.","sun",-1],
-  ["sun_el_max_deg","Elevación máx. del Sol","°","En el polo sur el Sol apenas sube unos grados, por eso las sombras son larguísimas.","sun",1],
-  ["earth_visible_pct","Tierra visible","%","Porcentaje del periodo con línea de vista directa a la Tierra para comunicarse.","earth",1],
-  ["longest_comms_gap_h","Mayor corte de comunicación","h","Tramo continuo más largo sin ver la Tierra.","earth",-1],
-  ["hours_to_sun_change","Hasta cambio de Sol","h","Tiempo hasta la próxima salida o puesta del Sol desde el momento elegido.","sun",0],
-  ["hours_to_earth_change","Hasta cambio de Tierra","h","Tiempo hasta que la Tierra aparezca o se oculte.","earth",0]
+/* [campo del API, unidad, clase de color, dirección ("mejor"), nombre y ayuda en inglés]. El español está en i18n-index.js. */
+const METRIC_DEFS = [
+  ["sun_lit_pct","%","sun",1,"Sun visible","Percentage of the period with the Sun above the horizon. More light, more solar power."],
+  ["longest_dark_h","h","sun",-1,"Longest night","Longest continuous stretch without Sun. It sets how much battery or heat the mission needs."],
+  ["sun_el_max_deg","°","sun",1,"Max. Sun elevation","At the south pole the Sun barely rises a few degrees, which is why shadows are extremely long."],
+  ["earth_visible_pct","%","earth",1,"Earth visible","Percentage of the period with a direct line of sight to the Earth for communications."],
+  ["longest_comms_gap_h","h","earth",-1,"Longest communications gap","Longest continuous stretch without seeing the Earth."],
+  ["hours_to_sun_change","h","sun",0,"Until Sun change","Time until the next sunrise or sunset from the chosen moment."],
+  ["hours_to_earth_change","h","earth",0,"Until Earth change","Time until the Earth appears or disappears."]
 ];
+/* Forma [campo, nombre, unidad, ayuda, clase, dirección] en el idioma activo. */
+const METRICS = () => METRIC_DEFS.map(([k,u,cls,dir,name,tip]) => [k, t("idx.m."+k,name), u, t("idx.m."+k+".tip",tip), cls, dir]);
 const fmt = v => v==null||isNaN(v) ? "—" : (Math.abs(v)>=100 ? v.toFixed(0) : v.toFixed(1));
 const fdate = t => t.replace("T"," ").replace(":00Z"," UTC").replace("Z"," UTC");
 
@@ -151,30 +215,44 @@ function showErr(msg){ const e=$("err"); e.textContent=msg; e.style.display=msg?
 async function api(path, params){
   const q = new URLSearchParams(params).toString();
   const r = await fetch(`/api/${path}?${q}`);
-  if(!r.ok) throw new Error(`El servidor respondió ${r.status} en /api/${path}`);
+  if(!r.ok) throw new Error(t("idx.err.server","The server answered {status} on /api/{path}",{status:r.status,path}));
   return r.json();
 }
 
 /* ---------- Sitios ---------- */
 async function loadSites(){
   try{ S.sites = await api("sites",{}); }
-  catch(e){ showErr("No se pudo cargar la lista de sitios. ¿Está corriendo el servidor (uvicorn backend.main:app --reload)?"); return; }
-  $("site").innerHTML = S.sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join("")
-    + `<option value="__custom">Coordenadas personalizadas…</option>`;
-  $("chips").innerHTML = S.sites.map((s,i)=>
-    `<label class="chip"><input type="checkbox" value="${s.id}" ${i<2?"checked":""}>${s.name}</label>`).join("");
+  catch(e){ showErr(t("idx.err.sites","Could not load the site list. Check the connection to the server and try again.")); return; }
+  renderSiteOptions();
+  let saved = null;
+  try{ saved = JSON.parse(localStorage.getItem("lunar.cmp")||"null"); }catch(e){}
+  const valid = Array.isArray(saved) ? saved.filter(id=>S.sites.some(s=>s.id===id)) : [];
+  const sel = valid.length>=2 ? valid : S.sites.slice(0,2).map(s=>s.id);
+  renderChips(sel);
+  syncChips();
   updateSiteInfo();
+}
+/* Los nombres de los sitios se muestran en el idioma activo (la API los devuelve en español). */
+function renderSiteOptions(){
+  const cur = $("site").value;
+  $("site").innerHTML = S.sites.map(s=>`<option value="${s.id}">${I18N.siteName(s)}</option>`).join("")
+    + `<option value="__custom">${t("idx.customopt","Custom coordinates…")}</option>`;
+  if(cur) $("site").value = cur;
+}
+function renderChips(sel){
+  $("chips").innerHTML = S.sites.map(s=>
+    `<label class="chip"><input type="checkbox" value="${s.id}" ${sel.includes(s.id)?"checked":""}>${I18N.siteName(s)}</label>`).join("");
 }
 function currentSite(){
   const v = $("site").value;
-  if(v==="__custom") return {id:"custom", name:"Personalizado", lat:+$("lat").value, lon:+$("lon").value};
+  if(v==="__custom") return {id:"custom", name:t("idx.custom","Custom"), lat:+$("lat").value, lon:+$("lon").value};
   return S.sites.find(s=>s.id===v);
 }
 function updateSiteInfo(){
   $("custom").style.display = $("site").value==="__custom" ? "grid" : "none";
   const s = currentSite(); if(!s) return;
-  const extra = s.mission ? `<br>Misión: ${s.mission}` : "";
-  const warn = s.verified===false ? `<br><span style="color:#f5d98f">Coordenadas sin verificar con Quickmap.</span>` : "";
+  const extra = s.mission ? `<br>${t("idx.mission","Mission: {m}",{m:I18N.siteMission(s)})}` : "";
+  const warn = s.verified===false ? `<br><span style="color:#f5d98f">${t("idx.unverified","Coordinates not yet verified with Quickmap.")}</span>` : "";
   $("siteinfo").innerHTML = `Lat ${s.lat}°, Lon ${s.lon}°${extra}${warn}`;
 }
 function range(){
@@ -185,9 +263,11 @@ function range(){
 }
 
 /* ---------- Cálculo principal ---------- */
+let runSeq = 0;
 async function run(){
-  const s = currentSite(); if(!s) return;
-  showErr(""); $("go").disabled = true; $("go").textContent = "Calculando…"; stop();
+  const s = currentSite(); if(!s || !Number.isFinite(s.lat) || !Number.isFinite(s.lon)) return;
+  const my = ++runSeq;
+  showErr(""); $("go").disabled = true; $("go").textContent = t("idx.calc","Calculating…"); stop();
   const base = {lat:s.lat, lon:s.lon};
   try{
     const [eph,hor,met] = await Promise.all([
@@ -195,19 +275,25 @@ async function run(){
       api("horizon",{...base,radius_km:50}),
       api("metrics",{...base,...range()})
     ]);
+    if(my !== runSeq) return;   // llegó una respuesta más nueva: esta ya no sirve
     S.eph=eph; S.hor=hor; S.met=met; S.i=0;
     const mock = [eph.source, hor.source, JSON.stringify(met.source)].join().includes("mock");
     $("banner").style.display = mock ? "block" : "none";
     renderMetrics(); drawChart();
     const sl=$("slider"); sl.max = eph.t.length-1; sl.value=0;
     updateNow();
-  }catch(e){ showErr(e.message+". Revisa que el backend esté corriendo y los parámetros sean válidos."); }
-  $("go").disabled=false; $("go").textContent="Calcular escenario";
+  }catch(e){ if(my !== runSeq) return; showErr(t("idx.err.run","{msg}. Check that the backend is running and the parameters are valid.",{msg:e.message})); }
+  $("go").disabled=false; $("go").textContent=t("idx.go","Calculate scenario");
 }
+/* Recalcula solo al cambiar un control (con una pausa corta para no pedir en cada tecla). */
+let autoTimer = null;
+function autoRun(){ clearTimeout(autoTimer); autoTimer = setTimeout(run, 350); }
+["site","lat","lon","start","days","step"].forEach(id => $(id).addEventListener("change", autoRun));
+["lat","lon","days"].forEach(id => $(id).addEventListener("input", autoRun));
 
 function renderMetrics(){
   const m = S.met;
-  $("metrics").innerHTML = METRICS.map(([k,name,u,tip,cls])=>
+  $("metrics").innerHTML = METRICS().map(([k,name,u,tip,cls])=>
     `<div class="m ${cls}"><span>${name}</span><b>${fmt(m[k])} ${u}</b><small>${tip}</small></div>`).join("");
 }
 
@@ -232,7 +318,7 @@ function drawChart(){
     grid += `<line x1="${L}" x2="${W-R}" y1="${f(Y(v))}" y2="${f(Y(v))}" stroke="${v===0?"#5b6486":"#252b3f"}" stroke-width="${v===0?1.5:1}"/>`
           + `<text x="${L-8}" y="${f(Y(v)+4)}" fill="#9aa3bd" font-size="12" text-anchor="end">${v}°</text>`;
   }
-  const names={0:"N",45:"NE",90:"E",135:"SE",180:"S",225:"SO",270:"O",315:"NO",360:"N"};
+  const names={0:t("idx.dir.N","N"),45:t("idx.dir.NE","NE"),90:t("idx.dir.E","E"),135:t("idx.dir.SE","SE"),180:t("idx.dir.S","S"),225:t("idx.dir.SW","SW"),270:t("idx.dir.W","W"),315:t("idx.dir.NW","NW"),360:t("idx.dir.N","N")};
   for(const a of [0,45,90,135,180,225,270,315,360]){
     grid += `<line x1="${f(X(a))}" x2="${f(X(a))}" y1="${T}" y2="${H-B}" stroke="#252b3f"/>`
           + `<text x="${f(X(a))}" y="${H-B+18}" fill="#9aa3bd" font-size="12" text-anchor="middle">${names[a]} ${a}°</text>`;
@@ -245,7 +331,7 @@ function drawChart(){
   const dots = (az,el)=> az.map((a,i)=>`M${f(X(a))} ${f(Y(el[i]))}h0`).join("");
 
   $("chart").innerHTML = `
-  <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Horizonte local con la posición del Sol y la Tierra">
+  <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("idx.svg.label","Local horizon with the position of the Sun and the Earth")}">
     <defs><clipPath id="clip"><rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}"/></clipPath></defs>
     ${grid}
     <g clip-path="url(#clip)">
@@ -255,11 +341,11 @@ function drawChart(){
       <circle id="earthDot" r="8" fill="#5ab0f0" stroke="#fff" stroke-width="2"/>
       <circle id="sunDot" r="11" fill="#f4b942" stroke="#fff" stroke-width="2"/>
     </g>
-    <text x="${W/2}" y="${H-4}" fill="#9aa3bd" font-size="12" text-anchor="middle">Azimut</text>
-    <text transform="translate(14 ${H/2}) rotate(-90)" fill="#9aa3bd" font-size="12" text-anchor="middle">Elevación</text>
-    <circle cx="${L+14}" cy="${T+12}" r="5" fill="#f4b942"/><text x="${L+24}" y="${T+16}" fill="#c5cbe0" font-size="12">Sol</text>
-    <circle cx="${L+64}" cy="${T+12}" r="5" fill="#5ab0f0"/><text x="${L+74}" y="${T+16}" fill="#c5cbe0" font-size="12">Tierra</text>
-    <rect x="${L+130}" y="${T+7}" width="14" height="10" fill="rgba(138,143,158,.55)" stroke="#8a8f9e"/><text x="${L+150}" y="${T+16}" fill="#c5cbe0" font-size="12">Relieve</text>
+    <text x="${W/2}" y="${H-4}" fill="#9aa3bd" font-size="12" text-anchor="middle">${t("idx.az","Azimuth")}</text>
+    <text transform="translate(14 ${H/2}) rotate(-90)" fill="#9aa3bd" font-size="12" text-anchor="middle">${t("idx.el","Elevation")}</text>
+    <circle cx="${L+14}" cy="${T+12}" r="5" fill="#f4b942"/><text x="${L+24}" y="${T+16}" fill="#c5cbe0" font-size="12">${t("idx.sun","Sun")}</text>
+    <circle cx="${L+64}" cy="${T+12}" r="5" fill="#5ab0f0"/><text x="${L+74}" y="${T+16}" fill="#c5cbe0" font-size="12">${t("idx.earth","Earth")}</text>
+    <rect x="${L+130}" y="${T+7}" width="14" height="10" fill="rgba(138,143,158,.55)" stroke="#8a8f9e"/><text x="${L+150}" y="${T+16}" fill="#c5cbe0" font-size="12">${t("idx.terrain","Terrain")}</text>
   </svg>`;
 }
 
@@ -270,45 +356,122 @@ function updateNow(){
   const sd=$("sunDot"), ed=$("earthDot");
   if(sd){ sd.setAttribute("cx",S.X(sa)); sd.setAttribute("cy",S.Y(se)); sd.setAttribute("fill-opacity",vs?1:.35); }
   if(ed){ ed.setAttribute("cx",S.X(ea)); ed.setAttribute("cy",S.Y(ee)); ed.setAttribute("fill-opacity",ve?1:.35); }
-  const row=(c,n,az,el,v)=>`<span class="pill"><span class="dot" style="background:${c}"></span>${n}: elev. ${el.toFixed(1)}°, az ${az.toFixed(0)}° <span class="tag ${v?"ok":"bad"}">${v?"visible":"oculto"}</span></span>`;
-  $("now").innerHTML = row("var(--sun)","Sol",sa,se,vs)+row("var(--earth)","Tierra",ea,ee,ve);
+  const row=(c,n,az,el,v)=>`<span class="pill"><span class="dot" style="background:${c}"></span>${n}: ${t("idx.elev","elev.")} ${el.toFixed(1)}°, ${t("idx.azshort","az")} ${az.toFixed(0)}° <span class="tag ${v?"ok":"bad"}">${v?t("idx.visible","visible"):t("idx.hidden","hidden")}</span></span>`;
+  $("now").innerHTML = row("var(--sun)",t("idx.sun","Sun"),sa,se,vs)+row("var(--earth)",t("idx.earth","Earth"),ea,ee,ve);
   $("tlabel").textContent = fdate(e.t[i]);
 }
 
 /* ---------- Línea de tiempo ---------- */
-function stop(){ clearInterval(S.timer); S.timer=null; $("play").textContent="▶ Reproducir"; }
+function stop(){ clearInterval(S.timer); S.timer=null; $("play").textContent=t("idx.play","▶ Play"); }
 $("play").onclick = ()=>{
   if(!S.eph) return;
   if(S.timer){ stop(); return; }
-  $("play").textContent="⏸ Pausar";
+  $("play").textContent=t("idx.pause","⏸ Pause");
   S.timer = setInterval(()=>{
     S.i = (S.i+1) % S.eph.t.length; $("slider").value=S.i; updateNow();
   },80);
 };
 $("slider").oninput = e=>{ S.i=+e.target.value; updateNow(); };
+$("slider").addEventListener("change", ()=>$("slider").blur());   // para que las flechas del teclado vuelvan a funcionar
+
+/* ---------- Atajos de teclado (no actúan mientras se escribe en un campo) ---------- */
+document.addEventListener("keydown", ev=>{
+  if(!S.eph || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const t = ev.target, tag = t && t.tagName;
+  if(tag==="INPUT" || tag==="SELECT" || tag==="TEXTAREA" || tag==="BUTTON") return;
+  const per = Math.max(1, Math.round(60/(+$("step").value)));   // muestras por hora
+  const go = n => { S.i = Math.min(S.eph.t.length-1, Math.max(0, S.i+n)); $("slider").value=S.i; updateNow(); ev.preventDefault(); };
+  if(ev.key===" ") { $("play").click(); ev.preventDefault(); }
+  else if(ev.key==="ArrowRight") go(per);
+  else if(ev.key==="ArrowLeft") go(-per);
+  else if(ev.key==="ArrowUp") go(per*24);
+  else if(ev.key==="ArrowDown") go(-per*24);
+});
 
 /* ---------- Comparación ---------- */
-$("cmp").onclick = async ()=>{
-  const ids=[...document.querySelectorAll("#chips input:checked")].map(c=>c.value);
-  if(ids.length<2){ $("cmpout").innerHTML='<div class="empty">Marca al menos dos sitios.</div>'; return; }
-  $("cmpout").innerHTML='<div class="empty">Calculando…</div>';
+const chipBoxes = () => [...document.querySelectorAll("#chips input")];
+const chipIds = () => chipBoxes().filter(c=>c.checked).map(c=>c.value);
+let cmpKey = "", cmpSeq = 0, cmpTimer = null;
+function syncChips(){
+  chipBoxes().forEach(c=>c.closest(".chip").classList.toggle("on", c.checked));
+  const n = chipIds().length, tot = chipBoxes().length;
+  $("cmpcount").textContent = t("idx.cmp.count","{n} of {tot} selected",{n,tot});
+  const names = chipBoxes().filter(c=>c.checked).map(c=>c.closest(".chip").textContent.trim().replace(/\s*\(.*\)$/,""));
+  $("dsn").textContent = names.length ? names.slice(0,3).join(", ") + (names.length>3 ? ` +${names.length-3}` : "") : t("idx.cmp.zero","None");
+  try{ localStorage.setItem("lunar.cmp", JSON.stringify(chipIds())); }catch(e){}
+}
+function setChips(fn){ chipBoxes().forEach((c,i)=>{ c.checked = fn(c,i); }); syncChips(); autoCompare(); }
+/* Compara solo cuando cambia algo (sitios o fechas), con una pausa corta para agrupar clics. */
+function autoCompare(force){ clearTimeout(cmpTimer); cmpTimer = setTimeout(()=>compare(force), 300); }
+async function compare(force){
+  const ids = chipIds();
+  if(ids.length<2){ cmpKey=""; S.cmp=null; $("cmpbest").innerHTML=""; $("cmpout").innerHTML=`<div class="empty">${t("idx.cmp.min2","Select at least two sites.")}</div>`; return; }
+  const rg = range(), key = ids.join(",")+"|"+rg.start+"|"+rg.end+"|"+rg.step_min;
+  if(!force && key===cmpKey) return;
+  const my = ++cmpSeq;
+  $("cmpout").innerHTML=`<div class="empty">${t("idx.calc","Calculating…")}</div>`; $("cmpbest").innerHTML="";
   try{
-    const res = await api("compare",{sites:ids.join(","),...range()});
-    const head = res.map(r=>`<th>${r.name}</th>`).join("");
-    const rows = METRICS.map(([k,name,u,,,dir])=>{
+    const res = await api("compare",{sites:ids.join(","),...rg});
+    if(my!==cmpSeq) return;
+    cmpKey = key; S.cmp = res;
+    renderCompare(res);
+  }catch(e){ if(my!==cmpSeq) return; $("cmpout").innerHTML=`<div class="empty">${e.message}</div>`; }
+}
+/* Pinta la tabla comparativa a partir de la última respuesta (también al cambiar de idioma). */
+function renderCompare(res){
+  {
+    const wins = res.map(()=>0);
+    const rows = METRICS().map(([k,name,u,,,dir])=>{
       const vals=res.map(r=>r.metrics[k]);
       const best = dir===0 ? null : (dir>0?Math.max(...vals):Math.min(...vals));
-      return `<tr><th>${name}</th>${vals.map(v=>`<td class="${best!==null&&v===best&&new Set(vals).size>1?"best":""}">${fmt(v)} ${u}</td>`).join("")}</tr>`;
+      const decisive = best!==null && new Set(vals).size>1;
+      return `<tr><th>${name}</th>${vals.map((v,j)=>{
+        const w = decisive && v===best; if(w) wins[j]++;
+        return `<td class="${w?"best":""}">${fmt(v)} ${u}</td>`;
+      }).join("")}</tr>`;
     }).join("");
+    const top = Math.max(...wins), leaders = res.filter((_,j)=>wins[j]===top);
+    const head = res.map((r,j)=>`<th class="${top>0&&wins[j]===top?"win":""}">${I18N.nameById(r.id,r.name)}</th>`).join("");
+    const scored = METRICS().filter(m=>m[5]!==0).length;
+    $("cmpbest").innerHTML = top>0 && leaders.length===1
+      ? t("idx.cmp.best","Best option in this period: <b>{name}</b>, wins {top} of {scored} comparable metrics.",{name:I18N.nameById(leaders[0].id,leaders[0].name),top,scored})
+      : top>0 ? t("idx.cmp.tie","Tie between <b>{names}</b> ({top} of {scored} metrics each).",{names:leaders.map(l=>I18N.nameById(l.id,l.name)).join("</b> "+t("idx.and","and")+" <b>"),top,scored}) : "";
     $("cmpout").innerHTML=`<table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
-  }catch(e){ $("cmpout").innerHTML=`<div class="empty">${e.message}</div>`; }
+  }
+}
+$("chips").addEventListener("change", ()=>{ syncChips(); autoCompare(); });
+$("cmpAll").onclick = ()=>setChips(()=>true);
+$("cmpNone").onclick = ()=>setChips(()=>false);
+$("cmpInv").onclick = ()=>setChips(c=>!c.checked);
+$("cmpCur").onclick = ()=>{
+  const cur = $("site").value, ids = S.sites.map(s=>s.id), i = ids.indexOf(cur);
+  const pick = new Set([cur, ids[(i+1)%ids.length]]);
+  setChips(c=>pick.has(c.value));
 };
+/* Si cambian las fechas o el paso, la comparación se rehace sola (el sitio del panel no la afecta). */
+["start","days","step"].forEach(id => $(id).addEventListener("change", ()=>autoCompare()));
+$("days").addEventListener("input", ()=>autoCompare());
+
+/* El desplegable de sitios se cierra al hacer clic fuera o con Escape. */
+document.addEventListener("click", ev => { const d=$("dsel"); if(d && d.open && !d.contains(ev.target)) d.open=false; });
+document.addEventListener("keydown", ev => { const d=$("dsel"); if(ev.key==="Escape" && d && d.open){ d.open=false; d.querySelector("summary").focus(); } });
 
 /* ---------- Eventos e inicio ---------- */
 $("site").onchange = updateSiteInfo;
 $("go").onclick = run;
 $("edu").onchange = e=>document.body.classList.toggle("edu", e.target.checked);
-loadSites().then(run);
+/* Al cambiar de idioma se repinta todo lo que genera JavaScript, sin volver a pedir datos al servidor. */
+I18N.onChange(()=>{
+  if(S.sites.length){ renderSiteOptions(); renderChips(chipIds()); syncChips(); updateSiteInfo(); }
+  else $("siteinfo").textContent = t("idx.siteinfo0","Choose a site and calculate.");
+  if(S.met) renderMetrics();
+  if(S.hor && S.eph){ drawChart(); updateNow(); }
+  $("go").textContent = $("go").disabled ? t("idx.calc","Calculating…") : t("idx.go","Calculate scenario");
+  $("play").textContent = S.timer ? t("idx.pause","⏸ Pause") : t("idx.play","▶ Play");
+  if(S.cmp) renderCompare(S.cmp);
+  else if(S.sites.length && chipIds().length<2) $("cmpout").innerHTML=`<div class="empty">${t("idx.cmp.min2","Select at least two sites.")}</div>`;
+});
+loadSites().then(()=>{ run(); compare(); });
 </script>
 <script src="/vista3d.js"></script>
 </body>
