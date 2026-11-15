@@ -7,6 +7,6 @@
   {"id": "apollo17", "name": "Apolo 17 (Taurus-Littrow)", "lat": 20.191, "lon": 30.772, "mission": "Apolo 17", "type": "historic", "verified": false},
   {"id": "chandrayaan3", "name": "Chandrayaan-3 (Shiv Shakti)", "lat": -69.373, "lon": 32.319, "mission": "Chandrayaan-3", "type": "recent", "verified": false},
   {"id": "im2", "name": "IM-2 (zona polar sur)", "lat": -84.79, "lon": 29.20, "mission": "CLPS IM-2", "type": "clps", "verified": false},
-  {"id": "shackleton", "name": "Borde del cráter Shackleton (aprox.)", "lat": -89.9, "lon": 129.8, "mission": "Candidato polo sur", "type": "candidate", "verified": false},
+  {"id": "shackleton", "name": "Borde del cráter Shackleton (aprox.)", "lat": -89.95438, "lon": -31.97565, "mission": "Candidato polo sur", "type": "candidate", "verified": true},
   {"id": "south_pole", "name": "Polo sur lunar", "lat": -90.0, "lon": 0.0, "mission": "Referencia", "type": "reference", "verified": false}
 ]
